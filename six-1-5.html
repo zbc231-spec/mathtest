@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="zh-TW">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最簡單整數比練習</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="min-h-full flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl"><!-- 學生資訊輸入頁面 -->
+   <div id="info-page" class="p-8 rounded-2xl shadow-xl">
+    <div class="text-center mb-8">
+     <div class="flex items-center justify-center gap-3 mb-4"><span class="text-5xl">📊</span>
+      <h1 id="app-title" class="text-4xl font-bold">最簡單整數比練習</h1><span class="text-5xl">🔢</span>
+     </div>
+     <div id="date-display" class="inline-block px-6 py-3 rounded-lg text-xl font-semibold"></div>
+    </div>
+    <div class="space-y-6">
+     <div><label for="grade-input" id="grade-label" class="flex items-center gap-2 text-lg font-medium mb-2"> <span>🎓</span> <span>年級</span> </label> <input type="number" id="grade-input" min="1" max="6" class="w-full px-4 py-3 rounded-lg border-2 text-lg" placeholder="5年級請填5,6年級請填6">
+     </div>
+     <div><label for="class-input" id="class-label" class="flex items-center gap-2 text-lg font-medium mb-2"> <span>🏫</span> <span>班級</span> </label> <input type="number" id="class-input" min="1" class="w-full px-4 py-3 rounded-lg border-2 text-lg" placeholder="1班請填1,2班請填2,依此類推">
+     </div>
+     <div><label for="seat-input" id="seat-label" class="flex items-center gap-2 text-lg font-medium mb-2"> <span>👤</span> <span>座號</span> </label> <input type="number" id="seat-input" min="1" class="w-full px-4 py-3 rounded-lg border-2 text-lg" placeholder="1號請填1,2號請填2,依此類推">
+     </div><button id="start-btn" class="w-full py-4 rounded-lg text-xl font-bold transition-all duration-200 flex items-center justify-center gap-2"> <span>✏️</span> <span>開始練習</span> </button>
+    </div>
+   </div><!-- 答題頁面 -->
+   <div id="question-page" class="hidden p-8 rounded-2xl shadow-xl">
+    <div class="mb-6">
+     <div class="flex justify-between items-center mb-4"><span id="progress" class="text-xl font-semibold flex items-center gap-2"> <span>📝</span> <span id="progress-text"></span> </span> <span id="student-info" class="text-lg flex items-center gap-2"> <span>👨‍🎓</span> <span id="student-info-text"></span> </span>
+     </div>
+     <div class="w-full h-3 rounded-full overflow-hidden">
+      <div id="progress-bar" class="h-full transition-all duration-300"></div>
+     </div>
+    </div>
+    <div id="question-container" class="mb-8 p-6 rounded-xl">
+     <p class="text-2xl font-semibold mb-6" id="question-text"></p>
+     <div class="flex items-center gap-4"><input type="number" id="answer1" class="flex-1 px-4 py-3 rounded-lg border-2 text-xl text-center" placeholder="第一個數"> <span class="text-3xl font-bold">:</span> <input type="number" id="answer2" class="flex-1 px-4 py-3 rounded-lg border-2 text-xl text-center" placeholder="第二個數">
+     </div>
+    </div><button id="submit-btn" class="w-full py-4 rounded-lg text-xl font-bold transition-all duration-200">提交答案</button>
+   </div><!-- 結果頁面 -->
+   <div id="result-page" class="hidden p-8 rounded-2xl shadow-xl">
+    <div class="text-center mb-8">
+     <div class="text-6xl mb-4">
+      🎉
+     </div>
+     <h2 class="text-4xl font-bold mb-4">練習完成!</h2>
+     <div id="score-display" class="text-6xl font-bold mb-6"></div>
+     <p class="text-2xl flex items-center justify-center gap-2"><span>🏆</span> <span>你的成績</span></p>
+    </div>
+    <div id="answers-review" class="space-y-4 mb-8"></div><button id="restart-btn" class="w-full py-4 rounded-lg text-xl font-bold transition-all duration-200 flex items-center justify-center gap-2"> <span>🔄</span> <span>重新開始</span> </button>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#e0f2fe",
+      surface_color: "#fef3c7",
+      text_color: "#1e293b",
+      primary_action_color: "#f59e0b",
+      secondary_action_color: "#06b6d4",
+      app_title: "最簡單整數比練習",
+      date_label: "今日日期",
+      grade_label: "年級",
+      class_label: "班級",
+      seat_label: "座號",
+      button_text: "開始練習",
+      font_family: "system-ui",
+      font_size: 16
+    };
+
+    let config = { ...defaultConfig };
+    let currentQuestion = 0;
+    let studentInfo = {};
+    let userAnswers = [];
+    let questions = [];
+
+    // 生成當日題目
+    function generateDailyQuestions(dateStr) {
+      const seed = dateStr.split('-').join('');
+      let random = parseInt(seed);
+      
+      function seededRandom() {
+        random = (random * 9301 + 49297) % 233280;
+        return random / 233280;
+      }
+
+      const qs = [];
+      
+      // 2題整數 (1-2位數,確保能約分)
+      for (let i = 0; i < 2; i++) {
+        // 先生成最簡整數比 (1-9的數字)
+        const a = Math.floor(seededRandom() * 9) + 1;
+        const b = Math.floor(seededRandom() * 9) + 1;
+        // 公因數 (2-9)
+        const gcdValue = Math.floor(seededRandom() * 8) + 2;
+        
+        let num1 = a * gcdValue;
+        let num2 = b * gcdValue;
+        
+        // 確保是1-2位數 (最大99)
+        if (num1 > 99) num1 = (Math.floor(seededRandom() * 9) + 1) * gcdValue;
+        if (num2 > 99) num2 = (Math.floor(seededRandom() * 9) + 1) * gcdValue;
+        
+        qs.push({
+          type: '整數',
+          display: `${num1} : ${num2}`,
+          answer: [a, b]
+        });
+      }
+      
+      // 2題小數 (化成整數後是1-2位數,確保能約分)
+      for (let i = 0; i < 2; i++) {
+        // 先生成最簡整數比 (1-9的數字)
+        const a = Math.floor(seededRandom() * 9) + 1;
+        const b = Math.floor(seededRandom() * 9) + 1;
+        // 公因數 (2-9)
+        const gcdValue = Math.floor(seededRandom() * 8) + 2;
+        
+        // 整數部分乘以公因數 (確保1-2位數)
+        let num1 = a * gcdValue;
+        let num2 = b * gcdValue;
+        
+        // 確保是1-2位數
+        if (num1 > 99) num1 = (Math.floor(seededRandom() * 9) + 1) * gcdValue;
+        if (num2 > 99) num2 = (Math.floor(seededRandom() * 9) + 1) * gcdValue;
+        
+        // 決定小數位數 (1-2位)
+        const digits1 = Math.floor(seededRandom() * 2) + 1;
+        const digits2 = Math.floor(seededRandom() * 2) + 1;
+        const maxDigits = Math.max(digits1, digits2);
+        
+        // 轉換成小數顯示
+        let dec1, dec2;
+        if (digits1 === 1) {
+          dec1 = (num1 / 10).toFixed(1);
+        } else {
+          dec1 = (num1 / 100).toFixed(2);
+        }
+        
+        if (digits2 === 1) {
+          dec2 = (num2 / 10).toFixed(1);
+        } else {
+          dec2 = (num2 / 100).toFixed(2);
+        }
+        
+        // 計算化成整數後的值
+        const multiplier = Math.pow(10, maxDigits);
+        let intNum1 = num1;
+        let intNum2 = num2;
+        
+        if (digits1 < maxDigits) intNum1 *= Math.pow(10, maxDigits - digits1);
+        if (digits2 < maxDigits) intNum2 *= Math.pow(10, maxDigits - digits2);
+        
+        const g = gcd(intNum1, intNum2);
+        
+        qs.push({
+          type: '小數',
+          display: `${dec1} : ${dec2}`,
+          answer: [intNum1 / g, intNum2 / g]
+        });
+      }
+      
+      // 2題分數 (包含真分數、假分數、帶分數)
+      for (let i = 0; i < 2; i++) {
+        const useMixed = seededRandom() > 0.6; // 40%機率使用帶分數
+        
+        let n1, d1, n2, d2;
+        let frac1Display, frac2Display;
+        
+        // 第一個分數
+        if (useMixed && seededRandom() > 0.5) {
+          const whole = Math.floor(seededRandom() * 3) + 1;
+          const numerator = Math.floor(seededRandom() * 4) + 1;
+          d1 = Math.floor(seededRandom() * 5) + 2;
+          n1 = whole * d1 + numerator;
+          frac1Display = { type: 'mixed', whole, numerator, denominator: d1 };
+        } else {
+          d1 = Math.floor(seededRandom() * 8) + 2;
+          n1 = Math.floor(seededRandom() * 12) + 1;
+          frac1Display = { type: 'simple', numerator: n1, denominator: d1 };
+        }
+        
+        // 第二個分數
+        if (useMixed && seededRandom() > 0.5) {
+          const whole = Math.floor(seededRandom() * 3) + 1;
+          const numerator = Math.floor(seededRandom() * 4) + 1;
+          d2 = Math.floor(seededRandom() * 5) + 2;
+          n2 = whole * d2 + numerator;
+          frac2Display = { type: 'mixed', whole, numerator, denominator: d2 };
+        } else {
+          d2 = Math.floor(seededRandom() * 8) + 2;
+          n2 = Math.floor(seededRandom() * 12) + 1;
+          frac2Display = { type: 'simple', numerator: n2, denominator: d2 };
+        }
+        
+        const ansNum = n1 * d2;
+        const ansDen = n2 * d1;
+        const g = gcd(ansNum, ansDen);
+        
+        qs.push({
+          type: '分數',
+          frac1: frac1Display,
+          frac2: frac2Display,
+          answer: [ansNum / g, ansDen / g]
+        });
+      }
+      
+      return qs;
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+      while (b !== 0) {
+        const temp = b;
+        b = a % b;
+        a = temp;
+      }
+      return a;
+    }
+
+    function getTodayDate() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function showQuestion() {
+      if (currentQuestion < questions.length) {
+        const q = questions[currentQuestion];
+        const questionText = document.getElementById('question-text');
+        questionText.innerHTML = '';
+        
+        const title = document.createElement('div');
+        title.textContent = '請將下列比化為最簡單整數比:';
+        title.style.marginBottom = '20px';
+        questionText.appendChild(title);
+        
+        if (q.type === '分數') {
+          const fractionContainer = document.createElement('div');
+          fractionContainer.style.display = 'flex';
+          fractionContainer.style.alignItems = 'center';
+          fractionContainer.style.justifyContent = 'center';
+          fractionContainer.style.gap = '30px';
+          fractionContainer.style.fontSize = '2rem';
+          
+          // 第一個分數
+          const frac1 = createFractionDisplay(q.frac1);
+          fractionContainer.appendChild(frac1);
+          
+          // 冒號
+          const colon = document.createElement('span');
+          colon.textContent = ':';
+          colon.style.fontSize = '2.5rem';
+          colon.style.fontWeight = 'bold';
+          fractionContainer.appendChild(colon);
+          
+          // 第二個分數
+          const frac2 = createFractionDisplay(q.frac2);
+          fractionContainer.appendChild(frac2);
+          
+          questionText.appendChild(fractionContainer);
+        } else {
+          const display = document.createElement('div');
+          display.textContent = q.display;
+          display.style.fontSize = '2rem';
+          display.style.textAlign = 'center';
+          display.style.marginTop = '10px';
+          questionText.appendChild(display);
+        }
+        
+        document.getElementById('progress-text').textContent = `第 ${currentQuestion + 1} 題 / 共 6 題`;
+        document.getElementById('progress-bar').style.width = `${((currentQuestion + 1) / 6) * 100}%`;
+        document.getElementById('answer1').value = '';
+        document.getElementById('answer2').value = '';
+        document.getElementById('answer1').focus();
+      }
+    }
+    
+    function createFractionDisplay(frac) {
+      const container = document.createElement('div');
+      container.style.display = 'inline-flex';
+      container.style.alignItems = 'center';
+      container.style.gap = '8px';
+      
+      if (frac.type === 'mixed') {
+        // 帶分數
+        const whole = document.createElement('span');
+        whole.textContent = frac.whole;
+        whole.style.fontSize = '2rem';
+        whole.style.fontWeight = 'bold';
+        container.appendChild(whole);
+        
+        const fracPart = document.createElement('div');
+        fracPart.style.display = 'inline-flex';
+        fracPart.style.flexDirection = 'column';
+        fracPart.style.alignItems = 'center';
+        
+        const num = document.createElement('div');
+        num.textContent = frac.numerator;
+        num.style.borderBottom = '2px solid currentColor';
+        num.style.paddingBottom = '2px';
+        fracPart.appendChild(num);
+        
+        const den = document.createElement('div');
+        den.textContent = frac.denominator;
+        den.style.paddingTop = '2px';
+        fracPart.appendChild(den);
+        
+        container.appendChild(fracPart);
+      } else {
+        // 真分數或假分數
+        const fracPart = document.createElement('div');
+        fracPart.style.display = 'inline-flex';
+        fracPart.style.flexDirection = 'column';
+        fracPart.style.alignItems = 'center';
+        
+        const num = document.createElement('div');
+        num.textContent = frac.numerator;
+        num.style.borderBottom = '2px solid currentColor';
+        num.style.paddingBottom = '2px';
+        num.style.fontSize = '1.5rem';
+        fracPart.appendChild(num);
+        
+        const den = document.createElement('div');
+        den.textContent = frac.denominator;
+        den.style.paddingTop = '2px';
+        den.style.fontSize = '1.5rem';
+        fracPart.appendChild(den);
+        
+        container.appendChild(fracPart);
+      }
+      
+      return container;
+    }
+
+    function checkAnswers() {
+      let score = 0;
+      const results = questions.map((q, i) => {
+        const userAns = userAnswers[i];
+        const g = gcd(userAns[0], userAns[1]);
+        const simplified = [userAns[0] / g, userAns[1] / g];
+        const isCorrect = simplified[0] === q.answer[0] && simplified[1] === q.answer[1];
+        if (isCorrect) score++;
+        
+        const result = {
+          type: q.type,
+          userAnswer: `${userAns[0]} : ${userAns[1]}`,
+          correctAnswer: `${q.answer[0]} : ${q.answer[1]}`,
+          isCorrect,
+          solution: generateSolution(q, i)
+        };
+        
+        if (q.type === '分數') {
+          result.frac1 = q.frac1;
+          result.frac2 = q.frac2;
+        } else {
+          result.question = q.display;
+        }
+        
+        return result;
+      });
+      return { score, results };
+    }
+    
+    function generateSolution(q, index) {
+      const solution = [];
+      
+      if (q.type === '整數') {
+        const parts = q.display.split(' : ');
+        const num1 = parseInt(parts[0]);
+        const num2 = parseInt(parts[1]);
+        const gcdValue = gcd(num1, num2);
+        
+        solution.push(`步驟1: 原式 = ${num1} : ${num2}`);
+        solution.push(`步驟2: 找出 ${num1} 和 ${num2} 的最大公因數`);
+        
+        // 列出因數
+        const factors1 = [];
+        const factors2 = [];
+        for (let i = 1; i <= num1; i++) {
+          if (num1 % i === 0) factors1.push(i);
+        }
+        for (let i = 1; i <= num2; i++) {
+          if (num2 % i === 0) factors2.push(i);
+        }
+        solution.push(`       ${num1} 的因數: ${factors1.join(', ')}`);
+        solution.push(`       ${num2} 的因數: ${factors2.join(', ')}`);
+        solution.push(`       最大公因數 = ${gcdValue}`);
+        solution.push(`步驟3: 同除以最大公因數 ${gcdValue}`);
+        solution.push(`       ${num1} ÷ ${gcdValue} = ${q.answer[0]}`);
+        solution.push(`       ${num2} ÷ ${gcdValue} = ${q.answer[1]}`);
+        solution.push(`✓ 答案: ${q.answer[0]} : ${q.answer[1]}`);
+        
+      } else if (q.type === '小數') {
+        const parts = q.display.split(' : ');
+        const dec1 = parts[0];
+        const dec2 = parts[1];
+        
+        // 計算小數位數
+        const digits1 = dec1.includes('.') ? dec1.split('.')[1].length : 0;
+        const digits2 = dec2.includes('.') ? dec2.split('.')[1].length : 0;
+        const maxDigits = Math.max(digits1, digits2);
+        const multiplier = Math.pow(10, maxDigits);
+        
+        solution.push(`步驟1: 原式 = ${dec1} : ${dec2}`);
+        solution.push(`步驟2: 將小數化為整數 (同乘以 ${multiplier})`);
+        
+        const int1 = parseFloat(dec1) * multiplier;
+        const int2 = parseFloat(dec2) * multiplier;
+        
+        solution.push(`       ${dec1} × ${multiplier} = ${int1}`);
+        solution.push(`       ${dec2} × ${multiplier} = ${int2}`);
+        solution.push(`       得到 ${int1} : ${int2}`);
+        
+        const gcdValue = gcd(int1, int2);
+        solution.push(`步驟3: 找出 ${int1} 和 ${int2} 的最大公因數 = ${gcdValue}`);
+        solution.push(`步驟4: 同除以最大公因數 ${gcdValue}`);
+        solution.push(`       ${int1} ÷ ${gcdValue} = ${q.answer[0]}`);
+        solution.push(`       ${int2} ÷ ${gcdValue} = ${q.answer[1]}`);
+        solution.push(`✓ 答案: ${q.answer[0]} : ${q.answer[1]}`);
+        
+      } else if (q.type === '分數') {
+        solution.push(`步驟1: 將分數比化為整數比`);
+        
+        // 轉換第一個分數
+        let n1, d1;
+        if (q.frac1.type === 'mixed') {
+          n1 = q.frac1.whole * q.frac1.denominator + q.frac1.numerator;
+          d1 = q.frac1.denominator;
+          solution.push(`       ${q.frac1.whole} 又 ${q.frac1.numerator}/${q.frac1.denominator} = ${n1}/${d1}`);
+        } else {
+          n1 = q.frac1.numerator;
+          d1 = q.frac1.denominator;
+          solution.push(`       第一個分數 = ${n1}/${d1}`);
+        }
+        
+        // 轉換第二個分數
+        let n2, d2;
+        if (q.frac2.type === 'mixed') {
+          n2 = q.frac2.whole * q.frac2.denominator + q.frac2.numerator;
+          d2 = q.frac2.denominator;
+          solution.push(`       ${q.frac2.whole} 又 ${q.frac2.numerator}/${q.frac2.denominator} = ${n2}/${d2}`);
+        } else {
+          n2 = q.frac2.numerator;
+          d2 = q.frac2.denominator;
+          solution.push(`       第二個分數 = ${n2}/${d2}`);
+        }
+        
+        solution.push(`步驟2: ${n1}/${d1} : ${n2}/${d2} = ${n1} × ${d2} : ${n2} × ${d1}`);
+        
+        const num1 = n1 * d2;
+        const num2 = n2 * d1;
+        
+        solution.push(`       = ${num1} : ${num2}`);
+        
+        const gcdValue = gcd(num1, num2);
+        solution.push(`步驟3: 找出 ${num1} 和 ${num2} 的最大公因數 = ${gcdValue}`);
+        solution.push(`步驟4: 同除以最大公因數 ${gcdValue}`);
+        solution.push(`       ${num1} ÷ ${gcdValue} = ${q.answer[0]}`);
+        solution.push(`       ${num2} ÷ ${gcdValue} = ${q.answer[1]}`);
+        solution.push(`✓ 答案: ${q.answer[0]} : ${q.answer[1]}`);
+      }
+      
+      return solution;
+    }
+
+    function showResults() {
+      const { score, results } = checkAnswers();
+      document.getElementById('question-page').classList.add('hidden');
+      document.getElementById('result-page').classList.remove('hidden');
+      document.getElementById('score-display').textContent = `${score} / 6`;
+      
+      const reviewContainer = document.getElementById('answers-review');
+      reviewContainer.innerHTML = '';
+      
+      results.forEach((r, i) => {
+        const resultCard = document.createElement('div');
+        resultCard.className = `p-4 rounded-lg border-2 ${r.isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50'}`;
+        
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between mb-2';
+        header.innerHTML = `
+          <span class="font-semibold">第 ${i + 1} 題 (${r.type})</span>
+          <span class="text-xl">${r.isCorrect ? '✓' : '✗'}</span>
+        `;
+        resultCard.appendChild(header);
+        
+        if (r.type === '分數') {
+          const questionLabel = document.createElement('p');
+          questionLabel.textContent = '題目:';
+          questionLabel.className = 'mb-2 font-semibold';
+          resultCard.appendChild(questionLabel);
+          
+          const questionDisplay = document.createElement('div');
+          questionDisplay.style.display = 'flex';
+          questionDisplay.style.alignItems = 'center';
+          questionDisplay.style.gap = '15px';
+          questionDisplay.style.marginBottom = '10px';
+          questionDisplay.style.fontSize = '1.2rem';
+          
+          const frac1 = createFractionDisplay(r.frac1);
+          questionDisplay.appendChild(frac1);
+          
+          const colon1 = document.createElement('span');
+          colon1.textContent = ':';
+          colon1.style.fontSize = '1.5rem';
+          questionDisplay.appendChild(colon1);
+          
+          const frac2 = createFractionDisplay(r.frac2);
+          questionDisplay.appendChild(frac2);
+          
+          resultCard.appendChild(questionDisplay);
+        } else {
+          const questionP = document.createElement('p');
+          questionP.textContent = `題目: ${r.question}`;
+          questionP.className = 'mb-2';
+          resultCard.appendChild(questionP);
+        }
+        
+        const userAnswerP = document.createElement('p');
+        userAnswerP.textContent = `你的答案: ${r.userAnswer}`;
+        userAnswerP.className = 'mb-2';
+        resultCard.appendChild(userAnswerP);
+        
+        if (!r.isCorrect) {
+          const correctAnswerP = document.createElement('p');
+          correctAnswerP.textContent = `正確答案: ${r.correctAnswer}`;
+          correctAnswerP.className = 'text-red-600 font-semibold mb-2';
+          resultCard.appendChild(correctAnswerP);
+        }
+        
+        // 加入解題過程
+        const solutionTitle = document.createElement('p');
+        solutionTitle.textContent = '📝 解題過程:';
+        solutionTitle.className = 'font-semibold mt-3 mb-2';
+        resultCard.appendChild(solutionTitle);
+        
+        const solutionBox = document.createElement('div');
+        solutionBox.className = 'bg-white bg-opacity-50 p-3 rounded text-sm space-y-1';
+        
+        if (r.solution) {
+          r.solution.forEach(step => {
+            const stepP = document.createElement('p');
+            stepP.textContent = step;
+            solutionBox.appendChild(stepP);
+          });
+        }
+        
+        resultCard.appendChild(solutionBox);
+        
+        reviewContainer.appendChild(resultCard);
+      });
+      
+      saveResult(score);
+    }
+
+    async function saveResult(score) {
+      const result = await window.dataSdk.create({
+        id: `${getTodayDate()}-${studentInfo.grade}-${studentInfo.classNumber}-${studentInfo.seatNumber}-${Date.now()}`,
+        date: getTodayDate(),
+        grade: studentInfo.grade,
+        class_number: studentInfo.classNumber,
+        seat_number: studentInfo.seatNumber,
+        answers: JSON.stringify(userAnswers),
+        score: score,
+        completed_at: new Date().toISOString()
+      });
+    }
+
+    function applyStyles() {
+      const baseFont = config.font_size || defaultConfig.font_size;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'system-ui, -apple-system, sans-serif';
+      
+      document.body.style.background = config.background_color || defaultConfig.background_color;
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+      document.body.style.fontFamily = `${fontFamily}, ${baseFontStack}`;
+      document.body.style.fontSize = `${baseFont}px`;
+      
+      const surfaces = [document.getElementById('info-page'), document.getElementById('question-page'), document.getElementById('result-page')];
+      surfaces.forEach(el => {
+        if (el) {
+          el.style.background = config.surface_color || defaultConfig.surface_color;
+          el.style.color = config.text_color || defaultConfig.text_color;
+        }
+      });
+      
+      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('app-title').style.fontSize = `${baseFont * 2}px`;
+      document.getElementById('app-title').style.color = config.text_color || defaultConfig.text_color;
+      
+      const dateDisplay = document.getElementById('date-display');
+      dateDisplay.style.background = config.secondary_action_color || defaultConfig.secondary_action_color;
+      dateDisplay.style.color = config.surface_color || defaultConfig.surface_color;
+      dateDisplay.style.fontSize = `${baseFont * 1.25}px`;
+      
+      const gradeLabel = document.getElementById('grade-label');
+      gradeLabel.querySelector('span:last-child').textContent = config.grade_label || defaultConfig.grade_label;
+      
+      const classLabel = document.getElementById('class-label');
+      classLabel.querySelector('span:last-child').textContent = config.class_label || defaultConfig.class_label;
+      
+      const seatLabel = document.getElementById('seat-label');
+      seatLabel.querySelector('span:last-child').textContent = config.seat_label || defaultConfig.seat_label;
+      
+      const labels = document.querySelectorAll('label');
+      labels.forEach(label => {
+        label.style.color = config.text_color || defaultConfig.text_color;
+        label.style.fontSize = `${baseFont * 1.125}px`;
+      });
+      
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.style.borderColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+        input.style.color = config.text_color || defaultConfig.text_color;
+        input.style.fontSize = `${baseFont * 1.125}px`;
+      });
+      
+      const startBtn = document.getElementById('start-btn');
+      startBtn.querySelector('span:last-child').textContent = config.button_text || defaultConfig.button_text;
+      startBtn.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+      startBtn.style.color = config.surface_color || defaultConfig.surface_color;
+      startBtn.style.fontSize = `${baseFont * 1.25}px`;
+      
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+      submitBtn.style.color = config.surface_color || defaultConfig.surface_color;
+      submitBtn.style.fontSize = `${baseFont * 1.25}px`;
+      
+      const restartBtn = document.getElementById('restart-btn');
+      restartBtn.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+      restartBtn.style.color = config.surface_color || defaultConfig.surface_color;
+      restartBtn.style.fontSize = `${baseFont * 1.25}px`;
+      
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+      
+      const questionContainer = document.getElementById('question-container');
+      questionContainer.style.background = config.surface_color || defaultConfig.surface_color;
+      questionContainer.style.borderColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      
+      document.getElementById('question-text').style.color = config.text_color || defaultConfig.text_color;
+      document.getElementById('question-text').style.fontSize = `${baseFont * 1.5}px`;
+    }
+
+    async function onConfigChange(newConfig) {
+      config = { ...config, ...newConfig };
+      applyStyles();
+    }
+
+    const dataHandler = {
+      onDataChanged(data) {
+        // 資料變更時不需要更新UI
+      }
+    };
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.dataSdk) {
+        await window.dataSdk.init(dataHandler);
+      }
+      
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (cfg) => ({
+            recolorables: [
+              { get: () => cfg.background_color || defaultConfig.background_color, set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+              { get: () => cfg.surface_color || defaultConfig.surface_color, set: (v) => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+              { get: () => cfg.text_color || defaultConfig.text_color, set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+              { get: () => cfg.primary_action_color || defaultConfig.primary_action_color, set: (v) => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+              { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+            ],
+            borderables: [],
+            fontEditable: { get: () => cfg.font_family || defaultConfig.font_family, set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+            fontSizeable: { get: () => cfg.font_size || defaultConfig.font_size, set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ["app_title", cfg.app_title || defaultConfig.app_title],
+            ["date_label", cfg.date_label || defaultConfig.date_label],
+            ["grade_label", cfg.grade_label || defaultConfig.grade_label],
+            ["class_label", cfg.class_label || defaultConfig.class_label],
+            ["seat_label", cfg.seat_label || defaultConfig.seat_label],
+            ["button_text", cfg.button_text || defaultConfig.button_text]
+          ])
+        });
+        config = window.elementSdk.config;
+      }
+      
+      const todayDate = getTodayDate();
+      document.getElementById('date-display').textContent = `${config.date_label || defaultConfig.date_label}: ${todayDate}`;
+      questions = generateDailyQuestions(todayDate);
+      
+      applyStyles();
+      
+      document.getElementById('start-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const grade = parseInt(document.getElementById('grade-input').value);
+        const classNum = parseInt(document.getElementById('class-input').value);
+        const seatNum = parseInt(document.getElementById('seat-input').value);
+        
+        if (!grade || !classNum || !seatNum) {
+          const msg = document.createElement('p');
+          msg.textContent = '請填寫完整資訊';
+          msg.className = 'text-red-500 text-center mt-4 font-semibold';
+          msg.style.fontSize = `${(config.font_size || defaultConfig.font_size) * 1.125}px`;
+          document.getElementById('info-page').appendChild(msg);
+          setTimeout(() => msg.remove(), 2000);
+          return;
+        }
+        
+        studentInfo = { grade, classNumber: classNum, seatNumber: seatNum };
+        document.getElementById('student-info-text').textContent = `${grade}年${classNum}班${seatNum}號`;
+        document.getElementById('info-page').classList.add('hidden');
+        document.getElementById('question-page').classList.remove('hidden');
+        showQuestion();
+      });
+      
+      document.getElementById('submit-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const ans1 = parseInt(document.getElementById('answer1').value);
+        const ans2 = parseInt(document.getElementById('answer2').value);
+        
+        if (!ans1 || !ans2 || ans1 <= 0 || ans2 <= 0) {
+          const msg = document.createElement('p');
+          msg.textContent = '請輸入正確的答案';
+          msg.className = 'text-red-500 text-center mt-4 font-semibold';
+          msg.style.fontSize = `${(config.font_size || defaultConfig.font_size) * 1.125}px`;
+          document.getElementById('question-page').appendChild(msg);
+          setTimeout(() => msg.remove(), 2000);
+          return;
+        }
+        
+        userAnswers.push([ans1, ans2]);
+        currentQuestion++;
+        
+        if (currentQuestion < 6) {
+          showQuestion();
+        } else {
+          showResults();
+        }
+      });
+      
+      document.getElementById('restart-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentQuestion = 0;
+        userAnswers = [];
+        studentInfo = {};
+        document.getElementById('grade-input').value = '';
+        document.getElementById('class-input').value = '';
+        document.getElementById('seat-input').value = '';
+        document.getElementById('result-page').classList.add('hidden');
+        document.getElementById('info-page').classList.remove('hidden');
+      });
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99d69c3b27c84a15',t:'MTc2Mjk1NjYwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
