@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="zh-TW">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>比例練習測驗</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Microsoft JhengHei', sans-serif;
+      min-height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .page {
+      display: none;
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .page.active {
+      display: block;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #667eea;
+      font-size: 32px;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .date-box {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(245,87,108,0.4);
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    .form-group label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+    }
+    
+    .form-group small {
+      display: block;
+      margin-top: 6px;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102,126,234,0.5);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .progress-bar {
+      background: #f0f0f0;
+      border-radius: 20px;
+      height: 8px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      height: 100%;
+      transition: width 0.3s;
+      border-radius: 20px;
+    }
+    
+    .question-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f8f9ff;
+      border-radius: 12px;
+    }
+    
+    .question-number {
+      font-size: 20px;
+      font-weight: bold;
+      color: #667eea;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .student-info {
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .question-content {
+      background: #f8f9ff;
+      padding: 32px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .ratio-equation {
+      font-size: 36px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    
+    .answer-input {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 3px solid #667eea;
+    }
+    
+    .answer-input input {
+      width: 80px;
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .fraction-input {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .fraction-input input {
+      width: 60px;
+    }
+    
+    .fraction-line {
+      width: 70px;
+      height: 3px;
+      background: #333;
+    }
+    
+    .answer-hint {
+      margin-top: 16px;
+      padding: 12px;
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 6px;
+      color: #856404;
+      font-size: 14px;
+    }
+    
+    .results-container {
+      margin-top: 30px;
+    }
+    
+    .score-display {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 32px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      border-radius: 16px;
+      color: white;
+    }
+    
+    .score-display h2 {
+      font-size: 28px;
+      margin: 0 0 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .score-number {
+      font-size: 64px;
+      font-weight: bold;
+      margin: 16px 0;
+    }
+    
+    .result-item {
+      background: #f8f9ff;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border-left: 5px solid #667eea;
+    }
+    
+    .result-item.correct {
+      border-left-color: #4caf50;
+    }
+    
+    .result-item.incorrect {
+      border-left-color: #f44336;
+    }
+    
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .status-badge {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .status-badge.correct {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .status-badge.incorrect {
+      background: #f44336;
+      color: white;
+    }
+    
+    .solution {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+    
+    .solution-title {
+      font-weight: bold;
+      color: #667eea;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    .solution-steps {
+      line-height: 1.8;
+      color: #555;
+      font-size: 15px;
+    }
+    
+    .solution-steps div {
+      margin-bottom: 6px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #667eea;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container"><!-- 開始頁面 -->
+   <div id="startPage" class="page active">
+    <div class="header">
+     <h1><span style="font-size: 40px;">📐</span> <span id="mainTitle">比例練習   驗</span></h1>
+     <div class="date-box"><span style="font-size: 20px;">📅</span> <span id="dateLabel">今日練習日期</span>：<span id="todayDate"></span>
+     </div>
+    </div>
+    <div class="form-group"><label for="gradeInput"> <span style="font-size: 24px;">🎓</span> <span id="gradeLabel">年級</span> </label> <input type="number" id="gradeInput" min="1" max="9" placeholder="請輸入年級"> <small>5年級請填5，6年級請填6</small>
+    </div>
+    <div class="form-group"><label for="classInput"> <span style="font-size: 24px;">🏫</span> <span id="classLabel">班級</span> </label> <input type="number" id="classInput" min="1" placeholder="請輸入班級"> <small>1班請填1，2班請填2，依此類推</small>
+    </div>
+    <div class="form-group"><label for="seatInput"> <span style="font-size: 24px;">💺</span> <span id="seatLabel">座號</span> </label> <input type="number" id="seatInput" min="1" placeholder="請輸入座號"> <small>1號請填1，2號請填2，依此類推</small>
+    </div><button class="btn" id="startBtn"> <span style="font-size: 24px;">🚀</span> <span id="startButtonText">開始練習</span> </button>
+   </div><!-- 測驗頁面 -->
+   <div id="quizPage" class="page">
+    <div class="progress-bar">
+     <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="question-info">
+     <div class="question-number"><span style="font-size: 24px;">📝</span> <span>第 <span id="currentQuestion">1</span> 題 / 共 6 題</span>
+     </div>
+     <div class="student-info" id="studentInfo"><span style="font-size: 16px;">👤</span> <span></span>
+     </div>
+    </div>
+    <div class="question-content">
+     <div class="ratio-equation" id="questionText"></div>
+     <div id="answerInputArea"></div>
+     <div class="answer-hint" id="answerHint" style="display: none;"></div>
+    </div><button class="btn" id="submitBtn"> <span style="font-size: 24px;">✅</span> <span>提交答案</span> </button>
+   </div><!-- 結果頁面 -->
+   <div id="resultPage" class="page">
+    <div class="score-display">
+     <h2><span style="font-size: 36px;">🎉</span> <span>測驗完成！</span></h2>
+     <div style="font-size: 32px; font-weight: bold; margin: 20px 0;">
+      得分：<span id="correctCount">0</span>
+     </div>
+    </div>
+    <div class="results-container" id="resultsContainer"></div><button class="btn" id="restartBtn"> <span style="font-size: 24px;">🔄</span> <span>重新開始</span> </button>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      main_title: "比的應用",
+      date_label: "今日練習日期",
+      grade_label: "年級",
+      class_label: "班級",
+      seat_label: "座號",
+      start_button_text: "開始練習"
+    };
+
+    const allQuestions = [
+      { question: "3.4：2.2＝17：□", answer: "11", type: "decimal", solution: ["已知：3.4：2.2 = 17：□", "根據比例性質，外項乘積 = 內項乘積", "3.4 × □ = 2.2 × 17", "3.4 × □ = 37.4", "□ = 37.4 ÷ 3.4", "□ = 11"] },
+      { question: "4.2：3.8＝21：□", answer: "19", type: "decimal", solution: ["已知：4.2：3.8 = 21：□", "根據比例性質", "4.2 × □ = 3.8 × 21", "4.2 × □ = 79.8", "□ = 79.8 ÷ 4.2", "□ = 19"] },
+      { question: "4：5＝21：□", answer: "26.25", type: "decimal", solution: ["已知：4：5 = 21：□", "根據比例性質", "4 × □ = 5 × 21", "4 × □ = 105", "□ = 105 ÷ 4", "□ = 26.25"] },
+      { question: "3.7：1.5＝□：9", answer: "22.2", type: "decimal", solution: ["已知：3.7：1.5 = □：9", "根據比例性質", "1.5 × □ = 3.7 × 9", "1.5 × □ = 33.3", "□ = 33.3 ÷ 1.5", "□ = 22.2"] },
+      { question: "24：216＝□：72", answer: "8", type: "integer", solution: ["已知：24：216 = □：72", "根據比例性質", "216 × □ = 24 × 72", "216 × □ = 1728", "□ = 1728 ÷ 216", "□ = 8"] },
+      { question: "9：28＝36：□", answer: "112", type: "integer", solution: ["已知：9：28 = 36：□", "根據比例性質", "9 × □ = 28 × 36", "9 × □ = 1008", "□ = 1008 ÷ 9", "□ = 112"] },
+      { question: "2.8：1.6＝14：□", answer: "8", type: "integer", solution: ["已知：2.8：1.6 = 14：□", "根據比例性質", "2.8 × □ = 1.6 × 14", "2.8 × □ = 22.4", "□ = 22.4 ÷ 2.8", "□ = 8"] },
+      { question: "7：□＝2：6", answer: "21", type: "integer", solution: ["已知：7：□ = 2：6", "根據比例性質", "2 × □ = 7 × 6", "2 × □ = 42", "□ = 42 ÷ 2", "□ = 21"] },
+      { question: "3：  ＝8：12", answer: "4.5", type: "decimal", solution: ["已知：3：□ = 8：12", "根   比例性質", "8 × □ = 3 × 12", "8 × □ = 36", "□ = 36 ÷ 8", "□ = 4.5"] },
+      { question: "2.3：3.5＝□：7", answer: "4.6", type: "decimal", solution: ["已知：2.3：3.5 = □：7", "根據比例性質", "3.5 × □ = 2.3 × 7", "3.5 × □ = 16.1", "□ = 16.1 ÷ 3.5", "□ = 4.6"] },
+      { question: "1.8：2.5＝□：10", answer: "7.2", type: "decimal", solution: ["已知：1.8：2.5 = □：10", "根據比例性質", "2.5 × □ = 1.8 × 10", "2.5 × □ = 18", "□ = 18 ÷ 2.5", "□ = 7.2"] },
+      { question: "7.5：6.5＝30：□", answer: "26", type: "integer", solution: ["已知：7.5：6.5 = 30：□", "根據比例性質", "7.5 × □ = 6.5 × 30", "7.5 × □ = 195", "□ = 195 ÷ 7.5", "□ = 26"] },
+      { question: "6：□＝20：14", answer: "4.2", type: "decimal", solution: ["已知：6：□ = 20：14", "根據比例性質", "20 × □ = 6 × 14", "20 × □ = 84", "□ = 84 ÷ 20", "□ = 4.2"] },
+      { question: "□：800＝5：20", answer: "200", type: "integer", solution: ["已知：□：800 = 5：20", "根據比例性質", "20 × □ = 5 × 800", "20 × □ = 4000", "□ = 4000 ÷ 20", "□ = 200"] },
+      { question: "6：□＝8：10", answer: "7.5", type: "decimal", solution: ["已知：6：□ = 8：10", "根據比例性質", "8 × □ = 6 × 10", "8 × □ = 60", "□ = 60 ÷ 8", "□ = 7.5"] },
+      { question: "12：□＝18：15", answer: "10", type: "integer", solution: ["已知：12：□ = 18：15", "根據比例性質", "18 × □ = 12 × 15", "18 × □ = 180", "□ = 180 ÷ 18", "□ = 10"] },
+      { question: "4：3＝2：□", answer: "1.5", type: "decimal", solution: ["已知：4：3 = 2：□", "根據比例性質", "4 × □ = 3 × 2", "4 × □ = 6", "□ = 6 ÷ 4", "□ = 1.5"] },
+      { question: "1.6：2.5＝□：10", answer: "6.4", type: "decimal", solution: ["已知：1.6：2.5 = □：10", "根據比例性質", "2.5 × □ = 1.6 × 10", "2.5 × □ = 16", "□ = 16 ÷ 2.5", "□ = 6.4"] },
+      { question: "7：□＝63：81", answer: "9", type: "integer", solution: ["已知：7：□ = 63：81", "根據比例性質", "63 × □ = 7 × 81", "63 × □ = 567", "□ = 567 ÷ 63", "□ = 9"] },
+      { question: "3：5＝□：125", answer: "75", type: "integer", solution: ["已知：3：5 = □：125", "根據比例性質", "5 × □ = 3 × 125", "5 × □ = 375", "□ = 375 ÷ 5", "□ = 75"] },
+      { question: "0.5：□＝6：1", answer: "1/12", type: "fraction", numerator: "1", denominator: "12", solution: ["已知：0.5：□ = 6：1", "根據比例性質", "6 × □ = 0.5 × 1", "6 × □ = 0.5", "□ = 0.5 ÷ 6", "□ = 1/12"] },
+      { question: "91：□＝13：2", answer: "14", type: "integer", solution: ["已知：91：□ = 13：2", "根據比例性質", "13 × □ = 91 × 2", "13 × □ = 182", "□ = 182 ÷ 13", "□ = 14"] },
+      { question: "42：□＝21：30", answer: "60", type: "integer", solution: ["已知：42：□ = 21：30", "根據比例性質", "21 × □ = 42 × 30", "21 × □ = 1260", "□ = 1260 ÷ 21", "□ = 60"] },
+      { question: "1：2＝□：46", answer: "23", type: "integer", solution: ["已知：1：2 = □：46", "根據比例性質", "2 × □ = 1 × 46", "2 × □ = 46", "□ = 46 ÷ 2", "□ = 23"] },
+      { question: "35：□＝5：14", answer: "98", type: "integer", solution: ["已知：35：□ = 5：14", "根據比例性質", "5 × □ = 35 × 14", "5 × □ = 490", "□ = 490 ÷ 5", "□ = 98"] },
+      { question: "19：71＝□：568", answer: "152", type: "integer", solution: ["已知：19：71 = □：568", "根據比例性質", "71 × □ = 19 × 568", "71 × □ = 10792", "□ = 10792 ÷ 71", "□ = 152"] },
+      { question: "2：6＝7：□", answer: "21", type: "integer", solution: ["已知：2：6 = 7：□", "根據比例性質", "2 × □ = 6 × 7", "2 × □ = 42", "□ = 42 ÷ 2", "□ = 21"] },
+      { question: "3.4：6＝□：30", answer: "17", type: "integer", solution: ["已知：3.4：6 = □：30", "根據比例性質", "6 × □ = 3.4 × 30", "6 × □ = 102", "□ = 102 ÷ 6", "□ = 17"] },
+      { question: "7：4＝□：28", answer: "49", type: "integer", solution: ["已知：7：4 = □：28", "根據比例性質", "4 × □ = 7 × 28", "4 × □ = 196", "□ = 196 ÷ 4", "□ = 49"] },
+      { question: "0.4：1.6＝□：48", answer: "12", type: "integer", solution: ["已知：0.4：1.6 = □：48", "根據比例性質", "1.6 × □ = 0.4 × 48", "1.6 × □ = 19.2", "□ = 19.2 ÷ 1.6", "□ = 12"] },
+      { question: "16：13＝□：52", answer: "64", type: "integer", solution: ["已知：16：13 = □：52", "根據比例性質", "13 × □ = 16 × 52", "13 × □ = 832", "□ = 832 ÷ 13", "□ = 64"] },
+      { question: "52：□＝2.6：4.2", answer: "84", type: "integer", solution: ["已知：52：□ = 2.6：4.2", "根據比例性質", "2.6 × □ = 52 × 4.2", "2.6 × □ = 218.4", "□ = 218.4 ÷ 2.6", "□ = 84"] },
+      { question: "12：<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>4</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>13</span></div>＝□：4", answer: "156", type: "integer", solution: ["已知：12：4/13 = □：4", "根據比例性質", "4/13 × □ = 12    4", "4/13 × □ = 48", "□ = 48 ÷ 4/13", "□ = 48 × 13/4 = 156"] },
+      { question: "<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>8</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>21</span></div>：<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>2</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>3</span></div>＝4：□", answer: "7", type: "integer", solution: ["已知：8/21：2/3 = 4：□", "根據比例性質", "8/21 × □ = 2/3 × 4", "8/21 × □ = 8/3", "□ = 8/3 ÷ 8/21", "□ = 8/3 × 21/8 = 7"] },
+      { question: "3<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>1</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>5</span></div>：4<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>2</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>6</span></div>＝□：13", answer: "9.6", type: "decimal", solution: ["已知：3 1/5：4 2/6 = □：13", "先轉換帶分數：3 1/5 = 16/5，4 2/6 = 13/3", "根據比例性質", "13/3 × □ = 16/5 × 13", "13/3 × □ = 208/5", "□ = 208/5 ÷ 13/3 = 208/5 × 3/13 = 9.6"] },
+      { question: "10<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>6</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>7</span></div>：19＝□：1.4", answer: "0.8", type: "decimal", solution: ["已知：10 6/7：19 = □：1.4", "先轉換帶分數：10 6/7 = 76/7", "根據比例性質", "19 × □ = 76/7 × 1.4", "19 × □ = 15.2", "□ = 15.2 ÷ 19", "□ = 0.8"] },
+      { question: "2<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>4</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>5</span></div>：5＝12：□", answer: "21 3/7", type: "fraction", numerator: "150", denominator: "7", solution: ["已知：2 4/5：5 = 12：□", "先轉換帶分數：2 4/5 = 14/5", "根據比例性質", "14/5 × □ = 5 × 12", "14/5 × □ = 60", "□ = 60 ÷ 14/5 = 60 × 5/14 = 150/7 = 21 3/7"] },
+      { question: "3：□＝12：3<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>1</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>3</span></div>", answer: "5/6", type: "fraction", numerator: "5", denominator: "6", solution: ["已知：3：□ = 12：3 1/3", "先轉換帶分數：3 1/3 = 10/3", "根據比例性質", "12 × □ = 3 × 10/3", "12 × □ = 10", "□ = 10 ÷ 12 = 5/6"] },
+      { question: "5：4<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>2</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>7</span></div>＝□：6", answer: "7", type: "integer", solution: ["已知：5：4 2/7 = □：6", "先轉換帶分數：4 2/7 = 30/7", "根據比例性質", "30/7 × □ = 5 × 6", "30/7 × □ = 30", "□ = 30 ÷ 30/7 = 30 × 7/30 = 7"] },
+      { question: "13<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>2</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>5</span></div>：□＝14：5", answer: "4 11/14", type: "fraction", numerator: "67", denominator: "14", solution: ["已知：13 2/5：□ = 14：5", "先轉換帶分數：13 2/5 = 67/5", "根據比例性質", "14 × □ = 67/5 × 5", "14 × □ = 67", "□ = 67 ÷ 14 = 67/14 = 4 11/14"] },
+      { question: "15：17＝9：□", answer: "10.2", type: "decimal", solution: ["已知：15：17 = 9：□", "根據比例性質", "15 × □ = 17 × 9", "15 × □ = 153", "□ = 153 ÷ 15", "□ = 10.2"] },
+      { question: "5<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>3</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>7</span></div>：4＝19：□", answer: "14", type: "integer", solution: ["已知：5 3/7：4 = 19：□", "先轉換帶分數：5 3/7 = 38/7", "根據比例性質", "38/7 × □ = 4 × 19", "38/7 × □ = 76", "□ = 76 ÷ 38/7 = 76 × 7/38 = 14"] },
+      { question: "3：□＝1.2：2", answer: "5", type: "integer", solution: ["已知：3：□ = 1.2：2", "根據比例性質", "1.2 × □ = 3 × 2", "1.2 × □ = 6", "□ = 6 ÷ 1.2", "□ = 5"] },
+      { question: "23：□＝11.5：9.5", answer: "19", type: "integer", solution: ["已知：23：□ = 11.5：9.5", "根據比例性質", "11.5 × □ = 23 × 9.5", "11.5 × □ = 218.5", "□ = 218.5 ÷ 11.5", "□ = 19"] },
+      { question: "27：35＝9：□", answer: "11 2/3", type: "fraction", numerator: "35", denominator: "3", solution: ["已知：27：35 = 9：□", "根據比例性質", "27 × □ = 35 × 9", "27 × □ = 315", "□ = 315 ÷ 27", "□ = 35/3 = 11 2/3"] },
+      { question: "7：0.5＝□：21", answer: "294", type: "integer", solution: ["已知：7：0.5 = □：21", "根據比例性質", "0.5 × □ = 7 × 21", "0.5 × □ = 147", "□ = 147 ÷ 0.5", "□ = 294"] },
+      { question: "7：□＝2<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>1</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>5</span></div>：1<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>4</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>7</span></div>", answer: "5", type: "integer", solution: ["已知：7：□ = 2 1/5：1 4/7", "先轉換帶分數：2 1/5 = 11/5，1 4/7 = 11/7", "根據比例性質", "11/5 × □ = 7 × 11/7", "11/5 × □ = 11", "□ = 11 ÷ 11/5 = 11 × 5/11 = 5"] },
+      { question: "1.8：3<div style='display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 4px;'><span style='font-size:20px;'>3</span><span style='border-top:2px solid #333;width:30px;margin:2px 0;'></span><span style='font-size:20px;'>5</span></div>＝8：□", answer: "16", type: "integer", solution: ["已知：1.8：3 3/5 = 8：□", "先轉換帶分數：3 3/5 = 18/5", "根據比例性質", "1.8 × □ = 18/5 × 8", "1.8 × □ = 28.8", "□ = 28.8 ÷ 1.8", "□ = 16"] },
+      { question: "7：9＝35：□", answer: "45", type: "integer", solution: ["已知：7：9 = 35：□", "根據比例性質", "7 × □ = 9 × 35", "7 × □ = 315", "□ = 315 ÷ 7", "□ = 45"] },
+      { question: "65：17＝□：3.4", answer: "13", type: "integer", solution: ["已知：65：17 = □：3.4", "根據比例性質", "17 × □ = 65 × 3.4", "17 × □ = 221", "□ = 221 ÷ 17", "□ = 13"] }
+    ];
+
+    let currentState = {
+      grade: 0,
+      classNumber: 0,
+      seatNumber: 0,
+      currentQuestionIndex: 0,
+      todayQuestions: [],
+      userAnswers: []
+    };
+
+    function getTodayDate() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function seededRandom(seed) {
+      const x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function generateDailyQuestions(dateStr) {
+      const seed = dateStr.split('-').reduce((acc, val) => acc + parseInt(val), 0);
+      const shuffled = [...allQuestions];
+      
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(seed + i) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      
+      const integerQuestions = shuffled.filter(q => q.type === 'integer').slice(0, 2);
+      const decimalQuestions = shuffled.filter(q => q.type === 'decimal').slice(0, 2);
+      const fractionQuestions = shuffled.filter(q => q.type === 'fraction').slice(0, 2);
+      
+      return [...integerQuestions, ...decimalQuestions, ...fractionQuestions];
+    }
+
+    function showPage(pageName) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageName).classList.add('active');
+    }
+
+    function renderQuestion() {
+      const question = currentState.todayQuestions[currentState.currentQuestionIndex];
+      const progress = ((currentState.currentQuestionIndex) / 6) * 100;
+      
+      document.getElementById('progressFill').style.width = `${progress}%`;
+      document.getElementById('currentQuestion').textContent = currentState.currentQuestionIndex + 1;
+      document.getElementById('questionText').innerHTML = question.question;
+      
+      const answerArea = document.getElementById('answerInputArea');
+      const hintArea = document.getElementById('answerHint');
+      
+      if (question.type === 'fraction') {
+        answerArea.innerHTML = `
+          <div class="answer-input">
+            <input type="number" id="integerPart" placeholder="整數" style="width: 60px;">
+            <div class="fraction-input">
+              <input type="number" id="numerator" placeholder="分子">
+              <div class="fraction-line"></div>
+              <input type="number" id="denominator" placeholder="分母">
+            </div>
+          </div>
+        `;
+        hintArea.style.display = 'block';
+        hintArea.textContent = '💡 此題答案為分數，請填入整數、分子和分母';
+      } else {
+        answerArea.innerHTML = `
+          <div class="answer-input">
+            <input type="text" id="answerInput" placeholder="請輸入答案">
+          </div>
+        `;
+        hintArea.style.display = 'none';
+      }
+    }
+
+    function getUserAnswer() {
+      const question = currentState.todayQuestions[currentState.currentQuestionIndex];
+      
+      if (question.type === 'fraction') {
+        const integer = document.getElementById('integerPart').value.trim();
+        const numerator = document.getElementById('numerator').value.trim();
+        const denominator = document.getElementById('denominator').value.trim();
+        
+        if (!numerator || !denominator) return null;
+        
+        if (integer) {
+          return `${integer} ${numerator}/${denominator}`;
+        } else {
+          return `${numerator}/${denominator}`;
+        }
+      } else {
+        return document.getElementById('answerInput').value.trim();
+      }
+    }
+
+    function normalizeAnswer(answer) {
+      if (!answer) return '';
+      
+      answer = answer.toString().trim();
+      
+      if (answer.includes('/')) {
+        const parts = answer.split(' ');
+        if (parts.length === 2) {
+          const integer = parseInt(parts[0]);
+          const [num, den] = parts[1].split('/').map(x => parseInt(x));
+          const improperNum = integer * den + num;
+          return `${improperNum}/${den}`;
+        }
+        
+        const [num, den] = answer.split('/').map(x => parseInt(x));
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+        const divisor = gcd(Math.abs(num), Math.abs(den));
+        return `${num / divisor}/${den / divisor}`;
+      }
+      
+      return parseFloat(answer).toString();
+    }
+
+    function checkAnswer(userAnswer, correctAnswer) {
+      return normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
+    }
+
+    async function submitAnswer() {
+      const userAnswer = getUserAnswer();
+      
+      if (!userAnswer) {
+        return;
+      }
+      
+      currentState.userAnswers.push(userAnswer);
+      
+      if (currentState.currentQuestionIndex < 5) {
+        currentState.currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        await showResults();
+      }
+    }
+
+    async function showResults() {
+      let correctCount = 0;
+      const resultsContainer = document.getElementById('resultsContainer');
+      resultsContainer.innerHTML = '';
+      
+      currentState.todayQuestions.forEach((question, index) => {
+        const userAnswer = currentState.userAnswers[index];
+        const isCorrect = checkAnswer(userAnswer, question.answer);
+        if (isCorrect) correctCount++;
+        
+        const resultItem = document.createElement('div');
+        resultItem.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
+        
+        const solutionSteps = question.solution.map(step => `<div>${step}</div>`).join('');
+        
+        resultItem.innerHTML = `
+          <div class="result-header">
+            <span>第 ${index + 1} 題：${question.question}</span>
+            <span class="status-badge ${isCorrect ? 'correct' : 'incorrect'}">
+              ${isCorrect ? '✓ 正確' : '✗ 錯誤'}
+            </span>
+          </div>
+          <div style="margin: 12px 0; font-size: 16px;">
+            <strong>你的答案：</strong>${userAnswer || '未作答'}
+            ${!isCorrect ? `<br><strong style="color: #4caf50;">正確答案：</strong>${question.answer}` : ''}
+          </div>
+          <div class="solution">
+            <div class="solution-title">📝 解題過程：</div>
+            <div class="solution-steps">${solutionSteps}</div>
+          </div>
+        `;
+        
+        resultsContainer.appendChild(resultItem);
+      });
+      
+      document.getElementById('correctCount').textContent = correctCount;
+      
+      showPage('resultPage');
+    }
+
+    function updateConfigUI(config) {
+      document.getElementById('mainTitle').textContent = config.main_title || defaultConfig.main_title;
+      document.getElementById('dateLabel').textContent = config.date_label || defaultConfig.date_label;
+      document.getElementById('gradeLabel').textContent = config.grade_label || defaultConfig.grade_label;
+      document.getElementById('classLabel').textContent = config.class_label || defaultConfig.class_label;
+      document.getElementById('seatLabel').textContent = config.seat_label || defaultConfig.seat_label;
+      document.getElementById('startButtonText').textContent = config.start_button_text || defaultConfig.start_button_text;
+    }
+
+    document.getElementById('todayDate').textContent = getTodayDate();
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const grade = parseInt(document.getElementById('gradeInput').value);
+      const classNumber = parseInt(document.getElementById('classInput').value);
+      const seatNumber = parseInt(document.getElementById('seatInput').value);
+      
+      if (!grade || !classNumber || !seatNumber) {
+        return;
+      }
+      
+      currentState.grade = grade;
+      currentState.classNumber = classNumber;
+      currentState.seatNumber = seatNumber;
+      currentState.currentQuestionIndex = 0;
+      currentState.userAnswers = [];
+      currentState.todayQuestions = generateDailyQuestions(getTodayDate());
+      
+      document.getElementById('studentInfo').innerHTML = `
+        <span style="font-size: 16px;">👤</span>
+        <span>${grade}年${classNumber}班${seatNumber}號</span>
+      `;
+      
+      renderQuestion();
+      showPage('quizPage');
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      document.getElementById('gradeInput').value = '';
+      document.getElementById('classInput').value = '';
+      document.getElementById('seatInput').value = '';
+      showPage('startPage');
+    });
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          updateConfigUI(config);
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["main_title", config.main_title || defaultConfig.main_title],
+          ["date_label", config.date_label || defaultConfig.date_label],
+          ["grade_label", config.grade_label || defaultConfig.grade_label],
+          ["class_label", config.class_label || defaultConfig.class_label],
+          ["seat_label", config.seat_label || defaultConfig.seat_label],
+          ["start_button_text", config.start_button_text || defaultConfig.start_button_text]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a0fad8a34a1a9ad',t:'MTc2MzU1NDk5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

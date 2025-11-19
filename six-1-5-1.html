@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="zh-TW">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最簡單整數比練習</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Microsoft JhengHei', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-height: 90%;
+      overflow-y: auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .header h1 {
+      color: #667eea;
+      font-size: 32px;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+    
+    .date-badge {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    .input-group label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+      box-sizing: border-box;
+    }
+    
+    .input-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .hint {
+      font-size: 13px;
+      color: #666;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .question-container {
+      text-align: center;
+    }
+    
+    .progress {
+      background: #f0f0f0;
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .progress-text {
+      font-weight: bold;
+      color: #667eea;
+      font-size: 18px;
+    }
+    
+    .student-info {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      color: #333;
+      font-weight: bold;
+    }
+    
+    .question-box {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 25px;
+    }
+    
+    .question-text {
+      font-size: 28px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    
+    .answer-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .answer-inputs input {
+      width: 100px;
+      padding: 12px;
+      border: 3px solid #667eea;
+      border-radius: 10px;
+      font-size: 24px;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    .answer-inputs span {
+      font-size: 32px;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .result-container {
+      text-align: center;
+      max-height: 100%;
+      overflow-y: auto;
+    }
+    
+    .celebration {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: bounce 1s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .score {
+      font-size: 48px;
+      color: #667eea;
+      font-weight: bold;
+      margin-bottom: 30px;
+    }
+    
+    .answers-list {
+      text-align: left;
+      margin-top: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .answer-item {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-left: 5px solid #667eea;
+    }
+    
+    .answer-item.correct {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+    
+    .answer-item.incorrect {
+      border-left-color: #f44336;
+      background: #fef5f5;
+    }
+    
+    .answer-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .answer-content {
+      margin-left: 30px;
+      color: #666;
+      line-height: 1.8;
+    }
+    
+    .solution-steps {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      border: 2px dashed #667eea;
+    }
+    
+    .solution-steps h4 {
+      color: #667eea;
+      margin: 0 0 10px 0;
+      font-size: 16px;
+    }
+    
+    .solution-steps ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .solution-steps li {
+      margin-bottom: 8px;
+      color: #333;
+    }
+    
+    .fraction {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      margin: 0 5px;
+    }
+    
+    .fraction-numerator {
+      display: block;
+      border-bottom: 2px solid #333;
+      padding-bottom: 3px;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    
+    .fraction-denominator {
+      display: block;
+      padding-top: 3px;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    
+    .mixed-number {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    
+    .whole-number {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <div id="welcomePage">
+    <div class="header">
+     <h1><span>📐</span> <span id="titleText">最簡單整數比練習</span> <span>📐</span></h1>
+     <div class="date-badge"><span>📅</span> <span id="dateLabel">今日日期</span> <span id="todayDate"></span>
+     </div>
+    </div>
+    <div class="input-group"><label> <span>🎓</span> <span>年級</span> </label> <input type="number" id="gradeInput" placeholder="請輸入年級" min="1" max="6">
+     <div class="hint">
+      💡 5年級請填5，6年級請填6
+     </div>
+    </div>
+    <div class="input-group"><label> <span>🏫</span> <span>班級</span> </label> <input type="number" id="classInput" placeholder="請輸入班級" min="1">
+     <div class="hint">
+      💡 1班請填1，2班請填2，依此類推
+     </div>
+    </div>
+    <div class="input-group"><label> <span>🪑</span> <span>座號</span> </label> <input type="number" id="seatInput" placeholder="請輸入座號" min="1">
+     <div class="hint">
+      💡 1號請填1，2號請填2，依此類推
+     </div>
+    </div><button class="btn" id="startBtn"> <span>🚀</span> <span id="startButtonText">開始練習</span> </button>
+   </div>
+   <div id="questionPage" class="hidden">
+    <div class="progress"><span>📊</span> <span class="progress-text" id="progressText">第 1 題 / 共 6 題</span>
+    </div>
+    <div class="student-info"><span>👤</span> <span id="studentInfoText"></span>
+    </div>
+    <div class="question-container">
+     <div class="question-box">
+      <div class="question-text" id="questionText"></div>
+      <div class="answer-inputs"><input type="number" id="answerLeft" placeholder="?"> <span>:</span> <input type="number" id="answerRight" placeholder="?">
+      </div>
+     </div><button class="btn" id="submitBtn"> <span>✅</span> <span id="submitButtonText">提交答案</span> </button>
+    </div>
+   </div>
+   <div id="resultPage" class="hidden">
+    <div class="result-container">
+     <div class="celebration">
+      🎉
+     </div>
+     <div class="score" id="scoreText"></div>
+     <div class="answers-list" id="answersList"></div><button class="btn" id="restartBtn"> <span>🔄</span> <span id="restartButtonText">重新開始</span> </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      title_text: "最簡單整數比練習",
+      date_label: "今日日期",
+      start_button: "開始練習",
+      submit_button: "提交答案",
+      restart_button: "重新開始"
+    };
+
+    const questionBank = [
+      { question: "42 : 294", answer: [1, 7], type: "integer", original: [42, 294], left: "42", right: "294" },
+      { question: "9.6 : 8.4", answer: [8, 7], type: "decimal", original: [9.6, 8.4], left: "9.6", right: "8.4" },
+      { question: "<frac>3|4</frac> : <frac>2|3</frac>", answer: [9, 8], type: "fraction", original: [3/4, 2/3], left: {num: 3, den: 4}, right: {num: 2, den: 3} },
+      { question: "<frac>2|5</frac> : <frac>5|6</frac>", answer: [12, 25], type: "fraction", original: [2/5, 5/6], left: {num: 2, den: 5}, right: {num: 5, den: 6} },
+      { question: "0.75 : 2.1", answer: [5, 14], type: "decimal", original: [0.75, 2.1], left: "0.75", right: "2.1" },
+      { question: "96 : 72", answer: [4, 3], type: "integer", original: [96, 72], left: "96", right: "72" },
+      { question: "1.6 : 5.6", answer: [2, 7], type: "decimal", original: [1.6, 5.6], left: "1.6", right: "5.6" },
+      { question: "6 : 1.2", answer: [5, 1], type: "decimal", original: [6, 1.2], left: "6", right: "1.2" },
+      { question: "1<frac>3|7</frac> : 2<frac>5|8</frac>", answer: [80, 147], type: "fraction", original: [10/7, 21/8], left: {whole: 1, num: 3, den: 7}, right: {whole: 2, num: 5, den: 8} },
+      { question: "1<frac>4|7</frac> : 6<frac>3|5</frac>", answer: [5, 21], type: "fraction", original: [11/7, 33/5], left: {whole: 1, num: 4, den: 7}, right: {whole: 6, num: 3, den: 5} },
+      { question: "<frac>3|10</frac> : 1<frac>1|2</frac>", answer: [1, 5], type: "fraction", original: [3/10, 3/2], left: {num: 3, den: 10}, right: {whole: 1, num: 1, den: 2} },
+      { question: "<frac>1|4</frac> : <frac>3|8</frac>", answer: [2, 3], type: "fraction", original: [1/4, 3/8], left: {num: 1, den: 4}, right: {num: 3, den: 8} },
+      { question: "210 : 140", answer: [3, 2], type: "integer", original: [210, 140], left: "210", right: "140" },
+      { question: "12 : 32", answer: [3, 8], type: "integer", original: [12, 32], left: "12", right: "32" },
+      { question: "12 : 16", answer: [3, 4], type: "integer", original: [12, 16], left: "12", right: "16" },
+      { question: "96 : 72", answer: [4, 3], type: "integer", original: [96, 72], left: "96", right: "72" },
+      { question: "<frac>3|4</frac> : <frac>2|3</frac>", answer: [9, 8], type: "fraction", original: [3/4, 2/3], left: {num: 3, den: 4}, right: {num: 2, den: 3} },
+      { question: "<frac>3|10</frac> : 1<frac>1|2</frac>", answer: [1, 5], type: "fraction", original: [3/10, 3/2], left: {num: 3, den: 10}, right: {whole: 1, num: 1, den: 2} },
+      { question: "<frac>2|5</frac> : <frac>5|6</frac>", answer: [12, 25], type: "fraction", original: [2/5, 5/6], left: {num: 2, den: 5}, right: {num: 5, den: 6} },
+      { question: "19 : 57", answer: [1, 3], type: "integer", original: [19, 57], left: "19", right: "57" },
+      { question: "1<frac>3|7</frac> : 2<frac>5|8</frac>", answer: [80, 147], type: "fraction", original: [10/7, 21/8], left: {whole: 1, num: 3, den: 7}, right: {whole: 2, num: 5, den: 8} },
+      { question: "9.6 : 8.4", answer: [8, 7], type: "decimal", original: [9.6, 8.4], left: "9.6", right: "8.4" },
+      { question: "1.5 : 4.5", answer: [1, 3], type: "decimal", original: [1.5, 4.5], left: "1.5", right: "4.5" },
+      { question: "9.6 : 8.4", answer: [8, 7], type: "decimal", original: [9.6, 8.4], left: "9.6", right: "8.4" },
+      { question: "19 : 57", answer: [1, 3], type: "integer", original: [19, 57], left: "19", right: "57" },
+      { question: "<frac>3|4</frac> : <frac>5|8</frac>", answer: [6, 5], type: "fraction", original: [3/4, 5/8], left: {num: 3, den: 4}, right: {num: 5, den: 8} },
+      { question: "0.04 : 0.2", answer: [1, 5], type: "decimal", original: [0.04, 0.2], left: "0.04", right: "0.2" },
+      { question: "1.25 : 5", answer: [1, 4], type: "decimal", original: [1.25, 5], left: "1.25", right: "5" },
+      { question: "72 : 27", answer: [8, 3], type: "integer", original: [72, 27], left: "72", right: "27" },
+      { question: "26 : 39", answer: [2, 3], type: "integer", original: [26, 39], left: "26", right: "39" },
+      { question: "1.25 : 4", answer: [5, 16], type: "decimal", original: [1.25, 4], left: "1.25", right: "4" },
+      { question: "0.96 : 1.6", answer: [3, 5], type: "decimal", original: [0.96, 1.6], left: "0.96", right: "1.6" },
+      { question: "3<frac>3|5</frac> : 6", answer: [3, 5], type: "fraction", original: [18/5, 6], left: {whole: 3, num: 3, den: 5}, right: "6" },
+      { question: "0.32 : 0.8", answer: [2, 5], type: "decimal", original: [0.32, 0.8], left: "0.32", right: "0.8" },
+      { question: "2.08 : 2<frac>3|5</frac>", answer: [4, 5], type: "mixed", original: [2.08, 13/5], left: "2.08", right: {whole: 2, num: 3, den: 5} },
+      { question: "<frac>1|5</frac> : <frac>1|9</frac>", answer: [9, 5], type: "fraction", original: [1/5, 1/9], left: {num: 1, den: 5}, right: {num: 1, den: 9} },
+      { question: "76 : 133", answer: [4, 7], type: "integer", original: [76, 133], left: "76", right: "133" },
+      { question: "<frac>1|12</frac> : <frac>1|9</frac>", answer: [3, 4], type: "fraction", original: [1/12, 1/9], left: {num: 1, den: 12}, right: {num: 1, den: 9} },
+      { question: "210 : 54", answer: [35, 9], type: "integer", original: [210, 54], left: "210", right: "54" },
+      { question: "<frac>7|15</frac> : <frac>7|12</frac>", answer: [4, 5], type: "fraction", original: [7/15, 7/12], left: {num: 7, den: 15}, right: {num: 7, den: 12} },
+      { question: "<frac>25|36</frac> : <frac>15|24</frac>", answer: [10, 9], type: "fraction", original: [25/36, 15/24], left: {num: 25, den: 36}, right: {num: 15, den: 24} },
+      { question: "0.93 : 0.62", answer: [3, 2], type: "decimal", original: [0.93, 0.62], left: "0.93", right: "0.62" },
+      { question: "2<frac>2|7</frac> : <frac>6|7</frac>", answer: [8, 3], type: "fraction", original: [16/7, 6/7], left: {whole: 2, num: 2, den: 7}, right: {num: 6, den: 7} },
+      { question: "0.72 : 0.8", answer: [9, 10], type: "decimal", original: [0.72, 0.8], left: "0.72", right: "0.8" },
+      { question: "0.8 : 0.375", answer: [32, 15], type: "decimal", original: [0.8, 0.375], left: "0.8", right: "0.375" },
+      { question: "<frac>1|5</frac> : <frac>1|8</frac>", answer: [8, 5], type: "fraction", original: [1/5, 1/8], left: {num: 1, den: 5}, right: {num: 1, den: 8} },
+      { question: "<frac>3|4</frac> : <frac>2|7</frac>", answer: [21, 8], type: "fraction", original: [3/4, 2/7], left: {num: 3, den: 4}, right: {num: 2, den: 7} },
+      { question: "24 : 72", answer: [1, 3], type: "integer", original: [24, 72], left: "24", right: "72" },
+      { question: "21 : 98", answer: [3, 14], type: "integer", original: [21, 98], left: "21", right: "98" },
+      { question: "12 : 9<frac>3|5</frac>", answer: [5, 4], type: "fraction", original: [12, 48/5], left: "12", right: {whole: 9, num: 3, den: 5} },
+      { question: "0.03 : 0.52", answer: [3, 52], type: "decimal", original: [0.03, 0.52], left: "0.03", right: "0.52" },
+      { question: "0.32 : 0.66", answer: [16, 33], type: "decimal", original: [0.32, 0.66], left: "0.32", right: "0.66" },
+      { question: "4.5 : 7<frac>1|5</frac>", answer: [5, 8], type: "mixed", original: [4.5, 36/5], left: "4.5", right: {whole: 7, num: 1, den: 5} }
+    ];
+
+    let currentQuestionIndex = 0;
+    let studentAnswers = [];
+    let dailyQuestions = [];
+    let studentInfo = {};
+
+    function formatQuestionText(questionStr) {
+      return questionStr.replace(/<frac>(\d+)\|(\d+)<\/frac>/g, 
+        '<span class="fraction"><span class="fraction-numerator">$1</span><span class="fraction-denominator">$2</span></span>');
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(a);
+      b = Math.abs(b);
+      while (b !== 0) {
+        let temp = b;
+        b = a % b;
+        a = temp;
+      }
+      return a;
+    }
+
+    function simplifyRatio(num1, num2) {
+      const divisor = gcd(num1, num2);
+      return [num1 / divisor, num2 / divisor];
+    }
+
+    function lcm(a, b) {
+      return Math.abs(a * b) / gcd(a, b);
+    }
+
+    function generateDailyQuestions() {
+      const today = new Date();
+      const daysSinceEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+      const cycleDay = daysSinceEpoch % 5;
+      
+      const seededRandom = (seed) => {
+        seed = Math.sin(seed) * 10000;
+        return seed - Math.floor(seed);
+      };
+      
+      const questionsPerDay = Math.ceil(questionBank.length / 5);
+      const startIdx = cycleDay * questionsPerDay;
+      const endIdx = Math.min(startIdx + questionsPerDay, questionBank.length);
+      
+      const availableQuestions = questionBank.slice(startIdx, endIdx);
+      
+      const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      const selected = [];
+      const usedIndices = new Set();
+      
+      for (let i = 0; i < 6 && selected.length < 6; i++) {
+        let attempts = 0;
+        let idx;
+        
+        do {
+          idx = Math.floor(seededRandom(seed + i * 100 + attempts) * availableQuestions.length);
+          attempts++;
+        } while (usedIndices.has(idx) && attempts < 50);
+        
+        if (!usedIndices.has(idx) && availableQuestions[idx]) {
+          usedIndices.add(idx);
+          selected.push(availableQuestions[idx]);
+        }
+      }
+      
+      if (selected.length < 6) {
+        for (let i = 0; i < questionBank.length && selected.length < 6; i++) {
+          const question = questionBank[i];
+          if (!selected.includes(question)) {
+            selected.push(question);
+          }
+        }
+      }
+      
+      return selected;
+    }
+
+    function getSolutionSteps(question) {
+      const { type, original, answer, left, right } = question;
+      const [num1, num2] = original;
+      const [ans1, ans2] = answer;
+      
+      if (type === "integer") {
+        const divisor = gcd(num1, num2);
+        return [
+          `原式：${num1} : ${num2}`,
+          `找出最大公因數：GCD(${num1}, ${num2}) = ${divisor}`,
+          `同時除以最大公因數：${num1}÷${divisor} : ${num2}÷${divisor}`,
+          `答案：${ans1} : ${ans2}`
+        ];
+      } else if (type === "decimal") {
+        const str1 = num1.toString();
+        const str2 = num2.toString();
+        const dec1 = str1.includes('.') ? str1.split('.')[1].length : 0;
+        const dec2 = str2.includes('.') ? str2.split('.')[1].length : 0;
+        const maxDec = Math.max(dec1, dec2);
+        const multiplier = Math.pow(10, maxDec);
+        const int1 = Math.round(num1 * multiplier);
+        const int2 = Math.round(num2 * multiplier);
+        const divisor = gcd(int1, int2);
+        
+        return [
+          `原式：${num1} : ${num2}`,
+          `同時乘以 ${multiplier} 化為整數：${int1} : ${int2}`,
+          `找出最大公因數：GCD(${int1}, ${int2}) = ${divisor}`,
+          `同時除以最大公因數：${int1}÷${divisor} : ${int2}÷${divisor}`,
+          `答案：${ans1} : ${ans2}`
+        ];
+      } else {
+        let leftFrac, rightFrac, leftImproper, rightImproper;
+        
+        if (left.whole !== undefined) {
+          leftImproper = left.whole * left.den + left.num;
+          leftFrac = `${leftImproper}/${left.den}`;
+        } else {
+          leftImproper = left.num;
+          leftFrac = `${left.num}/${left.den}`;
+        }
+        
+        if (right.whole !== undefined) {
+          rightImproper = right.whole * right.den + right.num;
+          rightFrac = `${rightImproper}/${right.den}`;
+        } else {
+          rightImproper = right.num;
+          rightFrac = `${right.num}/${right.den}`;
+        }
+        
+        const leftNum = left.whole !== undefined ? left.whole * left.den + left.num : left.num;
+        const leftDen = left.den;
+        const rightNum = right.whole !== undefined ? right.whole * right.den + right.num : right.num;
+        const rightDen = right.den;
+        
+        const commonDen = lcm(leftDen, rightDen);
+        const leftExpanded = leftNum * (commonDen / leftDen);
+        const rightExpanded = rightNum * (commonDen / rightDen);
+        const divisor = gcd(leftExpanded, rightExpanded);
+        
+        return [
+          `原式：${formatQuestionText(question.question)}`,
+          `化為假分數：${leftFrac} : ${rightFrac}`,
+          `通分母為 ${commonDen}：${leftExpanded}/${commonDen} : ${rightExpanded}/${commonDen}`,
+          `比的前後項同時乘以 ${commonDen}：${leftExpanded} : ${rightExpanded}`,
+          `找出最大公因數：GCD(${leftExpanded}, ${rightExpanded}) = ${divisor}`,
+          `同時除以最大公因數：${leftExpanded}÷${divisor} : ${rightExpanded}÷${divisor}`,
+          `答案：${ans1} : ${ans2}`
+        ];
+      }
+    }
+
+    function showPage(pageId) {
+      document.getElementById('welcomePage').classList.add('hidden');
+      document.getElementById('questionPage').classList.add('hidden');
+      document.getElementById('resultPage').classList.add('hidden');
+      document.getElementById(pageId).classList.remove('hidden');
+    }
+
+    function updateUI(config) {
+      document.getElementById('titleText').textContent = config.title_text || defaultConfig.title_text;
+      document.getElementById('dateLabel').textContent = config.date_label || defaultConfig.date_label;
+      document.getElementById('startButtonText').textContent = config.start_button || defaultConfig.start_button;
+      document.getElementById('submitButtonText').textContent = config.submit_button || defaultConfig.submit_button;
+      document.getElementById('restartButtonText').textContent = config.restart_button || defaultConfig.restart_button;
+    }
+
+    async function onConfigChange(config) {
+      updateUI(config);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["title_text", config.title_text || defaultConfig.title_text],
+          ["date_label", config.date_label || defaultConfig.date_label],
+          ["start_button", config.start_button || defaultConfig.start_button],
+          ["submit_button", config.submit_button || defaultConfig.submit_button],
+          ["restart_button", config.restart_button || defaultConfig.restart_button]
+        ])
+      });
+    }
+
+    const today = new Date();
+    document.getElementById('todayDate').textContent = 
+      `${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getDate()).padStart(2, '0')}`;
+
+    dailyQuestions = generateDailyQuestions();
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      const grade = document.getElementById('gradeInput').value;
+      const classNum = document.getElementById('classInput').value;
+      const seat = document.getElementById('seatInput').value;
+      
+      if (!grade || !classNum || !seat) {
+        const message = document.createElement('div');
+        message.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f44336; color: white; padding: 15px 30px; border-radius: 10px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2);';
+        message.textContent = '請填寫完整的年級、班級和座號！';
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 3000);
+        return;
+      }
+      
+      studentInfo = { grade, classNum, seat };
+      document.getElementById('studentInfoText').textContent = 
+        `${grade}年${classNum}班 ${seat}號`;
+      
+      currentQuestionIndex = 0;
+      studentAnswers = [];
+      showQuestion();
+      showPage('questionPage');
+    });
+
+    function showQuestion() {
+      const question = dailyQuestions[currentQuestionIndex];
+      document.getElementById('progressText').textContent = 
+        `第 ${currentQuestionIndex + 1} 題 / 共 6 題`;
+      document.getElementById('questionText').innerHTML = formatQuestionText(question.question);
+      document.getElementById('answerLeft').value = '';
+      document.getElementById('answerRight').value = '';
+      document.getElementById('answerLeft').focus();
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const left = parseInt(document.getElementById('answerLeft').value);
+      const right = parseInt(document.getElementById('answerRight').value);
+      
+      if (isNaN(left) || isNaN(right)) {
+        const message = document.createElement('div');
+        message.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f44336; color: white; padding: 15px 30px; border-radius: 10px; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.2);';
+        message.textContent = '請輸入完整的答案！';
+        document.body.appendChild(message);
+        setTimeout(() => message.remove(), 3000);
+        return;
+      }
+      
+      const question = dailyQuestions[currentQuestionIndex];
+      const isCorrect = left === question.answer[0] && right === question.answer[1];
+      
+      studentAnswers.push({
+        question: question.question,
+        userAnswer: [left, right],
+        correctAnswer: question.answer,
+        isCorrect: isCorrect,
+        questionData: question
+      });
+      
+      currentQuestionIndex++;
+      
+      if (currentQuestionIndex < 6) {
+        showQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      const correctCount = studentAnswers.filter(a => a.isCorrect).length;
+      
+      document.getElementById('scoreText').textContent = `得分：${correctCount}`;
+      
+      const answersList = document.getElementById('answersList');
+      answersList.innerHTML = '<h3 style="color: #667eea; margin-bottom: 20px;">📝 詳細解答</h3>';
+      
+      studentAnswers.forEach((answer, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `answer-item ${answer.isCorrect ? 'correct' : 'incorrect'}`;
+        
+        const icon = answer.isCorrect ? '✅' : '❌';
+        const steps = getSolutionSteps(answer.questionData);
+        
+        itemDiv.innerHTML = `
+          <div class="answer-header">
+            <span>${icon}</span>
+            <span>第 ${index + 1} 題</span>
+          </div>
+          <div class="answer-content">
+            <div><strong>題目：</strong>${formatQuestionText(answer.question)}</div>
+            <div><strong>你的答案：</strong>${answer.userAnswer[0]} : ${answer.userAnswer[1]}</div>
+            <div><strong>正確答案：</strong>${answer.correctAnswer[0]} : ${answer.correctAnswer[1]}</div>
+            <div class="solution-steps">
+              <h4>📖 解題步驟：</h4>
+              <ol>
+                ${steps.map(step => `<li>${step}</li>`).join('')}
+              </ol>
+            </div>
+          </div>
+        `;
+        
+        answersList.appendChild(itemDiv);
+      });
+      
+      showPage('resultPage');
+    }
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      currentQuestionIndex = 0;
+      studentAnswers = [];
+      document.getElementById('gradeInput').value = '';
+      document.getElementById('classInput').value = '';
+      document.getElementById('seatInput').value = '';
+      showPage('welcomePage');
+    });
+
+    updateUI(window.elementSdk ? window.elementSdk.config : defaultConfig);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a0fa59645f7a9ad',t:'MTc2MzU1NDY3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
