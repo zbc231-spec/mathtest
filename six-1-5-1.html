@@ -473,52 +473,74 @@
       return Math.abs(a * b) / gcd(a, b);
     }
 
-    function generateDailyQuestions() {
-      const today = new Date();
-      const daysSinceEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
-      const cycleDay = daysSinceEpoch % 5;
-      
-      const seededRandom = (seed) => {
-        seed = Math.sin(seed) * 10000;
-        return seed - Math.floor(seed);
-      };
-      
-      const questionsPerDay = Math.ceil(questionBank.length / 5);
-      const startIdx = cycleDay * questionsPerDay;
-      const endIdx = Math.min(startIdx + questionsPerDay, questionBank.length);
-      
-      const availableQuestions = questionBank.slice(startIdx, endIdx);
-      
-      const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
-      const selected = [];
-      const usedIndices = new Set();
-      
-      for (let i = 0; i < 6 && selected.length < 6; i++) {
-        let attempts = 0;
-        let idx;
-        
-        do {
-          idx = Math.floor(seededRandom(seed + i * 100 + attempts) * availableQuestions.length);
-          attempts++;
-        } while (usedIndices.has(idx) && attempts < 50);
-        
-        if (!usedIndices.has(idx) && availableQuestions[idx]) {
-          usedIndices.add(idx);
-          selected.push(availableQuestions[idx]);
-        }
-      }
-      
-      if (selected.length < 6) {
-        for (let i = 0; i < questionBank.length && selected.length < 6; i++) {
-          const question = questionBank[i];
-          if (!selected.includes(question)) {
-            selected.push(question);
-          }
-        }
-      }
-      
-      return selected;
+    /* ...（上方的 gcd, simplifyRatio, lcm 等函數保持不變）... */
+
+// 修正後的 generateDailyQuestions 函數
+function generateDailyQuestions() {
+  const today = new Date();
+  const daysSinceEpoch = Math.floor(today.getTime() / (1000 * 60 * 60 * 24));
+  // 將題庫分成 5 份輪替，確保每天的基礎題目範圍不同
+  const numCycles = 5; 
+  const questionsPerCycle = Math.ceil(questionBank.length / numCycles);
+  const cycleDay = daysSinceEpoch % numCycles;
+  
+  const startIdx = cycleDay * questionsPerCycle;
+  const endIdx = Math.min(startIdx + questionsPerCycle, questionBank.length);
+  
+  const availableQuestions = questionBank.slice(startIdx, endIdx);
+  
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const seededRandom = (seed) => {
+    seed = Math.sin(seed) * 10000;
+    return seed - Math.floor(seed);
+  };
+  
+  const selected = [];
+  const usedIndices = new Set();
+  
+  // 1. 嘗試從當日可用題庫中隨機選取題目
+  const availableCount = availableQuestions.length;
+  for (let i = 0; i < availableCount && selected.length < 6; i++) {
+    // 使用一個更簡單的隨機選取邏輯
+    let idx;
+    let attempts = 0;
+    
+    // 嘗試在當日可用題庫中隨機挑選一個未被選過的題目
+    do {
+      // 使用種子生成隨機索引
+      idx = Math.floor(seededRandom(seed + i * 10 + attempts) * availableCount);
+      attempts++;
+    } while (usedIndices.has(idx) && attempts < 100); 
+
+    if (!usedIndices.has(idx) && availableQuestions[idx]) {
+      usedIndices.add(idx);
+      selected.push(availableQuestions[idx]);
+    } else if (availableQuestions[i] && !selected.includes(availableQuestions[i])) {
+      // 如果隨機選取失敗，則按順序補上
+      selected.push(availableQuestions[i]);
     }
+
+    if (selected.length === 6) break;
+  }
+  
+  // 2. 🚨 關鍵修正：如果選取不足 6 題，則從整個題庫中補足
+  if (selected.length < 6) {
+    const questionsToFill = 6 - selected.length;
+    let fillCount = 0;
+    
+    // 從頭開始檢查整個題庫，補足缺少的題目
+    for (let i = 0; i < questionBank.length && fillCount < questionsToFill; i++) {
+      const question = questionBank[i];
+      // 檢查是否已在 selected 陣列中
+      if (!selected.includes(question)) {
+        selected.push(question);
+        fillCount++;
+      }
+    }
+  }
+  
+  return selected.slice(0, 6); // 最終確保只返回前 6 題
+}
 
     function getSolutionSteps(question) {
       const { type, original, answer, left, right } = question;
