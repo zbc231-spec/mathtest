@@ -22,7 +22,7 @@
       instruction_text: "請輸入你的資訊開始測驗",
       start_button_text: "開始練習",
       submit_button_text: "提交答案",
-      restart_button_text: "重新開始測驗",
+      back_button_text: "上一題",
       primary_color: "#3b82f6",
       secondary_color: "#ffffff",
       text_color: "#1e293b",
@@ -32,7 +32,7 @@
       font_size: 16
     };
 
-    const allQuestions = [
+ const allQuestions = [
       {type: "perimeter", angle: 30, diameter: 6, answer: "7.57", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 6 ÷ 2 = 3\n弧長 = 2 × 3.14 × 3 × (30 ÷ 360) = 1.57\n周長 = 1.57 + 3 + 3 = 7.57"},
       {type: "perimeter", angle: 36, diameter: 50, answer: "65.7", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 50 ÷ 2 = 25\n弧長 = 2 × 3.14 × 25 × (36 ÷ 360) = 15.7\n周長 = 15.7 + 25 + 25 = 65.7"},
       {type: "perimeter", angle: 40, diameter: 27, answer: "36.42", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 27 ÷ 2 = 13.5\n弧長 = 2 × 3.14 × 13.5 × (40 ÷ 360) = 9.42\n周長 = 9.42 + 13.5 + 13.5 = 36.42"},
@@ -86,6 +86,7 @@
       {type: "area", angle: 330, radius: 15, answer: "647.625", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 15² = 706.5\n扇形面積 = 706.5 × (330 ÷ 360) = 647.625"}
     ];
 
+
     let currentState = {
       stage: 'input',
       grade: '',
@@ -94,12 +95,23 @@
       currentQuestionIndex: 0,
       userAnswers: [],
       dailyQuestions: [],
-      todayDate: ''
+      todayDate: '',
+      alreadyTested: false
     };
 
     function getTodayDate() {
       const today = new Date();
       return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function checkIfAlreadyTested(grade, classNumber, seatNumber, date) {
+      const key = `quiz_${grade}_${classNumber}_${seatNumber}_${date}`;
+      return localStorage.getItem(key) !== null;
+    }
+
+    function markAsTested(grade, classNumber, seatNumber, date) {
+      const key = `quiz_${grade}_${classNumber}_${seatNumber}_${date}`;
+      localStorage.setItem(key, 'completed');
     }
 
     function seedRandom(seed) {
@@ -180,10 +192,22 @@
                   <svg class="w-5 h-5" fill="none" stroke="${config.primary_color || defaultConfig.primary_color}" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
-                  <span class="font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">今天測驗日期：${currentState.todayDate}</span>
+                  <span class="font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">今天的日期：${currentState.todayDate}</span>
                 </div>
-                <p style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color};">作答請加油</p>
+                <p style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color};">仔細作答，加油！</p>
               </div>
+              
+              ${currentState.alreadyTested ? `
+                <div class="mb-6 p-4 rounded-lg border-2" style="background: #fef2f2; border-color: #ef4444;">
+                  <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-6 h-6" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span class="font-bold" style="font-size: ${baseSize * 1.1}px; color: #ef4444;">你今天已經完成測驗</span>
+                  </div>
+                  <p style="font-size: ${baseSize * 0.9}px; color: #991b1b;">每位學生每天只能測驗一次，請明天再來！</p>
+                </div>
+              ` : ''}
               
               <p class="mb-6 text-center" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">${config.instruction_text || defaultConfig.instruction_text}</p>
               
@@ -226,7 +250,8 @@
               </div>
               
               <button id="startBtn" class="w-full mt-6 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                      style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
+                      style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack}; ${currentState.alreadyTested ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
+                      ${currentState.alreadyTested ? 'disabled' : ''}>
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -237,11 +262,14 @@
           </div>
         `;
         
-        document.getElementById('startBtn').addEventListener('click', startQuiz);
+        if (!currentState.alreadyTested) {
+          document.getElementById('startBtn').addEventListener('click', startQuiz);
+        }
       } else if (currentState.stage === 'quiz') {
         const question = currentState.dailyQuestions[currentState.currentQuestionIndex];
         const questionType = question.type === 'perimeter' ? '周長' : '面積';
         const dimensionText = question.radius ? `半徑 ${question.radius}` : `直徑 ${question.diameter}`;
+        const currentAnswer = currentState.userAnswers[currentState.currentQuestionIndex] || '';
         
         app.innerHTML = `
           <div class="max-w-2xl mx-auto">
@@ -274,28 +302,44 @@
               
               <div class="mb-6">
                 <label class="block mb-3 font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">你的答案：</label>
-                <input type="number" step="0.01" id="answerInput" placeholder="請輸入答案" 
+                <input type="number" step="0.01" id="answerInput" placeholder="請輸入答案" value="${currentAnswer}"
                        class="w-full px-4 py-4 border-2 rounded-lg focus:outline-none focus:ring-2 text-center text-xl"
                        style="font-size: ${baseSize * 1.2}px; border-color: ${config.primary_color || defaultConfig.primary_color}; font-family: ${customFont}, ${baseFontStack};">
+                <div id="errorMessage" class="mt-2 text-center" style="font-size: ${baseSize * 0.9}px; color: #ef4444; display: none;">
+                  請輸入答案後再提交
+                </div>
               </div>
               
-              <button id="submitBtn" class="w-full px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                      style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                ${config.submit_button_text || defaultConfig.submit_button_text}
-              </button>
+              <div class="flex gap-3">
+                ${currentState.currentQuestionIndex > 0 ? `
+                  <button id="backBtn" class="flex-1 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                          style="background: #6b7280; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    ${config.back_button_text || defaultConfig.back_button_text}
+                  </button>
+                ` : ''}
+                <button id="submitBtn" class="flex-1 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  ${config.submit_button_text || defaultConfig.submit_button_text}
+                </button>
+              </div>
             </div>
           </div>
         `;
         
         document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+        if (currentState.currentQuestionIndex > 0) {
+          document.getElementById('backBtn').addEventListener('click', goBack);
+        }
       } else if (currentState.stage === 'results') {
         const score = currentState.userAnswers.filter((ans, idx) => 
           parseFloat(ans) === parseFloat(currentState.dailyQuestions[idx].answer)
         ).length;
-        const percentage = Math.round((score / 6) * 100);
         
         app.innerHTML = `
           <div class="max-w-4xl mx-auto">
@@ -344,19 +388,9 @@
                   `;
                 }).join('')}
               </div>
-              
-              <button id="restartBtn" class="w-full mt-8 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                      style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                ${config.restart_button_text || defaultConfig.restart_button_text}
-              </button>
             </div>
           </div>
         `;
-        
-        document.getElementById('restartBtn').addEventListener('click', restart);
       }
     }
 
@@ -372,42 +406,53 @@
       if (grade !== '5' && grade !== '6') {
         return;
       }
+
+      // 檢查是否已經測驗過
+      if (checkIfAlreadyTested(grade, classNumber, seatNumber, currentState.todayDate)) {
+        currentState.alreadyTested = true;
+        render();
+        return;
+      }
       
       currentState.grade = grade;
       currentState.classNumber = classNumber;
       currentState.seatNumber = seatNumber;
       currentState.stage = 'quiz';
       currentState.currentQuestionIndex = 0;
-      currentState.userAnswers = [];
+      currentState.userAnswers = new Array(6).fill('');
       
       render();
     }
 
     function submitAnswer() {
-      const answer = document.getElementById('answerInput').value;
-      currentState.userAnswers.push(answer);
+      const answer = document.getElementById('answerInput').value.trim();
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // 檢查是否有填入答案
+      if (!answer) {
+        errorMessage.style.display = 'block';
+        return;
+      }
+      
+      errorMessage.style.display = 'none';
+      currentState.userAnswers[currentState.currentQuestionIndex] = answer;
       
       if (currentState.currentQuestionIndex < 5) {
         currentState.currentQuestionIndex++;
         render();
       } else {
+        // 測驗完成，標記為已測驗
+        markAsTested(currentState.grade, currentState.classNumber, currentState.seatNumber, currentState.todayDate);
         currentState.stage = 'results';
         render();
       }
     }
 
-    function restart() {
-      currentState = {
-        stage: 'input',
-        grade: '',
-        classNumber: '',
-        seatNumber: '',
-        currentQuestionIndex: 0,
-        userAnswers: [],
-        dailyQuestions: generateDailyQuestions(getTodayDate()),
-        todayDate: getTodayDate()
-      };
-      render();
+    function goBack() {
+      if (currentState.currentQuestionIndex > 0) {
+        currentState.currentQuestionIndex--;
+        render();
+      }
     }
 
     async function initializeApp() {
@@ -476,7 +521,7 @@
             ["instruction_text", config.instruction_text || defaultConfig.instruction_text],
             ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
             ["submit_button_text", config.submit_button_text || defaultConfig.submit_button_text],
-            ["restart_button_text", config.restart_button_text || defaultConfig.restart_button_text]
+            ["back_button_text", config.back_button_text || defaultConfig.back_button_text]
           ])
         });
       }
@@ -489,5 +534,5 @@
 
     initializeApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a5e0f3c86368f0f',t:'MTc2NDM3Njg4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab1836d73938276',t:'MTc2NTI1MTk2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
