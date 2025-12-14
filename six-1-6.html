@@ -32,23 +32,23 @@
       font_size: 16
     };
 
- const allQuestions = [
+    const allQuestions = [
       {type: "perimeter", angle: 30, diameter: 6, answer: "7.57", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 6 ÷ 2 = 3\n弧長 = 2 × 3.14 × 3 × (30 ÷ 360) = 1.57\n周長 = 1.57 + 3 + 3 = 7.57"},
       {type: "perimeter", angle: 36, diameter: 50, answer: "65.7", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 50 ÷ 2 = 25\n弧長 = 2 × 3.14 × 25 × (36 ÷ 360) = 15.7\n周長 = 15.7 + 25 + 25 = 65.7"},
       {type: "perimeter", angle: 40, diameter: 27, answer: "36.42", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 27 ÷ 2 = 13.5\n弧長 = 2 × 3.14 × 13.5 × (40 ÷ 360) = 9.42\n周長 = 9.42 + 13.5 + 13.5 = 36.42"},
       {type: "perimeter", angle: 45, diameter: 8, answer: "11.14", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 8 ÷ 2 = 4\n弧長 = 2 × 3.14 × 4 × (45 ÷ 360) = 3.14\n周長 = 3.14 + 4 + 4 = 11.14"},
-      {type: "perimeter", angle: 45, diameter: 16, answer: "22.28", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 16 ÷ 2 = 8\n弧長 = 2 × 3.14 × 8 × (45 ÷ 360) = 6.28\n周長 = 6.28 + 8 + 8 = 22.28"},
+      {type: "perimeter", angle: 45, diameter: 16, answer: "22.28", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 16 ÷ 2 = 8\n弧    = 2 × 3.14 × 8 × (45 ÷ 360) = 6.28\n周長 = 6.28 + 8 + 8 = 22.28"},
       {type: "perimeter", angle: 60, radius: 12, answer: "36.56", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 12 × (60 ÷ 360) = 12.56\n周長 = 12.56 + 12 + 12 = 36.56"},
-      {type: "perimeter", angle: 60, diameter: 9, answer: "13.71", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 9 ÷ 2 = 4.5\n弧長 = 2 × 3.14 × 4.5 × (60 ÷ 360) = 4.71\n周長 = 4.71 + 4.5 + 4.5 = 13.71"},
+      {type: "perimeter", angle: 60, diameter: 8, answer: "12.18", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 8 ÷ 2 = 4\n弧長 = 2 × 3.14 × 4 × (60 ÷ 360) = 4.18\n周長 = 4.18 + 4 + 4 = 12.18"},
       {type: "perimeter", angle: 72, diameter: 25, answer: "40.7", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 25 ÷ 2 = 12.5\n弧長 = 2 × 3.14 × 12.5 × (72 ÷ 360) = 15.7\n周長 = 15.7 + 12.5 + 12.5 = 40.7"},
       {type: "perimeter", angle: 80, radius: 9, answer: "30.56", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 9 × (80 ÷ 360) = 12.56\n周長 = 12.56 + 9 + 9 = 30.56"},
-      {type: "perimeter", angle: 90, diameter: 16, answer: "28.56", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 16 ÷ 2 = 8\n弧長 = 2 × 3.14 × 8 × (90 ÷ 360) = 12.56\n周長 = 12.56 + 8 + 8 = 28.56"},
+      {type: "perimeter", angle: 90, diameter: 16, answer: "28.56", solution: "周   = 弧長 + 兩條半徑\n半徑 = 16 ÷ 2 = 8\n弧長 = 2 × 3.14 × 8 × (90 ÷ 360) = 12.56\n周長 = 12.56 + 8 + 8 = 28.56"},
       {type: "perimeter", angle: 120, radius: 15, answer: "61.4", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 15 × (120 ÷ 360) = 31.4\n周長 = 31.4 + 15 + 15 = 61.4"},
       {type: "perimeter", angle: 120, radius: 12, answer: "49.12", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 12 × (120 ÷ 360) = 25.12\n周長 = 25.12 + 12 + 12 = 49.12"},
       {type: "perimeter", angle: 135, radius: 4, answer: "17.42", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 4 × (135 ÷ 360) = 9.42\n周長 = 9.42 + 4 + 4 = 17.42"},
       {type: "perimeter", angle: 144, radius: 10, answer: "45.12", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 10 × (144 ÷ 360) = 25.12\n周長 = 25.12 + 10 + 10 = 45.12"},
-      {type: "perimeter", angle: 150, radius: 24, answer: "110.8", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 24 × (150 ÷ 360) = 62.8\n周長 = 62.8 + 24 + 24 = 110.8"},
-      {type: "perimeter", angle: 180, diameter: 14, answer: "35.98", solution: "周長 = 弧長 + 兩條條半徑\n半徑 = 14 ÷ 2 = 7\n弧長 = 2 × 3.14 × 7 × (180 ÷ 360) = 21.98\n周長 = 21.98 + 7 + 7 = 35.98"},
+      {type: "perimeter", angle: 150, radius: 24, answer: "110.8", solution: "周長 = 弧長 + 兩條半徑\n   長 = 2 × 3.14 × 24 × (150 ÷ 360) = 62.8\n周長 = 62.8 + 24 + 24 = 110.8"},
+      {type: "perimeter", angle: 160, diameter: 14, answer: "33.53", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 14 ÷ 2 = 7\n弧長 = 2 × 3.14 × 7 × (160 ÷ 360) = 19.53\n周長 = 19.53 + 7 + 7 = 33.53"},
       {type: "perimeter", angle: 180, radius: 9, answer: "46.26", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 9 × (180 ÷ 360) = 28.26\n周長 = 28.26 + 9 + 9 = 46.26"},
       {type: "perimeter", angle: 180, diameter: 10, answer: "25.7", solution: "周長 = 弧長 + 兩條半徑\n半徑 = 10 ÷ 2 = 5\n弧長 = 2 × 3.14 × 5 × (180 ÷ 360) = 15.7\n周長 = 15.7 + 5 + 5 = 25.7"},
       {type: "perimeter", angle: 210, radius: 18, answer: "101.97", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 18 × (210 ÷ 360) = 65.97\n周長 = 65.97 + 18 + 18 = 101.97"},
@@ -60,7 +60,7 @@
       {type: "perimeter", angle: 330, radius: 15, answer: "116.35", solution: "周長 = 弧長 + 兩條半徑\n弧長 = 2 × 3.14 × 15 × (330 ÷ 360) = 86.35\n周長 = 86.35 + 15 + 15 = 116.35"},
       {type: "area", angle: 30, radius: 6, answer: "9.42", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 6² = 113.04\n扇形面積 = 113.04 × (30 ÷ 360) = 9.42"},
       {type: "area", angle: 36, radius: 5, answer: "7.85", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 5² = 78.5\n扇形面積 = 78.5 × (36 ÷ 360) = 7.85"},
-      {type: "area", angle: 40, radius: 3, answer: "3.14", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 3² = 28.26\n扇形面積 = 28.26 × (40 ÷ 360) = 3.14"},
+      {type: "area", angle: 40, radius: 3, answer: "3.14", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 3² = 28.26\n扇形面積 = 28.26    (40 ÷ 360) = 3.14"},
       {type: "area", angle: 45, radius: 10, answer: "39.25", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 10² = 314\n扇形面積 = 314 × (45 ÷ 360) = 39.25"},
       {type: "area", angle: 45, radius: 12, answer: "56.52", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 12² = 452.16\n扇形面積 = 452.16 × (45 ÷ 360) = 56.52"},
       {type: "area", angle: 60, radius: 30, answer: "471", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 30² = 2826\n扇形面積 = 2826 × (60 ÷ 360) = 471"},
@@ -71,21 +71,20 @@
       {type: "area", angle: 120, radius: 15, answer: "235.5", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 15² = 706.5\n扇形面積 = 706.5 × (120 ÷ 360) = 235.5"},
       {type: "area", angle: 120, diameter: 24, answer: "150.72", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 24 ÷ 2 = 12\n圓面積 = 3.14 × 12² = 452.16\n扇形面積 = 452.16 × (120 ÷ 360) = 150.72"},
       {type: "area", angle: 135, radius: 4, answer: "18.84", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 4² = 50.24\n扇形面積 = 50.24 × (135 ÷ 360) = 18.84"},
-      {type: "area", angle: 144, diameter: 20, answer: "125.6", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 20 ÷ 2 = 10\n圓面積 = 3.14 × 10² = 314\n扇形面積 = 314 × (144 ÷ 360) = 125.6"},
-      {type: "area", angle: 150, radius: 24, answer: "753.6", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 24² = 1808.64\n扇形面積 = 1808.64 × (150 ÷ 360) = 753.6"},
-      {type: "area", angle: 180, diameter: 14, answer: "76.93", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 14 ÷ 2 = 7\n扇形面積 = 3.14 × 7² = 153.86\n扇形面積 = 153.86 × (180 ÷ 360) = 76.93"},
+      {type: "area", angle: 144, diameter: 20, answer: "125.6", solution: "面積 = 圓面積 × (圓   角    360)\n半徑 = 20 ÷ 2 = 10\n圓面積 = 3.14 × 10² = 314\n扇形面積 = 314 × (144 ÷ 360) = 125.6"},
+      {type: "area", angle: 150, radius: 24, answer: "754", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 24² = 1808.64\n扇形面積 = 1808.64 × (150 ÷ 360) = 754"},
+      {type: "area", angle: 160, diameter: 14, answer: "68.22", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 14 ÷ 2 = 7\n圓面積 = 3.14 × 7² = 153.86\n扇形面積 = 153.86 × (160 ÷ 360) = 68.22"},
       {type: "area", angle: 180, diameter: 20, answer: "157", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 20 ÷ 2 = 10\n圓面積 = 3.14 × 10² = 314\n扇形面積 = 314 × (180 ÷ 360) = 157"},
-      {type: "area", angle: 180, radius: 9, answer: "127.17", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 9² = 254.34\n扇形面積 = 254.34 × (180 ÷ 360) = 127.17"},
+      {type: "area", angle: 180, radius: 9, answer: "127.17", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 9² = 254.34\n扇形面積 = 254.34 × (180    360) = 127.17"},
       {type: "area", angle: 180, diameter: 10, answer: "39.25", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 10 ÷ 2 = 5\n圓面積 = 3.14 × 5² = 78.5\n扇形面積 = 78.5 × (180 ÷ 360) = 39.25"},
-      {type: "area", angle: 210, radius: 18, answer: "593.46", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 18² = 1017.36\n扇形面積 = 1017.36 × (210 ÷ 360) = 593.46"},
+      {type: "area", angle: 210, radius: 18, answer: "188.49", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 18² = 1017.36\n扇形面積 = 1017.36 × (210 ÷ 360) = 188.49"},
       {type: "area", angle: 240, radius: 6, answer: "75.36", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 6² = 113.04\n扇形面積 = 113.04 × (240 ÷ 360) = 75.36"},
       {type: "area", angle: 240, diameter: 30, answer: "471", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 30 ÷ 2 = 15\n圓面積 = 3.14 × 15² = 706.5\n扇形面積 = 706.5 × (240 ÷ 360) = 471"},
-      {type: "area", angle: 270, radius: 20, answer: "942", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 20² = 1256\n扇形形面積 = 1256 × (270 ÷ 360) = 942"},
+      {type: "area", angle: 270, radius: 20, answer: "942", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 20² = 1256\n扇形面積 = 1256 × (270 ÷ 360) = 942"},
       {type: "area", angle: 300, diameter: 24, answer: "376.8", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 24 ÷ 2 = 12\n圓面積 = 3.14 × 12² = 452.16\n扇形面積 = 452.16 × (300 ÷ 360) = 376.8"},
-      {type: "area", angle: 315, diameter: 22, answer: "332.4475", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 22 ÷ 2 = 11\n圓面積 = 3.14 × 11² = 379.94\n扇形面積 = 379.94 × (315 ÷ 360) = 332.4475"},
-      {type: "area", angle: 330, radius: 15, answer: "647.625", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 15² = 706.5\n扇形面積 = 706.5 × (330 ÷ 360) = 647.625"}
+      {type: "area", angle: 315, diameter: 22, answer: "105.04", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n半徑 = 22 ÷ 2 = 11\n圓面積 = 3.14 × 11² = 379.94\n扇形面積 = 379.94 × (315 ÷ 360) = 105.04"},
+      {type: "area", angle: 330, radius: 15, answer: "193.13", solution: "面積 = 圓面積 × (圓心角 ÷ 360)\n圓面積 = 3.14 × 15² = 706.5\n扇形面積 = 706.5 × (330 ÷ 360) = 193.13"}
     ];
-
 
     let currentState = {
       stage: 'input',
@@ -96,7 +95,9 @@
       userAnswers: [],
       dailyQuestions: [],
       todayDate: '',
-      alreadyTested: false
+      alreadyTested: false,
+      showingResult: false,
+      currentAnswer: ''
     };
 
     function getTodayDate() {
@@ -187,14 +188,8 @@
                 <h1 class="font-bold" style="font-size: ${baseSize * 2}px; color: ${config.text_color || defaultConfig.text_color};">${config.quiz_title || defaultConfig.quiz_title}</h1>
               </div>
               
-              <div class="mb-6 p-4 rounded-lg" style="background: ${config.primary_color || defaultConfig.primary_color}15;">
-                <div class="flex items-center gap-2 mb-2">
-                  <svg class="w-5 h-5" fill="none" stroke="${config.primary_color || defaultConfig.primary_color}" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                  <span class="font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">今天的日期：${currentState.todayDate}</span>
-                </div>
-                <p style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color};">仔細作答，加油！</p>
+              <div class="mb-6 p-6 rounded-xl border-4 text-center" style="background: ${config.primary_color || defaultConfig.primary_color}15; border-color: ${config.primary_color || defaultConfig.primary_color};">
+                <p class="font-bold" style="font-size: ${baseSize * 1.5}px; color: ${config.text_color || defaultConfig.text_color};">${currentState.todayDate}</p>
               </div>
               
               ${currentState.alreadyTested ? `
@@ -231,7 +226,7 @@
                     </svg>
                     班級
                   </label>
-                  <input type="number" id="classNumber" min="1" placeholder="1班請填1，2班請填2，依此類推" 
+                  <input type="number" id="classNumber" min="1" placeholder="1班請填1，2班請填2，依此類  " 
                          class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                          style="font-size: ${baseSize}px; border-color: ${config.primary_color || defaultConfig.primary_color}30; font-family: ${customFont}, ${baseFontStack};">
                 </div>
@@ -243,7 +238,7 @@
                     </svg>
                     座號
                   </label>
-                  <input type="number" id="seatNumber" min="1" placeholder="1號請填1，2號請填2，依此類推" 
+                  <input type="number" id="seatNumber" min="1" placeholder="1號請  1，2號請填2，依此類推" 
                          class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2"
                          style="font-size: ${baseSize}px; border-color: ${config.primary_color || defaultConfig.primary_color}30; font-family: ${customFont}, ${baseFontStack};">
                 </div>
@@ -269,58 +264,49 @@
         const question = currentState.dailyQuestions[currentState.currentQuestionIndex];
         const questionType = question.type === 'perimeter' ? '周長' : '面積';
         const dimensionText = question.radius ? `半徑 ${question.radius}` : `直徑 ${question.diameter}`;
-        const currentAnswer = currentState.userAnswers[currentState.currentQuestionIndex] || '';
         
-        app.innerHTML = `
-          <div class="max-w-2xl mx-auto">
-            <div class="rounded-2xl shadow-xl p-8" style="background: ${config.secondary_color || defaultConfig.secondary_color}; font-family: ${customFont}, ${baseFontStack};">
-              <div class="mb-6 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                  <svg class="w-6 h-6" fill="none" stroke="${config.accent_color || defaultConfig.accent_color}" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span class="font-bold" style="font-size: ${baseSize * 1.2}px; color: ${config.accent_color || defaultConfig.accent_color};">題目 ${currentState.currentQuestionIndex + 1}/6</span>
-                </div>
-                <div class="text-right" style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color};">
-                  <div class="flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="${config.text_color || defaultConfig.text_color}" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        if (!currentState.showingResult) {
+          // 顯示題目和答題介面
+          app.innerHTML = `
+            <div class="max-w-2xl mx-auto">
+              <div class="rounded-2xl shadow-xl p-8" style="background: ${config.secondary_color || defaultConfig.secondary_color}; font-family: ${customFont}, ${baseFontStack};">
+                <div class="mb-6 flex justify-between items-center">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-6 h-6" fill="none" stroke="${config.accent_color || defaultConfig.accent_color}" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span>${currentState.grade}年${currentState.classNumber}班 ${currentState.seatNumber}號</span>
+                    <span class="font-bold" style="font-size: ${baseSize * 1.2}px; color: ${config.accent_color || defaultConfig.accent_color};">題目 ${currentState.currentQuestionIndex + 1}/6</span>
+                  </div>
+                  <div class="text-right" style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color};">
+                    <div class="flex items-center gap-1">
+                      <svg class="w-4 h-4" fill="none" stroke="${config.text_color || defaultConfig.text_color}" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      <span>${currentState.grade}年${currentState.classNumber}班 ${currentState.seatNumber}號</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div class="mb-6 p-6 rounded-xl" style="background: ${config.primary_color || defaultConfig.primary_color}10;">
-                ${drawSector(question.angle, question.radius || question.diameter / 2)}
-                <div class="mt-4 text-center space-y-2">
-                  <p class="font-bold" style="font-size: ${baseSize * 1.3}px; color: ${config.text_color || defaultConfig.text_color};">圓心角：${question.angle}度</p>
-                  <p class="font-semibold" style="font-size: ${baseSize * 1.1}px; color: ${config.text_color || defaultConfig.text_color};">${dimensionText}</p>
-                  <p class="font-bold" style="font-size: ${baseSize * 1.5}px; color: ${config.button_color || defaultConfig.button_color};">求${questionType}</p>
+                
+                <div class="mb-6 p-6 rounded-xl" style="background: ${config.primary_color || defaultConfig.primary_color}10;">
+                  ${drawSector(question.angle, question.radius || question.diameter / 2)}
+                  <div class="mt-4 text-center space-y-2">
+                    <p class="font-bold" style="font-size: ${baseSize * 1.3}px; color: ${config.text_color || defaultConfig.text_color};">圓心角：${question.angle}度</p>
+                    <p class="font-semibold" style="font-size: ${baseSize * 1.1}px; color: ${config.text_color || defaultConfig.text_color};">${dimensionText}</p>
+                    <p class="font-bold" style="font-size: ${baseSize * 1.5}px; color: ${config.button_color || defaultConfig.button_color};">求${questionType}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div class="mb-6">
-                <label class="block mb-3 font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">你的答案：</label>
-                <input type="number" step="0.01" id="answerInput" placeholder="請輸入答案" value="${currentAnswer}"
-                       class="w-full px-4 py-4 border-2 rounded-lg focus:outline-none focus:ring-2 text-center text-xl"
-                       style="font-size: ${baseSize * 1.2}px; border-color: ${config.primary_color || defaultConfig.primary_color}; font-family: ${customFont}, ${baseFontStack};">
-                <div id="errorMessage" class="mt-2 text-center" style="font-size: ${baseSize * 0.9}px; color: #ef4444; display: none;">
-                  請輸入答案後再提交
+                
+                <div class="mb-6">
+                  <label class="block mb-3 font-semibold" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">你的答案：</label>
+                  <input type="number" step="0.01" id="answerInput" placeholder="請輸入答案" value="${currentState.currentAnswer}"
+                         class="w-full px-4 py-4 border-2 rounded-lg focus:outline-none focus:ring-2 text-center text-xl"
+                         style="font-size: ${baseSize * 1.2}px; border-color: ${config.primary_color || defaultConfig.primary_color}; font-family: ${customFont}, ${baseFontStack};">
+                  <div id="errorMessage" class="mt-2 text-center" style="font-size: ${baseSize * 0.9}px; color: #ef4444; display: none;">
+                    請輸入答案後再提交
+                  </div>
                 </div>
-              </div>
-              
-              <div class="flex gap-3">
-                ${currentState.currentQuestionIndex > 0 ? `
-                  <button id="backBtn" class="flex-1 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-                          style="background: #6b7280; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                    ${config.back_button_text || defaultConfig.back_button_text}
-                  </button>
-                ` : ''}
-                <button id="submitBtn" class="flex-1 px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                
+                <button id="submitBtn" class="w-full px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
                         style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -329,12 +315,56 @@
                 </button>
               </div>
             </div>
-          </div>
-        `;
-        
-        document.getElementById('submitBtn').addEventListener('click', submitAnswer);
-        if (currentState.currentQuestionIndex > 0) {
-          document.getElementById('backBtn').addEventListener('click', goBack);
+          `;
+          
+          document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+        } else {
+          // 顯示答題結果
+          const isCorrect = parseFloat(currentState.currentAnswer) === parseFloat(question.answer);
+          const isLastQuestion = currentState.currentQuestionIndex === 5;
+          
+          app.innerHTML = `
+            <div class="max-w-2xl mx-auto">
+              <div class="rounded-2xl shadow-xl p-8 text-center" style="background: ${config.secondary_color || defaultConfig.secondary_color}; font-family: ${customFont}, ${baseFontStack};">
+                <div class="mb-6">
+                  <img src="${isCorrect ? '1.gif' : '0.gif'}" 
+                       alt="${isCorrect ? '答對' : '答錯'}" 
+                       class="mx-auto mb-4"
+                       style="width: 600px; height: 600px;"
+                       onerror="this.style.display='none';">
+                  <p class="font-bold mb-4" style="font-size: ${baseSize * 2}px; color: ${isCorrect ? config.accent_color || defaultConfig.accent_color : '#ef4444'};">
+                    ${isCorrect ? '得1分' : '加油'}
+                  </p>
+                </div>
+                
+                <div class="mb-6 text-left">
+                  <div class="p-4 rounded-lg mb-4" style="background: ${config.primary_color || defaultConfig.primary_color}10;">
+                    <p class="mb-2" style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">
+                      <span class="font-semibold">你的答案：</span>${currentState.currentAnswer}
+                    </p>
+                    <p style="font-size: ${baseSize}px; color: ${config.accent_color || defaultConfig.accent_color};">
+                      <span class="font-semibold">正確答案：</span>${question.answer}
+                    </p>
+                  </div>
+                  
+                  <div class="p-4 rounded-lg" style="background: ${config.primary_color || defaultConfig.primary_color}10;">
+                    <p class="font-semibold mb-2" style="font-size: ${baseSize}px; color: ${config.button_color || defaultConfig.button_color};">     解題  程：</p>
+                    <pre class="whitespace-pre-wrap text-left" style="font-size: ${baseSize * 0.9}px; color: ${config.text_color || defaultConfig.text_color}; font-family: ${customFont}, ${baseFontStack};">${question.solution}</pre>
+                  </div>
+                </div>
+                
+                <button id="nextBtn" class="w-full px-6 py-4 rounded-lg font-bold text-white shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+                        style="background: ${config.button_color || defaultConfig.button_color}; font-size: ${baseSize * 1.1}px; font-family: ${customFont}, ${baseFontStack};">
+                  ${isLastQuestion ? '公布成績' : '下一題'}
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          `;
+          
+          document.getElementById('nextBtn').addEventListener('click', goToNext);
         }
       } else if (currentState.stage === 'results') {
         const score = currentState.userAnswers.filter((ans, idx) => 
@@ -342,52 +372,15 @@
         ).length;
         
         app.innerHTML = `
-          <div class="max-w-4xl mx-auto">
-            <div class="rounded-2xl shadow-xl p-8" style="background: ${config.secondary_color || defaultConfig.secondary_color}; font-family: ${customFont}, ${baseFontStack};">
-              <div class="text-center mb-8">
-                <svg class="w-20 h-20 mx-auto mb-4" fill="none" stroke="${config.accent_color || defaultConfig.accent_color}" viewBox="0 0 24 24">
+          <div class="flex items-center justify-center" style="min-height: 100vh;">
+            <div class="text-center p-8" style="font-family: ${customFont}, ${baseFontStack};">
+              <div class="mb-8">
+                <svg class="mx-auto mb-6" style="width: 15vw; height: 15vw;" fill="none" stroke="${config.accent_color || defaultConfig.accent_color}" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                 </svg>
-                <h2 class="font-bold mb-2" style="font-size: ${baseSize * 2}px; color: ${config.text_color || defaultConfig.text_color};">測驗完成！</h2>
-                <p class="font-bold" style="font-size: ${baseSize * 1.8}px; color: ${config.button_color || defaultConfig.button_color};">(得分：${score})</p>
               </div>
-              
-              <div class="space-y-6">
-                ${currentState.dailyQuestions.map((q, idx) => {
-                  const isCorrect = parseFloat(currentState.userAnswers[idx]) === parseFloat(q.answer);
-                  const questionType = q.type === 'perimeter' ? '周長' : '面積';
-                  const dimensionText = q.radius ? `半徑 ${q.radius}` : `直徑 ${q.diameter}`;
-                  
-                  return `
-                    <div class="p-6 rounded-xl border-2" style="border-color: ${isCorrect ? config.accent_color || defaultConfig.accent_color : '#ef4444'}; background: ${config.secondary_color || defaultConfig.secondary_color};">
-                      <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0">
-                          ${isCorrect ? 
-                            `<svg class="w-8 h-8" fill="none" stroke="${config.accent_color || defaultConfig.accent_color}" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>` :
-                            `<svg class="w-8 h-8" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>`
-                          }
-                        </div>
-                        <div class="flex-1">
-                          <h3 class="font-bold mb-2" style="font-size: ${baseSize * 1.2}px; color: ${config.text_color || defaultConfig.text_color};">第 ${idx + 1} 題</h3>
-                          <p style="font-size: ${baseSize}px; color: ${config.text_color || defaultConfig.text_color};">圓心角 ${q.angle}度，${dimensionText}，求${questionType}</p>
-                          <div class="mt-3 space-y-1" style="font-size: ${baseSize * 0.9}px;">
-                            <p style="color: ${config.text_color || defaultConfig.text_color};">你的答案：<span class="font-semibold">${currentState.userAnswers[idx] || '未作答'}</span></p>
-                            <p style="color: ${config.accent_color || defaultConfig.accent_color};">正確答案：<span class="font-semibold">${q.answer}</span></p>
-                          </div>
-                          <div class="mt-4 p-4 rounded-lg" style="background: ${config.primary_color || defaultConfig.primary_color}10;">
-                            <p class="font-semibold mb-2" style="font-size: ${baseSize * 0.9}px; color: ${config.button_color || defaultConfig.button_color};">📝 解題過程：</p>
-                            <pre class="whitespace-pre-wrap" style="font-size: ${baseSize * 0.85}px; color: ${config.text_color || defaultConfig.text_color}; font-family: ${customFont}, ${baseFontStack};">${q.solution}</pre>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
+              <p class="font-bold" style="font-size: 40vw; line-height: 0.9; color: ${config.button_color || defaultConfig.button_color};">${score}</p>
+              <p class="font-bold mt-4" style="font-size: 8vw; color: ${config.text_color || defaultConfig.text_color};">得分</p>
             </div>
           </div>
         `;
@@ -407,7 +400,7 @@
         return;
       }
 
-      // 檢查是否已經測驗過
+      // 檢查是否已經測驗   
       if (checkIfAlreadyTested(grade, classNumber, seatNumber, currentState.todayDate)) {
         currentState.alreadyTested = true;
         render();
@@ -420,6 +413,8 @@
       currentState.stage = 'quiz';
       currentState.currentQuestionIndex = 0;
       currentState.userAnswers = new Array(6).fill('');
+      currentState.showingResult = false;
+      currentState.currentAnswer = '';
       
       render();
     }
@@ -435,7 +430,16 @@
       }
       
       errorMessage.style.display = 'none';
+      currentState.currentAnswer = answer;
       currentState.userAnswers[currentState.currentQuestionIndex] = answer;
+      currentState.showingResult = true;
+      
+      render();
+    }
+
+    function goToNext() {
+      currentState.showingResult = false;
+      currentState.currentAnswer = '';
       
       if (currentState.currentQuestionIndex < 5) {
         currentState.currentQuestionIndex++;
@@ -444,13 +448,6 @@
         // 測驗完成，標記為已測驗
         markAsTested(currentState.grade, currentState.classNumber, currentState.seatNumber, currentState.todayDate);
         currentState.stage = 'results';
-        render();
-      }
-    }
-
-    function goBack() {
-      if (currentState.currentQuestionIndex > 0) {
-        currentState.currentQuestionIndex--;
         render();
       }
     }
@@ -534,5 +531,5 @@
 
     initializeApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab1836d73938276',t:'MTc2NTI1MTk2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ade5ef696eea39d',t:'MTc2NTcyMjMzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
