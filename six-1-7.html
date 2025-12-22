@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>時間、速率換算練習</title>
+  <title>單位換算練習遊戲</title>
   <script src="/_sdk/element_sdk.js"></script>
   <style>
     body {
@@ -12,26 +12,19 @@
       padding: 0;
       font-family: 'Microsoft JhengHei', Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100%;
-      width: 100%;
-    }
-
-    .app-container {
-      width: 100%;
       min-height: 100vh;
-      padding: 40px 20px;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    .card {
+    .container {
       background: white;
       border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 40px;
-      max-width: 600px;
-      width: 100%;
+      max-width: 700px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     }
 
     .header {
@@ -41,31 +34,34 @@
 
     .header h1 {
       color: #667eea;
+      margin: 0;
       font-size: 32px;
-      margin: 0 0 10px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 15px;
     }
 
-    .math-icon {
-      font-size: 40px;
-    }
-
-    .date-display {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 12px 24px;
-      border-radius: 12px;
+    .date-badge {
+      background: #f0f4ff;
+      color: #667eea;
+      padding: 10px 20px;
+      border-radius: 25px;
+      margin: 15px auto;
+      display: inline-block;
       font-size: 18px;
       font-weight: bold;
-      display: inline-block;
-      margin-top: 10px;
+    }
+
+    .input-section {
+      background: #f8f9ff;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
     }
 
     .input-group {
-      margin-bottom: 25px;
+      margin-bottom: 20px;
     }
 
     .input-group label {
@@ -73,21 +69,17 @@
       align-items: center;
       gap: 10px;
       font-size: 18px;
-      font-weight: bold;
       color: #333;
       margin-bottom: 8px;
-    }
-
-    .input-icon {
-      font-size: 24px;
+      font-weight: bold;
     }
 
     .input-group input {
       width: 100%;
-      padding: 12px 16px;
-      font-size: 16px;
-      border: 2px solid #e0e0e0;
+      padding: 12px;
+      border: 2px solid #ddd;
       border-radius: 10px;
+      font-size: 16px;
       transition: border-color 0.3s;
     }
 
@@ -96,252 +88,186 @@
       border-color: #667eea;
     }
 
-    .hint-text {
+    .input-hint {
       font-size: 14px;
       color: #666;
       margin-top: 5px;
     }
 
-    .start-button {
-      width: 100%;
-      padding: 16px;
-      font-size: 20px;
-      font-weight: bold;
+    .btn {
+      background: #667eea;
       color: white;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
-      border-radius: 12px;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: bold;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
+      margin: 0 auto;
     }
 
-    .start-button:hover {
+    .btn:hover {
+      background: #5568d3;
       transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
 
-    .start-button:disabled {
-      opacity: 0.5;
+    .btn:disabled {
+      background: #ccc;
       cursor: not-allowed;
       transform: none;
     }
 
-    .question-container {
-      display: none;
+    .question-section {
+      margin-top: 30px;
     }
 
-    .progress-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 30px;
-      padding: 15px;
-      background: #f5f5f5;
-      border-radius: 12px;
-    }
-
-    .progress-icon {
-      font-size: 24px;
-    }
-
-    .progress-text {
+    .progress {
+      text-align: center;
+      margin-bottom: 20px;
       font-size: 18px;
-      font-weight: bold;
       color: #667eea;
+      font-weight: bold;
     }
 
     .student-info {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 12px;
-      background: #e8eaf6;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      font-size: 16px;
-      color: #333;
     }
 
-    .student-icon {
-      font-size: 24px;
+    .question-box {
+      background: #f8f9ff;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 25px;
     }
 
     .question-text {
       font-size: 24px;
-      font-weight: bold;
       color: #333;
-      margin-bottom: 25px;
+      margin-bottom: 20px;
       line-height: 1.6;
     }
 
-    .answer-input-container {
-      margin-bottom: 25px;
+    .answer-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    .decimal-input {
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 20px;
-      border: 2px solid #e0e0e0;
+    .answer-input input {
+      padding: 12px;
+      border: 2px solid #ddd;
       border-radius: 10px;
+      font-size: 18px;
+      width: 100px;
       text-align: center;
     }
 
     .fraction-input {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 15px;
-      justify-content: center;
+      gap: 5px;
     }
 
     .fraction-input input {
       width: 80px;
-      padding: 12px;
-      font-size: 20px;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .fraction-display {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     .fraction-line {
-      width: 60px;
+      width: 100px;
       height: 2px;
       background: #333;
-      margin: 5px 0;
     }
 
-    .submit-button {
-      width: 100%;
-      padding: 16px;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .submit-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .results-container {
-      display: none;
-    }
-
-    .celebration-icon {
-      font-size: 80px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .score-display {
-      text-align: center;
-      font-size: 36px;
-      font-weight: bold;
-      color: #667eea;
-      margin-bottom: 30px;
-    }
-
-    .question-review {
-      margin-bottom: 25px;
+    .result-box {
+      margin-top: 20px;
       padding: 20px;
-      background: #f9f9f9;
-      border-radius: 12px;
-      border-left: 5px solid #667eea;
+      border-radius: 15px;
+      text-align: center;
     }
 
-    .question-review.correct {
-      border-left-color: #43e97b;
+    .result-box.correct {
+      background: #d4edda;
+      border: 2px solid #28a745;
     }
 
-    .question-review.incorrect {
-      border-left-color: #ff6b6b;
+    .result-box.incorrect {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
     }
 
-    .review-question {
-      font-size: 18px;
+    .result-image {
+      width: 600px;
+      height: 300px;
+      margin: 20px auto;
+      display: block;
+    }
+
+    .result-text {
+      font-size: 28px;
       font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
+      margin: 15px 0;
     }
 
-    .review-answer {
-      font-size: 16px;
-      margin-bottom: 8px;
-    }
-
-    .review-answer.correct-answer {
-      color: #43e97b;
-      font-weight: bold;
-    }
-
-    .review-answer.user-answer {
-      color: #666;
-    }
-
-    .review-answer.wrong-answer {
-      color: #ff6b6b;
-      font-weight: bold;
-    }
-
-    .solution-steps {
-      margin-top: 15px;
-      padding: 15px;
+    .solution {
       background: white;
-      border-radius: 8px;
-      border: 1px solid #e0e0e0;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+      text-align: left;
     }
 
     .solution-title {
       font-weight: bold;
       color: #667eea;
       margin-bottom: 10px;
-      font-size: 16px;
+      font-size: 18px;
     }
 
     .solution-step {
-      font-size: 15px;
-      color: #555;
-      margin-bottom: 8px;
-      line-height: 1.6;
+      margin: 8px 0;
+      font-size: 16px;
+      line-height: 1.8;
     }
 
-    .restart-button {
-      width: 100%;
-      padding: 16px;
-      font-size: 18px;
+    .final-score {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .score-number {
+      font-size: 200px;
       font-weight: bold;
-      color: white;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .restart-button:hover {
-      transform: translateY(-2px);
+      color: #667eea;
+      margin: 30px 0;
     }
 
     .hidden {
       display: none;
+    }
+
+    .error-message {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      color: #856404;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 16px;
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
@@ -349,315 +275,370 @@
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
  <body>
-  <div class="app-container">
-   <div class="card"><!-- 初始頁面 -->
-    <div id="welcomePage">
-     <div class="header">
-      <h1><span class="math-icon">📐</span> <span id="practiceTitle">時間、速率換算練習</span></h1>
-      <div class="date-display" id="dateDisplay"></div>
-     </div>
-     <div class="input-group"><label> <span class="input-icon">🎓</span> 年級 </label> <input type="number" id="gradeInput" placeholder="5" min="1" max="6">
-      <div class="hint-text">
+  <div class="container">
+   <div class="header">
+    <h1><span style="font-size: 40px;">📐</span> <span id="pageTitle">單位換算練習遊戲</span> <span style="font-size: 40px;">📏</span></h1>
+    <div class="date-badge" id="dateBadge">
+     🗓️ 載入中...
+    </div>
+   </div>
+   <div id="startScreen">
+    <div class="input-section">
+     <div class="input-group"><label for="gradeInput"> <span style="font-size: 24px;">📚</span> 年級 </label> <input type="number" id="gradeInput" min="1" max="6" placeholder="請輸入年級">
+      <div class="input-hint">
        5年級請填5,6年級請填6
       </div>
      </div>
-     <div class="input-group"><label> <span class="input-icon">🏫</span> 班級 </label> <input type="number" id="classInput" placeholder="1" min="1">
-      <div class="hint-text">
+     <div class="input-group"><label for="classInput"> <span style="font-size: 24px;">🏫</span> 班級 </label> <input type="number" id="classInput" min="1" placeholder="請輸入班級">
+      <div class="input-hint">
        1班請填1,2班請填2,依此類推
       </div>
      </div>
-     <div class="input-group"><label> <span class="input-icon">👤</span> 座號 </label> <input type="number" id="seatInput" placeholder="1" min="1">
-      <div class="hint-text">
+     <div class="input-group"><label for="numberInput"> <span style="font-size: 24px;">👤</span> 座號 </label> <input type="number" id="numberInput" min="1" placeholder="請輸入座號">
+      <div class="input-hint">
        1號請填1,2號請填2,依此類推
       </div>
-     </div><button class="start-button" id="startButton"> <span>🚀</span> <span id="startButtonText">開始練習</span> </button>
-    </div><!-- 答題頁面 -->
-    <div id="questionPage" class="question-container">
-     <div class="progress-bar"><span class="progress-icon">📝</span> <span class="progress-text" id="progressText">第 1 題 / 共 6 題</span>
      </div>
-     <div class="student-info"><span class="student-icon">👨‍🎓</span> <span id="studentInfo"></span>
+    </div>
+    <div id="errorMessage" class="error-message hidden"></div><button class="btn" id="startBtn"> <span style="font-size: 24px;">🚀</span> 開始練習 </button>
+   </div>
+   <div id="questionScreen" class="hidden">
+    <div class="progress" id="progress"><span style="font-size: 20px;">📊</span> 題目 <span id="currentQuestion">1</span> / 6
+    </div>
+    <div class="student-info" id="studentInfo"><span style="font-size: 20px;">👨‍🎓</span> <span id="studentInfoText"></span>
+    </div>
+    <div class="question-section">
+     <div class="question-box">
+      <div class="question-text" id="questionText"></div>
+      <div id="answerInputArea"></div>
      </div>
-     <div class="question-text" id="questionText"></div>
-     <div class="answer-input-container" id="answerInputContainer"></div><button class="submit-button" id="submitButton"> <span id="submitButtonText">提交答案</span> </button>
-    </div><!-- 結果頁面 -->
-    <div id="resultsPage" class="results-container">
-     <div class="celebration-icon">
+     <div id="resultBox" class="hidden"></div><button class="btn" id="submitBtn">提交答案</button> <button class="btn hidden" id="nextBtn">下一題 ➡️</button>
+    </div>
+   </div>
+   <div id="finalScreen" class="hidden">
+    <div class="final-score">
+     <div style="font-size: 40px; margin-bottom: 20px;">
       🎉
      </div>
-     <div class="score-display" id="scoreDisplay"></div>
-     <div id="reviewContainer"></div><button class="restart-button" id="restartButton"> <span>🔄</span> <span>重新開始</span> </button>
+     <h2 style="color: #667eea; font-size: 32px;">測驗完成!</h2>
+     <div style="font-size: 24px; margin: 20px 0;">
+      得分:
+     </div>
+     <div class="score-number" id="finalScore">
+      0
+     </div>
     </div>
    </div>
   </div>
   <script>
     const defaultConfig = {
-      practice_title: "數學單位換算練習",
-      start_button_text: "開始練習",
-      submit_button_text: "提交答案"
+      page_title: "單位換算練習遊戲"
     };
 
     const questions = [
-      { id: 1, text: "1140公尺／分＝(      )公尺／秒", answer: "19", type: "decimal", solution: ["1分鐘 = 60秒", "1140公尺／分 = 1140公尺∕60秒", "1140 ÷ 60 = 19", "答案：19公尺／秒"] },
-      { id: 2, text: "3小時35分鐘＝(      )小時(用分數表示)", answer: { whole: 3, numerator: 7, denominator: 12 }, type: "fraction", solution: ["35分鐘 = 35/60小時", "化簡：35/60 = 7/12", "3小時35分鐘 = 3又7/12小時", "答案：3 7/12小時"] },
-      { id: 3, text: "4分鐘12秒鐘＝(      )分鐘(答案用小數表示)", answer: "4.2", type: "decimal", solution: ["12秒 = 12/60分鐘", "12 ÷ 60 = 0.2", "4分鐘12秒 = 4 + 0.2 = 4.2分鐘", "答案：4.2分鐘"] },
-      { id: 4, text: "480公里／時＝(      )公里／分", answer: "8", type: "decimal", solution: ["1小時 = 60分鐘", "480公里／時 = 480公里／60分鐘", "480 ÷ 60 = 8", "答案：8公里／分"] },
-      { id: 5, text: "540公里／時＝(      )公里／分", answer: "9", type: "decimal", solution: ["1小時 = 60分鐘", "540公里／時 = 540公里／60分鐘", "540 ÷ 60 = 9", "答案：9公里／分"] },
-      { id: 6, text: "7分鐘28秒鐘＝(      )分鐘(答案用分數表示)", answer: { whole: 7, numerator: 7, denominator: 15 }, type: "fraction", solution: ["28秒 = 28/60分鐘", "化簡：28/60 = 7/15", "7分鐘28秒 = 7又7/15分鐘", "答案：7 7/15分鐘"] },
-      { id: 7, text: "4.8公里／時＝(      )公尺／分", answer: "80", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 60分鐘", "4.8公里／時 = 4800公尺／60分鐘", "4800 ÷ 60 = 80", "答案：80公尺／分"] },
-      { id: 8, text: "3分鐘36秒鐘＝(      )分鐘(答案用小數表示)", answer: "3.6", type: "decimal", solution: ["36秒 = 36/60分鐘", "36 ÷ 60 = 0.6", "3分鐘36秒 = 3 + 0.6 = 3.6分鐘", "答案：3.6分鐘"] },
-      { id: 9, text: "1680公尺／分＝(      )公尺／秒", answer: "28", type: "decimal", solution: ["1分鐘 = 60秒", "1680公尺／分 = 1680公尺／60秒", "1680 ÷ 60 = 28", "答案：28公尺／秒"] },
-      { id: 10, text: "114秒鐘＝(      )分鐘(答案用小數表示)", answer: "1.9", type: "decimal", solution: ["114秒 = 114/60分鐘", "114 ÷ 60 = 1.9", "答案：1.9分鐘"] },
-      { id: 11, text: "120公里／時＝(      )公里∕分", answer: "2", type: "decimal", solution: ["1小時 = 60分鐘", "120公里／時 = 120公里／60分鐘", "120 ÷ 60 = 2", "答案：2公里／分"] },
-      { id: 12, text: "160秒鐘＝(      )分鐘(用分數表示)", answer: { whole: 2, numerator: 2, denominator: 3 }, type: "fraction", solution: ["160秒 = 160/60分鐘", "160 ÷ 60 = 2餘40", "化簡：40/60 = 2/3", "答案：2 2/3分鐘"] },
-      { id: 13, text: "6分鐘24秒鐘＝(      )分鐘(答案用小數表示)", answer: "6.4", type: "decimal", solution: ["24秒 = 24/60分鐘", "24 ÷ 60 = 0.4", "6分鐘24秒 = 6 + 0.4 = 6.4分鐘", "答案：6.4分鐘"] },
-      { id: 14, text: "10.8公里／時＝(      )公尺／秒", answer: "3", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 3600秒", "10.8公里／時 = 10800公尺／3600秒", "10800 ÷ 3600 = 3", "答案：3公尺／秒"] },
-      { id: 15, text: "2分鐘15秒鐘＝(      )分鐘(答案用小數表示)", answer: "2.25", type: "decimal", solution: ["15秒 = 15/60分鐘", "15 ÷ 60 = 0.25", "2分鐘15秒 = 2 + 0.25 = 2.25分鐘", "答案：2.25分鐘"] },
-      { id: 16, text: "1440公尺／分＝(      )公尺／秒", answer: "24", type: "decimal", solution: ["1分鐘 = 60秒", "1440公尺／分 = 1440公尺／60秒", "1440 ÷ 60 = 24", "答案：24公尺／秒"] },
-      { id: 17, text: "102分鐘＝(      )小時(答案用小數表示)", answer: "1.7", type: "decimal", solution: ["102分鐘 = 102/60小時", "102 ÷ 60 = 1.7", "答案：1.7小時"] },
-      { id: 18, text: "時速48公里＝分速(      )公尺", answer: "800", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 60分鐘", "48公里∕時 = 48000公尺∕60分鐘", "48000 ÷ 60 = 800", "答案：800公尺∕分"] },
-      { id: 19, text: "420公里／時＝(      )公里／分", answer: "7", type: "decimal", solution: ["1小時 = 60分鐘", "420公里／時 = 420公里／60分鐘", "420 ÷ 60 = 7", "答案：7公里／分"] },
-      { id: 20, text: "4分鐘36秒鐘＝(      )分鐘(用小數表示)", answer: "4.6", type: "decimal", solution: ["36秒 = 36/60分鐘", "36 ÷ 60 = 0.6", "4分鐘36秒 = 4 + 0.6 = 4.6分鐘", "答案：4.6分鐘"] },
-      { id: 21, text: "8分鐘36秒鐘＝(      )分鐘(答案用小數表示)", answer: "8.6", type: "decimal", solution: ["36秒 = 36/60分鐘", "36 ÷ 60 = 0.6", "8分鐘36秒 = 8 + 0.6 = 8.6分鐘", "答案：8.6分鐘"] },
-      { id: 22, text: "180公里／時＝(      )公里／分", answer: "3", type: "decimal", solution: ["1小時 = 60分鐘", "180公里／時 = 180公里／60分鐘", "180 ÷ 60 = 3", "答案：3公里／分"] },
-      { id: 23, text: "138分鐘＝(      )小時(答案用小數表示)", answer: "2.3", type: "decimal", solution: ["138分鐘 = 138/60小時", "138 ÷ 60 = 2.3", "答案：2.3小時"] },
-      { id: 24, text: "360公里／時＝(      )公里／分", answer: "6", type: "decimal", solution: ["1小時 = 60分鐘", "360公里／時 = 360公里／60分鐘", "360 ÷ 60 = 6", "答案：6公里／分"] },
-      { id: 25, text: "114分鐘＝(      )小時(答案用小數表示)", answer: "1.9", type: "decimal", solution: ["114分鐘 = 114/60小時", "114 ÷ 60 = 1.9", "答案：1.9小時"] },
-      { id: 26, text: "7.2公里／時＝(      )公尺／秒", answer: "2", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 3600秒", "7.2公里／時 = 7200公尺／3600秒", "7200 ÷ 3600 = 2", "答案：2公尺／秒"] },
-      { id: 27, text: "5小時15分鐘＝(      )小時(答案用分數表示)", answer: { whole: 5, numerator: 1, denominator: 4 }, type: "fraction", solution: ["15分鐘 = 15/60小時", "化簡：15/60 = 1/4", "5小時15分鐘 = 5又1/4小時", "答案：5 1/4小時"] },
-      { id: 28, text: "1500公尺／分＝(      )公尺／秒", answer: "25", type: "decimal", solution: ["1分鐘 = 60秒", "1500公尺／分 = 1500公尺／60秒", "1500 ÷ 60 = 25", "答案：25公尺／秒"] },
-      { id: 29, text: "10分鐘50秒鐘＝(      )分鐘(答案用分數表示)", answer: { whole: 10, numerator: 5, denominator: 6 }, type: "fraction", solution: ["50秒 = 50/60分鐘", "化簡：50/60 = 5/6", "10分鐘50秒 = 10又5/6分鐘", "答案：10 5/6分鐘"] },
-      { id: 30, text: "1080公尺／分＝(      )公尺／秒", answer: "18", type: "decimal", solution: ["1分鐘 = 60秒", "1080公尺／分 = 1080公尺／60秒", "1080 ÷ 60 = 18", "答案：18公尺／秒"] },
-      { id: 31, text: "時速36公里＝分速(      )公里", answer: "0.6", type: "decimal", solution: ["1小時 = 60分鐘", "36公里∕時 = 36公里∕60分鐘", "36 ÷ 60 = 0.6", "答案：0.6公里∕分"] },
-      { id: 32, text: "8分鐘35秒鐘＝(      )分鐘(答案用分數表示)", answer: { whole: 8, numerator: 7, denominator: 12 }, type: "fraction", solution: ["35秒 = 35/60分鐘", "化簡：35/60 = 7/12", "8分鐘35秒 = 8又7/12分鐘", "答案：8 7/12分鐘"] },
-      { id: 33, text: "144分鐘＝(      )小時(答案用小數表示)", answer: "2.4", type: "decimal", solution: ["144分鐘 = 144/60小時", "144 ÷ 60 = 2.4", "答案：2.4小時"] },
-      { id: 34, text: "540公尺／分＝(      )公尺／秒", answer: "9", type: "decimal", solution: ["1分鐘 = 60秒", "540公尺／分 = 540公尺／60秒", "540 ÷ 60 = 9", "答案：9公尺／秒"] },
-      { id: 35, text: "4小時20分鐘＝(      )小時(答案用分數表示)", answer: { whole: 4, numerator: 1, denominator: 3 }, type: "fraction", solution: ["20分鐘 = 20/60小時", "化簡：20/60 = 1/3", "4小時20分鐘 = 4又1/3小時", "答案：4 1/3小時"] },
-      { id: 36, text: "1200公尺／分＝(      )公尺／秒", answer: "20", type: "decimal", solution: ["1分鐘 = 60秒", "1200公尺／分 = 1200公尺／60秒", "1200 ÷ 60 = 20", "答案：20公尺／秒"] },
-      { id: 37, text: "1小時39分鐘＝(      )小時(用分數表示)", answer: { whole: 1, numerator: 13, denominator: 20 }, type: "fraction", solution: ["39分鐘 = 39/60小時", "化簡：39/60 = 13/20", "1小時39分鐘 = 1又13/20小時", "答案：1 13/20小時"] },
-      { id: 38, text: "960公尺／分＝(      )公尺／秒", answer: "16", type: "decimal", solution: ["1分鐘 = 60秒", "960公尺／分 = 960公尺／60秒", "960 ÷ 60 = 16", "答案：16公尺／秒"] },
-      { id: 39, text: "時速54公里＝分速(      )公尺", answer: "900", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 60分鐘", "54公里∕時 = 54000公尺∕60分鐘", "54000 ÷ 60 = 900", "答案：900公尺∕分"] },
-      { id: 40, text: "4小時25分鐘＝(      )小時(答案用分數表示)", answer: { whole: 4, numerator: 5, denominator: 12 }, type: "fraction", solution: ["25分鐘 = 25/60小時", "化簡：25/60 = 5/12", "4小時25分鐘 = 4又5/12小時", "答案：4 5/12小時"] },
-      { id: 41, text: "時速7200公尺＝分速(      )公尺", answer: "120", type: "decimal", solution: ["1小時 = 60分鐘", "7200公尺∕時 = 7200公尺∕60分鐘", "7200 ÷ 60 = 120", "答案：120公尺∕分"] },
-      { id: 42, text: "48秒鐘＝(      )分鐘(用小數表示)", answer: "0.8", type: "decimal", solution: ["48秒 = 48/60分鐘", "48 ÷ 60 = 0.8", "答案：0.8分鐘"] },
-      { id: 43, text: "9小時28分鐘＝(      )小時(答案用分數表示)", answer: { whole: 9, numerator: 7, denominator: 15 }, type: "fraction", solution: ["28分鐘 = 28/60小時", "化簡：28/60 = 7/15", "9小時28分鐘 = 9又7/15小時", "答案：9 7/15小時"] },
-      { id: 44, text: "時速10800公尺＝分速(      )公尺", answer: "180", type: "decimal", solution: ["1小時 = 60分鐘", "10800公尺∕時 = 10800公尺∕60分鐘", "10800 ÷ 60 = 180", "答案：180公尺∕分"] },
-      { id: 45, text: "660公尺／分＝(      )公尺／秒", answer: "11", type: "decimal", solution: ["1分鐘 = 60秒", "660公尺／分 = 660公尺／60秒", "660 ÷ 60 = 11", "答案：11公尺／秒"] },
-      { id: 46, text: "156分鐘＝(      )小時(答案用小數表示)", answer: "2.6", type: "decimal", solution: ["156分鐘 = 156/60小時", "156 ÷ 60 = 2.6", "答案：2.6小時"] },
-      { id: 47, text: "7小時26分鐘＝(      )小時(答案用分數表示)", answer: { whole: 7, numerator: 13, denominator: 30 }, type: "fraction", solution: ["26分鐘 = 26/60小時", "化簡：26/60 = 13/30", "7小時26分鐘 = 7又13/30小時", "答案：7 13/30小時"] },
-      { id: 48, text: "時速42公里＝分速(      )公尺", answer: "700", type: "decimal", solution: ["1公里 = 1000公尺,1小時 = 60分鐘", "42公里∕時 = 42000公尺∕60分鐘", "42000 ÷ 60 = 700", "答案：700公尺∕分"] },
-      { id: 49, text: "228分鐘＝(      )小時(答案用小數表示)", answer: "3.8", type: "decimal", solution: ["228分鐘 = 228/60小時", "228 ÷ 60 = 3.8", "答案：3.8小時"] },
-      { id: 50, text: "720公尺／分＝(      )公尺／秒", answer: "12", type: "decimal", solution: ["1分鐘 = 60秒", "720公尺／分 = 720公尺／60秒", "720 ÷ 60 = 12", "答案：12公尺／秒"] },
-      { id: 51, text: "240公里／時＝(      )公里／分", answer: "4", type: "decimal", solution: ["1小時 = 60分鐘", "240公里／時 = 240公里／60分鐘", "240 ÷ 60 = 4", "答案：4公里／分"] },
-      { id: 52, text: "165秒鐘＝(      )分鐘(答案用小數表示)", answer: "2.75", type: "decimal", solution: ["165秒 = 165/60分鐘", "165 ÷ 60 = 2.75", "答案：2.75分鐘"] },
-      { id: 53, text: "900公尺／分＝(      )公尺／秒", answer: "15", type: "decimal", solution: ["1分鐘 = 60秒", "900公尺／分 = 900公尺／60秒", "900 ÷ 60 = 15", "答案：15公尺／秒"] },
-      { id: 54, text: "2小時33分鐘＝(      )小時(答案用分數表示)", answer: { whole: 2, numerator: 11, denominator: 20 }, type: "fraction", solution: ["33分鐘 = 33/60小時", "化簡：33/60 = 11/20", "2小時33分鐘 = 2又11/20小時", "答案：2 11/20小時"] },
-      { id: 55, text: "105秒鐘＝(      )分鐘(答案用小數表示)", answer: "1.75", type: "decimal", solution: ["105秒 = 105/60分鐘", "105 ÷ 60 = 1.75", "答案：1.75分鐘"] },
-      { id: 56, text: "780公尺／分＝(      )公尺／秒", answer: "13", type: "decimal", solution: ["1分鐘 = 60秒", "780公尺／分 = 780公尺／60秒", "780 ÷ 60 = 13", "答案：13公尺／秒"] },
-      { id: 57, text: "15分鐘35秒鐘＝(      )分鐘(答案用分數表示)", answer: { whole: 15, numerator: 7, denominator: 12 }, type: "fraction", solution: ["35秒 = 35/60分鐘", "化簡：35/60 = 7/12", "15分鐘35秒 = 15又7/12分鐘", "答案：15 7/12分鐘"] }
+      { id: 1, text: "1140公尺/分 = □公尺/秒", type: "decimal", answer: "19", solution: ["1分鐘 = 60秒", "1140 ÷ 60 = 19", "答案:19公尺/秒"] },
+      { id: 2, text: "3小時35分鐘 = □小時(用分數表示)", type: "fraction", answer: "3 7/12", solution: ["35分鐘 = 35/60小時", "化簡:35/60 = 7/12", "3小時 + 7/12小時", "答案:3又7/12小時"] },
+      { id: 3, text: "4分鐘12秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "4.2", solution: ["12秒 = 12/60分鐘 = 0.2分鐘", "4分鐘 + 0.2分鐘 = 4.2分鐘", "答案:4.2分鐘"] },
+      { id: 4, text: "480公里/時 = □公里/分", type: "decimal", answer: "8", solution: ["1小時 = 60分鐘", "480 ÷ 60 = 8", "答案:8公里/分"] },
+      { id: 5, text: "540公里/時 = □公里/分", type: "decimal", answer: "9", solution: ["1小時 = 60分鐘", "540 ÷ 60 = 9", "答案:9公里/分"] },
+      { id: 6, text: "7分鐘28秒鐘 = □分鐘(答案用分數表示)", type: "fraction", answer: "7 7/15", solution: ["28秒 = 28/60分鐘", "化簡:28/60 = 7/15", "7分鐘 + 7/15分鐘", "答案:7又7/15分鐘"] },
+      { id: 7, text: "4.8公里/時 = □公尺/分", type: "decimal", answer: "80", solution: ["4.8公里 = 4800公尺", "1小時 = 60分鐘", "4800 ÷ 60 = 80", "答案:80公尺/分"] },
+      { id: 8, text: "3分鐘36秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "3.6", solution: ["36秒 = 36/60分鐘 = 0.6分鐘", "3分鐘 + 0.6分鐘 = 3.6分鐘", "答案:3.6分鐘"] },
+      { id: 9, text: "1680公尺/分 = □公尺/秒", type: "decimal", answer: "28", solution: ["1分鐘 = 60秒", "1680 ÷ 60 = 28", "答案:28公尺/秒"] },
+      { id: 10, text: "114秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "1.9", solution: ["114 ÷ 60 = 1.9", "答案:1.9分鐘"] },
+      { id: 11, text: "120公里/時 = □公里/分", type: "decimal", answer: "2", solution: ["1小時 = 60分鐘", "120 ÷ 60 = 2", "答案:2公里/分"] },
+      { id: 12, text: "160秒鐘 = □分鐘(用分數表示)", type: "fraction", answer: "2 2/3", solution: ["160 ÷ 60 = 2餘40", "40/60 = 2/3", "答案:2又2/3分鐘"] },
+      { id: 13, text: "6分鐘24秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "6.4", solution: ["24秒 = 24/60分鐘 = 0.4分鐘", "6分鐘 + 0.4分鐘 = 6.4分鐘", "答案:6.4分鐘"] },
+      { id: 14, text: "10.8公里/時 = □公尺/秒", type: "decimal", answer: "3", solution: ["10.8公里 = 10800公尺", "1小時 = 3600秒", "10800 ÷ 3600 = 3", "答案:3公尺/秒"] },
+      { id: 15, text: "2分鐘15秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "2.25", solution: ["15秒 = 15/60分鐘 = 0.25分鐘", "2分鐘 + 0.25分鐘 = 2.25分鐘", "答案:2.25分鐘"] },
+      { id: 16, text: "1440公尺/分 = □公尺/秒", type: "decimal", answer: "24", solution: ["1分鐘 = 60秒", "1440 ÷ 60 = 24", "答案:24公尺/秒"] },
+      { id: 17, text: "102分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "1.7", solution: ["102 ÷ 60 = 1.7", "答案:1.7小時"] },
+      { id: 18, text: "時速48公里 = 分速□公尺", type: "decimal", answer: "800", solution: ["48公里 = 48000公尺", "1小時 = 60分鐘", "48000 ÷ 60 = 800", "答案:800公尺"] },
+      { id: 19, text: "420公里/時 = □公里/分", type: "decimal", answer: "7", solution: ["1小時 = 60分鐘", "420 ÷ 60 = 7", "答案:7公里/分"] },
+      { id: 20, text: "4分鐘36秒鐘 = □分鐘(用小數表示)", type: "decimal", answer: "4.6", solution: ["36秒 = 36/60分鐘 = 0.6分鐘", "4分鐘 + 0.6分鐘 = 4.6分鐘", "答案:4.6分鐘"] },
+      { id: 21, text: "8分鐘36秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "8.6", solution: ["36秒 = 36/60分鐘 = 0.6分鐘", "8分鐘 + 0.6分鐘 = 8.6分鐘", "答案:8.6分鐘"] },
+      { id: 22, text: "180公里/時 = □公里/分", type: "decimal", answer: "3", solution: ["1小時 = 60分鐘", "180 ÷ 60 = 3", "答案:3公里/分"] },
+      { id: 23, text: "138分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "2.3", solution: ["138 ÷ 60 = 2.3", "答案:2.3小時"] },
+      { id: 24, text: "360公里/時 = □公里/分", type: "decimal", answer: "6", solution: ["1小時 = 60分鐘", "360 ÷ 60 = 6", "答案:6公里/分"] },
+      { id: 25, text: "114分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "1.9", solution: ["114 ÷ 60 = 1.9", "答案:1.9小時"] },
+      { id: 26, text: "7.2公里/時 = □公尺/秒", type: "decimal", answer: "2", solution: ["7.2公里 = 7200公尺", "1小時 = 3600秒", "7200 ÷ 3600 = 2", "答案:2公尺/秒"] },
+      { id: 27, text: "5小時15分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "5 1/4", solution: ["15分鐘 = 15/60小時", "化簡:15/60 = 1/4", "5小時 + 1/4小時", "答案:5又1/4小時"] },
+      { id: 28, text: "1500公尺/分 = □公尺/秒", type: "decimal", answer: "25", solution: ["1分鐘 = 60秒", "1500 ÷ 60 = 25", "答案:25公尺/秒"] },
+      { id: 29, text: "10分鐘50秒鐘 = □分鐘(答案用分數表示)", type: "fraction", answer: "10 5/6", solution: ["50秒 = 50/60分鐘", "化簡:50/60 = 5/6", "10分鐘 + 5/6分鐘", "答案:10又5/6分鐘"] },
+      { id: 30, text: "1080公尺/分 = □公尺/秒", type: "decimal", answer: "18", solution: ["1分鐘 = 60秒", "1080 ÷ 60 = 18", "答案:18公尺/秒"] },
+      { id: 31, text: "時速36公里 = 分速□公里", type: "decimal", answer: "0.6", solution: ["1小時 = 60分鐘", "36 ÷ 60 = 0.6", "答案:0.6公里"] },
+      { id: 32, text: "8分鐘35秒鐘 = □分鐘(答案用分數表示)", type: "fraction", answer: "8 7/12", solution: ["35秒 = 35/60分鐘", "化簡:35/60 = 7/12", "8分鐘 + 7/12分鐘", "答案:8又7/12分鐘"] },
+      { id: 33, text: "144分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "2.4", solution: ["144 ÷ 60 = 2.4", "答案:2.4小時"] },
+      { id: 34, text: "540公尺/分 = □公尺/秒", type: "decimal", answer: "9", solution: ["1分鐘 = 60秒", "540 ÷ 60 = 9", "答案:9公尺/秒"] },
+      { id: 35, text: "4小時20分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "4 1/3", solution: ["20分鐘 = 20/60小時", "化簡:20/60 = 1/3", "4小時 + 1/3小時", "答案:4又1/3小時"] },
+      { id: 36, text: "1200公尺/分 = □公尺/秒", type: "decimal", answer: "20", solution: ["1分鐘 = 60秒", "1200 ÷ 60 = 20", "答案:20公尺/秒"] },
+      { id: 37, text: "1小時39分鐘 = □小時(用分數表示)", type: "fraction", answer: "1 13/20", solution: ["39分鐘 = 39/60小時", "化簡:39/60 = 13/20", "1小時 + 13/20小時", "答案:1又13/20小時"] },
+      { id: 38, text: "960公尺/分 = □公尺/秒", type: "decimal", answer: "16", solution: ["1分鐘 = 60秒", "960 ÷ 60 = 16", "答案:16公尺/秒"] },
+      { id: 39, text: "時速54公里 = 分速□公尺", type: "decimal", answer: "900", solution: ["54公里 = 54000公尺", "1小時 = 60分鐘", "54000 ÷ 60 = 900", "答案:900公尺"] },
+      { id: 40, text: "4小時25分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "4 5/12", solution: ["25分鐘 = 25/60小時", "化簡:25/60 = 5/12", "4小時 + 5/12小時", "答案:4又5/12小時"] },
+      { id: 41, text: "時速7200公尺 = 分速□公尺", type: "decimal", answer: "120", solution: ["1小時 = 60分鐘", "7200 ÷ 60 = 120", "答案:120公尺"] },
+      { id: 42, text: "48秒鐘 = □分鐘(用小數表示)", type: "decimal", answer: "0.8", solution: ["48 ÷ 60 = 0.8", "答案:0.8分鐘"] },
+      { id: 43, text: "9小時28分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "9 7/15", solution: ["28分鐘 = 28/60小時", "化簡:28/60 = 7/15", "9小時 + 7/15小時", "答案:9又7/15小時"] },
+      { id: 44, text: "時速10800公尺 = 分速□公尺", type: "decimal", answer: "180", solution: ["1小時 = 60分鐘", "10800 ÷ 60 = 180", "答案:180公尺"] },
+      { id: 45, text: "660公尺/分 = □公尺/秒", type: "decimal", answer: "11", solution: ["1分鐘 = 60秒", "660 ÷ 60 = 11", "答案:11公尺/秒"] },
+      { id: 46, text: "156分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "2.6", solution: ["156 ÷ 60 = 2.6", "答案:2.6小時"] },
+      { id: 47, text: "7小時26分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "7 13/30", solution: ["26分鐘 = 26/60小時", "化簡:26/60 = 13/30", "7小時 + 13/30小時", "答案:7又13/30小時"] },
+      { id: 48, text: "時速42公里 = 分速□公尺", type: "decimal", answer: "700", solution: ["42公里 = 42000公尺", "1小時 = 60分鐘", "42000 ÷ 60 = 700", "答案:700公尺"] },
+      { id: 49, text: "228分鐘 = □小時(答案用小數表示)", type: "decimal", answer: "3.8", solution: ["228 ÷ 60 = 3.8", "答案:3.8小時"] },
+      { id: 50, text: "720公尺/分 = □公尺/秒", type: "decimal", answer: "12", solution: ["1分鐘 = 60秒", "720 ÷ 60 = 12", "答案:12公尺/秒"] },
+      { id: 51, text: "240公里/時 = □公里/分", type: "decimal", answer: "4", solution: ["1小時 = 60分鐘", "240 ÷ 60 = 4", "答案:4公里/分"] },
+      { id: 52, text: "165秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "2.75", solution: ["165 ÷ 60 = 2.75", "答案:2.75分鐘"] },
+      { id: 53, text: "900公尺/分 = □公尺/秒", type: "decimal", answer: "15", solution: ["1分鐘 = 60秒", "900 ÷ 60 = 15", "答案:15公尺/秒"] },
+      { id: 54, text: "2小時33分鐘 = □小時(答案用分數表示)", type: "fraction", answer: "2 11/20", solution: ["33分鐘 = 33/60小時", "化簡:33/60 = 11/20", "2小時 + 11/20小時", "答案:2又11/20小時"] },
+      { id: 55, text: "105秒鐘 = □分鐘(答案用小數表示)", type: "decimal", answer: "1.75", solution: ["105 ÷ 60 = 1.75", "答案:1.75分鐘"] },
+      { id: 56, text: "780公尺/分 = □公尺/秒", type: "decimal", answer: "13", solution: ["1分鐘 = 60秒", "780 ÷ 60 = 13", "答案:13公尺/秒"] },
+      { id: 57, text: "15分鐘35秒鐘 = □分鐘(答案用分數表示)", type: "fraction", answer: "15 7/12", solution: ["35秒 = 35/60分鐘", "化簡:35/60 = 7/12", "15分鐘 + 7/12分鐘", "答案:15又7/12分鐘"] }
     ];
 
-    let currentQuestions = [];
     let currentQuestionIndex = 0;
-    let userAnswers = [];
-    let studentInfo = { grade: '', class: '', seat: '' };
+    let score = 0;
+    let dailyQuestions = [];
+    let studentData = {};
 
-    function getTodayDateString() {
+    function getTodayDate() {
       const today = new Date();
-      return `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
-    function generateDailyQuestions() {
-      const today = new Date();
-      const daysSinceEpoch = Math.floor(today / (1000 * 60 * 60 * 24));
-      const seed = daysSinceEpoch;
+    function seededRandom(seed) {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function getDailyQuestions(dateStr) {
+      const seed = dateStr.split('-').join('') * 1;
+      const shuffled = [...questions];
       
-      const shuffled = [...questions].sort((a, b) => {
-        const hashA = (a.id * seed * 2654435761) % 2147483647;
-        const hashB = (b.id * seed * 2654435761) % 2147483647;
-        return hashA - hashB;
-      });
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(seededRandom(seed + i) * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
       
       return shuffled.slice(0, 6);
     }
 
-    function showPage(pageId) {
-      document.getElementById('welcomePage').style.display = 'none';
-      document.getElementById('questionPage').style.display = 'none';
-      document.getElementById('resultsPage').style.display = 'none';
-      document.getElementById(pageId).style.display = 'block';
+    function checkIfAlreadyTested() {
+      const todayKey = getTodayDate();
+      const testRecords = JSON.parse(localStorage.getItem('testRecords') || '{}');
+      const studentKey = `${studentData.grade}-${studentData.class}-${studentData.number}`;
+      
+      if (testRecords[studentKey] === todayKey) {
+        return true;
+      }
+      return false;
     }
 
-    function startPractice() {
+    function markAsTested() {
+      const todayKey = getTodayDate();
+      const testRecords = JSON.parse(localStorage.getItem('testRecords') || '{}');
+      const studentKey = `${studentData.grade}-${studentData.class}-${studentData.number}`;
+      testRecords[studentKey] = todayKey;
+      localStorage.setItem('testRecords', JSON.stringify(testRecords));
+    }
+
+    function initializePage() {
+      const today = getTodayDate();
+      document.getElementById('dateBadge').textContent = `🗓️ ${today}`;
+      dailyQuestions = getDailyQuestions(today);
+    }
+
+    function startGame() {
       const grade = document.getElementById('gradeInput').value;
       const classNum = document.getElementById('classInput').value;
-      const seat = document.getElementById('seatInput').value;
+      const number = document.getElementById('numberInput').value;
+      const errorMessage = document.getElementById('errorMessage');
 
-      if (!grade || !classNum || !seat) {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b6b; color: white; padding: 15px 30px; border-radius: 10px; font-weight: bold; z-index: 1000;';
-        tempDiv.textContent = '請填寫完整的年級、班級和座號';
-        document.body.appendChild(tempDiv);
-        setTimeout(() => tempDiv.remove(), 2000);
+      if (!grade || !classNum || !number) {
+        errorMessage.textContent = '請填寫所有欄位!';
+        errorMessage.classList.remove('hidden');
         return;
       }
 
-      studentInfo = { grade, class: classNum, seat };
-      document.getElementById('studentInfo').textContent = `${grade}年${classNum}班 ${seat}號`;
-      
-      currentQuestions = generateDailyQuestions();
-      currentQuestionIndex = 0;
-      userAnswers = [];
-      
-      showPage('questionPage');
-      displayQuestion();
+      studentData = { grade, class: classNum, number };
+
+      if (checkIfAlreadyTested()) {
+        errorMessage.textContent = '你今天已經測驗過了!每位學生每天只能測驗一次。';
+        errorMessage.classList.remove('hidden');
+        return;
+      }
+
+      errorMessage.classList.add('hidden');
+      markAsTested();
+
+      document.getElementById('startScreen').classList.add('hidden');
+      document.getElementById('questionScreen').classList.remove('hidden');
+      document.getElementById('studentInfoText').textContent = 
+        `${grade}年級 ${classNum}班 ${number}號`;
+
+      showQuestion();
     }
 
-    function displayQuestion() {
-      const question = currentQuestions[currentQuestionIndex];
-      document.getElementById('progressText').textContent = `第 ${currentQuestionIndex + 1} 題 / 共 6 題`;
+    function showQuestion() {
+      const question = dailyQuestions[currentQuestionIndex];
+      document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
       document.getElementById('questionText').textContent = question.text;
       
-      const container = document.getElementById('answerInputContainer');
-      container.innerHTML = '';
-      
-      if (question.type === 'decimal') {
-        container.innerHTML = '<input type="text" class="decimal-input" id="answerInput" placeholder="請輸入答案">';
-      } else {
-        container.innerHTML = `
-          <div class="fraction-input">
-            <input type="number" id="wholeInput" placeholder="整數">
-            <div class="fraction-display">
-              <input type="number" id="numeratorInput" placeholder="分子">
+      const answerArea = document.getElementById('answerInputArea');
+      answerArea.innerHTML = '';
+
+      if (question.type === 'fraction') {
+        answerArea.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 15px; margin-top: 20px;">
+            <span style="font-size: 20px;">答案:</span>
+            <input type="number" id="wholeInput" placeholder="整數" style="width: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 18px; text-align: center;">
+            <div class="fraction-input">
+              <input type="number" id="numeratorInput" placeholder="分子" style="width: 80px; padding: 8px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center;">
               <div class="fraction-line"></div>
-              <input type="number" id="denominatorInput" placeholder="分母">
+              <input type="number" id="denominatorInput" placeholder="分母" style="width: 80px; padding: 8px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; text-align: center;">
             </div>
           </div>
         `;
+      } else {
+        answerArea.innerHTML = `
+          <div class="answer-input">
+            <span style="font-size: 20px;">答案:</span>
+            <input type="text" id="decimalInput" placeholder="請輸入答案" style="width: 150px; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 18px; text-align: center;">
+          </div>
+        `;
       }
+
+      document.getElementById('resultBox').classList.add('hidden');
+      document.getElementById('submitBtn').classList.remove('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
     }
 
     function submitAnswer() {
-      const question = currentQuestions[currentQuestionIndex];
-      let userAnswer;
-      
-      if (question.type === 'decimal') {
-        userAnswer = document.getElementById('answerInput').value.trim();
-      } else {
-        const whole = document.getElementById('wholeInput').value || '0';
-        const numerator = document.getElementById('numeratorInput').value || '0';
-        const denominator = document.getElementById('denominatorInput').value || '0';
-        userAnswer = { whole, numerator, denominator };
-      }
-      
-      userAnswers.push(userAnswer);
-      
-      currentQuestionIndex++;
-      if (currentQuestionIndex < 6) {
-        displayQuestion();
-      } else {
-        showResults();
-      }
-    }
+      const question = dailyQuestions[currentQuestionIndex];
+      let userAnswer = '';
+      let hasInput = false;
 
-    function checkAnswer(userAnswer, correctAnswer, type) {
-      if (type === 'decimal') {
-        return userAnswer === correctAnswer;
-      } else {
-        return userAnswer.whole === String(correctAnswer.whole) &&
-               userAnswer.numerator === String(correctAnswer.numerator) &&
-               userAnswer.denominator === String(correctAnswer.denominator);
-      }
-    }
-
-    function formatAnswer(answer, type) {
-      if (type === 'decimal') {
-        return answer;
-      } else {
-        return `${answer.whole} ${answer.numerator}/${answer.denominator}`;
-      }
-    }
-
-    function formatUserAnswer(answer, type) {
-      if (type === 'decimal') {
-        return answer || '(未作答)';
-      } else {
-        if (!answer.whole && !answer.numerator && !answer.denominator) {
-          return '(未作答)';
+      if (question.type === 'fraction') {
+        const whole = document.getElementById('wholeInput').value.trim();
+        const numerator = document.getElementById('numeratorInput').value.trim();
+        const denominator = document.getElementById('denominatorInput').value.trim();
+        
+        if (!whole && !numerator && !denominator) {
+          showInlineMessage('請填入答案後再提交!');
+          return;
         }
-        return `${answer.whole || '0'} ${answer.numerator || '0'}/${answer.denominator || '0'}`;
+        
+        hasInput = true;
+        if (whole && numerator && denominator) {
+          userAnswer = `${whole} ${numerator}/${denominator}`;
+        } else if (numerator && denominator) {
+          userAnswer = `${numerator}/${denominator}`;
+        } else if (whole) {
+          userAnswer = whole;
+        }
+      } else {
+        userAnswer = document.getElementById('decimalInput').value.trim();
+        if (!userAnswer) {
+          showInlineMessage('請填入答案後再提交!');
+          return;
+        }
+        hasInput = true;
+      }
+
+      const isCorrect = userAnswer === question.answer;
+      if (isCorrect) score++;
+
+      showResult(isCorrect, question);
+      document.getElementById('submitBtn').classList.add('hidden');
+      
+      if (currentQuestionIndex < 5) {
+        document.getElementById('nextBtn').classList.remove('hidden');
+      } else {
+        setTimeout(() => {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.innerHTML = '<span style="font-size: 24px;">📊</span> 公布成績';
+          btn.onclick = showFinalScore;
+          document.getElementById('resultBox').appendChild(btn);
+        }, 100);
       }
     }
 
-    function showResults() {
-      let score = 0;
-      const reviewContainer = document.getElementById('reviewContainer');
-      reviewContainer.innerHTML = '';
+    function showInlineMessage(message) {
+      const resultBox = document.getElementById('resultBox');
+      resultBox.innerHTML = `
+        <div style="background: #fff3cd; border: 2px solid #ffc107; color: #856404; padding: 15px; border-radius: 10px; text-align: center; font-size: 18px;">
+          ${message}
+        </div>
+      `;
+      resultBox.classList.remove('hidden');
       
-      currentQuestions.forEach((question, index) => {
-        const userAnswer = userAnswers[index];
-        const isCorrect = checkAnswer(userAnswer, question.answer, question.type);
-        if (isCorrect) score++;
-        
-        const reviewDiv = document.createElement('div');
-        reviewDiv.className = `question-review ${isCorrect ? 'correct' : 'incorrect'}`;
-        
-        const userAnswerText = formatUserAnswer(userAnswer, question.type);
-        const correctAnswerText = formatAnswer(question.answer, question.type);
-        
-        reviewDiv.innerHTML = `
-          <div class="review-question">第 ${index + 1} 題：${question.text}</div>
-          <div class="review-answer ${isCorrect ? 'correct-answer' : 'wrong-answer'}">
-            你的答案：${userAnswerText} ${isCorrect ? '✓' : '✗'}
-          </div>
-          ${!isCorrect ? `<div class="review-answer correct-answer">正確答案：${correctAnswerText}</div>` : ''}
-          <div class="solution-steps">
-            <div class="solution-title">📝 解題過程：</div>
-            ${question.solution.map(step => `<div class="solution-step">• ${step}</div>`).join('')}
-          </div>
-        `;
-        
-        reviewContainer.appendChild(reviewDiv);
-      });
+      setTimeout(() => {
+        resultBox.classList.add('hidden');
+      }, 2000);
+    }
+
+    function showResult(isCorrect, question) {
+      const resultBox = document.getElementById('resultBox');
+      const resultClass = isCorrect ? 'correct' : 'incorrect';
+      const resultImage = isCorrect ? 'D1.gif' : 'D0.gif';
+      const resultText = isCorrect ? '得1分' : '加油';
       
-      document.getElementById('scoreDisplay').textContent = `得分：${score}`;
-      showPage('resultsPage');
-    }
-
-    function restart() {
-      document.getElementById('gradeInput').value = '';
-      document.getElementById('classInput').value = '';
-      document.getElementById('seatInput').value = '';
-      showPage('welcomePage');
-    }
-
-    document.getElementById('dateDisplay').textContent = getTodayDateString();
-    document.getElementById('startButton').addEventListener('click', startPractice);
-    document.getElementById('submitButton').addEventListener('click', submitAnswer);
-    document.getElementById('restartButton').addEventListener('click', restart);
-
-    async function onConfigChange(config) {
-      document.getElementById('practiceTitle').textContent = config.practice_title || defaultConfig.practice_title;
-      document.getElementById('startButtonText').textContent = config.start_button_text || defaultConfig.start_button_text;
-      document.getElementById('submitButtonText').textContent = config.submit_button_text || defaultConfig.submit_button_text;
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["practice_title", config.practice_title || defaultConfig.practice_title],
-          ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
-          ["submit_button_text", config.submit_button_text || defaultConfig.submit_button_text]
-        ])
+      let solutionHTML = '<div class="solution"><div class="solution-title">✏️ 解題過程:</div>';
+      question.solution.forEach(step => {
+        solutionHTML += `<div class="solution-step">${step}</div>`;
       });
+      solutionHTML += '</div>';
+
+      resultBox.innerHTML = `
+        <div class="result-box ${resultClass}">
+          <img src="${resultImage}" alt="${resultText}" class="result-image" onerror="this.style.display='none'; this.alt='圖片載入失敗';">
+          <div class="result-text">${resultText}</div>
+          ${solutionHTML}
+        </div>
+      `;
+      resultBox.classList.remove('hidden');
     }
+
+    function nextQuestion() {
+      currentQuestionIndex++;
+      showQuestion();
+    }
+
+    function showFinalScore() {
+      document.getElementById('questionScreen').classList.add('hidden');
+      document.getElementById('finalScreen').classList.remove('hidden');
+      document.getElementById('finalScore').textContent = score;
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+    document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initializePage();
+      
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('pageTitle').textContent = 
+              config.page_title || defaultConfig.page_title;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["page_title", config.page_title || defaultConfig.page_title]
+          ])
+        });
+      }
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a5e2ebcc3186a8c',t:'MTc2NDM3ODE3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b22e15d1704a36d',t:'MTc2NjQ0MDcwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
