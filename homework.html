@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>114學年度六年二班作業繳交表</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+}
+
+.controls {
+  margin-bottom: 10px;
+}
+
+.controls button {
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+#tableWrapper {
+  transform-origin: top left;
+}
+
+table {
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+  min-width: 40px;
+}
+
+th {
+  background-color: #f0f0f0;
+}
+
+select {
+  width: 120px;
+}
+
+.box img {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.submitted img {
+  cursor: default;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.assignment-name {
+  font-weight: bold;
+font-size: 24px;
+}
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.header h2 {
+  margin: 0;
+}
+
+.controls button {
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  margin-left: 6px;
+}
+
+</style>
+</head>
+
+<body>
+<!-- 放大縮小控制 -->
+<div class="header">
+  <h2>114學年度六年二班作業繳交表</h2>
+  <div class="controls">
+    <button onclick="zoomIn()">＋</button>
+    <button onclick="zoomOut()">－</button>
+  </div>
+</div>
+
+<div id="tableWrapper">
+
+<!-- ========= 上半部 ========= -->
+<table id="topTable">
+<thead>
+<tr>
+  <th>作業＼座號</th>
+  <script>
+    for (let i = 1; i <= 14; i++) document.write(`<th>${i}</th>`);
+  </script>
+</tr>
+</thead>
+<tbody>
+
+<script>
+const assignments = [
+  "聯絡簿",      // 第 1 列固定
+  "",            // 以下用下拉
+  "",
+  "",
+  ""
+];
+
+const options = `
+  <option value="">無</option>
+  <option value="國甲乙">國甲乙</option>
+  <option value="國習">國習</option>
+  <option value="國圈詞">國圈詞</option>
+  <option value="作文">作文</option>
+  <option value="數習">數習</option>
+  <option value="數8題">數8題</option>
+<option value="國卷簽名">國卷簽名</option>
+<option value="數卷簽名">數卷簽名</option>
+`;
+
+for (let r = 0; r < 5; r++) {
+  document.write("<tr>");
+
+  // 左欄
+  if (r === 0) {
+    document.write(`<td class="assignment-name">聯絡簿</td>`);
+  } else {
+    document.write(`<td><select class="assignment">${options}</select></td>`);
+  }
+
+  // 學生格子
+  for (let c = 0; c < 14; c++) {
+    document.write(`
+      <td>
+        <div class="box ${r === 0 ? '' : 'hidden'}">
+          <img src="no.jpg">
+        </div>
+      </td>
+    `);
+  }
+
+  document.write("</tr>");
+}
+</script>
+
+</tbody>
+</table>
+
+<!-- ========= 下半部 ========= -->
+<table id="bottomTable">
+<thead>
+<tr>
+  <th>作業＼座號</th>
+  <script>
+    for (let i = 15; i <= 28; i++) document.write(`<th>${i}</th>`);
+  </script>
+</tr>
+</thead>
+<tbody>
+
+<script>
+for (let r = 0; r < 5; r++) {
+  document.write("<tr>");
+  document.write(`<td class="assignment-name">${r === 0 ? "聯絡簿" : ""}</td>`);
+
+  for (let c = 0; c < 14; c++) {
+    document.write(`
+      <td>
+        <div class="box ${r === 0 ? '' : 'hidden'}">
+          <img src="no.jpg">
+        </div>
+      </td>
+    `);
+  }
+
+  document.write("</tr>");
+}
+</script>
+
+</tbody>
+</table>
+
+</div>
+
+<script>
+/* ===== 縮放控制 ===== */
+let scale = 1;
+
+function zoomIn() {
+  scale += 0.1;
+  document.getElementById("tableWrapper").style.transform = `scale(${scale})`;
+}
+
+function zoomOut() {
+  scale = Math.max(0.5, scale - 0.1);
+  document.getElementById("tableWrapper").style.transform = `scale(${scale})`;
+}
+
+/* ===== 表格邏輯 ===== */
+const topRows = document.querySelectorAll("#topTable tbody tr");
+const bottomRows = document.querySelectorAll("#bottomTable tbody tr");
+
+topRows.forEach((topRow, index) => {
+  if (index === 0) return; // 聯絡簿跳過
+
+  const select = topRow.querySelector("select");
+  const topBoxes = topRow.querySelectorAll(".box");
+  const bottomRow = bottomRows[index];
+  const bottomTitle = bottomRow.querySelector(".assignment-name");
+  const bottomBoxes = bottomRow.querySelectorAll(".box");
+
+  select.addEventListener("change", () => {
+    bottomTitle.textContent = select.value;
+
+    [...topBoxes, ...bottomBoxes].forEach(box => {
+      if (select.value === "") {
+        box.classList.add("hidden");
+      } else if (!box.classList.contains("submitted")) {
+        box.classList.remove("hidden");
+      }
+    });
+  });
+});
+
+// 點擊繳交（包含聯絡簿）
+document.querySelectorAll(".box").forEach(box => {
+  box.addEventListener("click", () => {
+    if (box.classList.contains("submitted")) return;
+    box.classList.add("submitted");
+    box.querySelector("img").src = "yes.jpg";
+  });
+});
+</script>
+
+</body>
+</html>
