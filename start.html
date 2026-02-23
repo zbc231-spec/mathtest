@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>數學闖關-冒險開始</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: url("start.jpg") no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Microsoft JhengHei", sans-serif;
+        overflow: hidden;
+    }
+
+    .container {
+        text-align: center;
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        text-shadow: 2px 2px 8px black;
+    }
+
+    .line {
+        opacity: 0;
+        margin: 20px 0;
+        transition: opacity 1.5s ease;
+    }
+
+    .show {
+        opacity: 1;
+    }
+
+    /* 關鍵修正：讓按鈕先佔位但隱形 */
+    #startBtn {
+        margin-top: 40px;
+        padding: 12px 30px;
+        font-size: 20px;
+        background-color: white;
+        color: black;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        
+        opacity: 0; /* 1. 變成透明，但保留位置，字才不會跳動 */
+        pointer-events: none; /* 2. 沒出現前不能點擊 */
+        transition: opacity 1s ease; /* 3. 讓按鈕出現時更平滑 */
+    }
+
+    #startBtn:hover {
+        background-color: #ddd;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="line" id="line1">勇者（希望你是！）</div>
+    <div class="line" id="line2">你必須直面數學大魔王的挑戰</div>
+    <div class="line" id="line3">唯有理解與思考</div>
+    <div class="line" id="line4">才能贏得這場戰鬥</div>
+
+    <button id="startBtn" onclick="location.href='map.html'">
+        進入冒險
+    </button>
+</div>
+
+<script>
+    const lines = [
+        document.getElementById("line1"),
+        document.getElementById("line2"),
+        document.getElementById("line3"),
+        document.getElementById("line4")
+    ];
+    const button = document.getElementById("startBtn");
+
+    // 1. 依序顯示每一行文字（每隔 2 秒出一句）
+    lines.forEach((line, index) => {
+        setTimeout(() => {
+            line.classList.add("show");
+        }, index * 2000);
+    });
+
+    // 2. 節奏微調：最後一行字在 6000ms 時開始出現
+    // 我們讓按鈕在 6500ms 出現，這樣字會領先一點點，畫面更和諧
+    setTimeout(() => {
+        button.style.opacity = "1";
+        button.style.pointerEvents = "auto";
+    }, 6500); // 這是最推薦的節奏點
+</script></body>
+</html>

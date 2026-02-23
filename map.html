@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>冒險世界大地圖</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: url("map.jpg") no-repeat center center fixed;
+        background-size: cover;
+        font-family: "Microsoft JhengHei", sans-serif;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        height: 100vh;
+    }
+
+    .area {
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 2px 2px 10px black;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .area:hover .label {
+        opacity: 1;
+    }
+
+    /* 🌲 左上 - 翠林原境 */
+    .forest:hover {
+        box-shadow:
+            0 0 20px #00ff88,
+            0 0 40px #00ff88,
+            inset 0 0 20px rgba(0,255,136,0.4);
+        z-index: 10;
+    }
+
+    /* ☀ 右上 - 烈陽沙洲 */
+    .desert:hover {
+        box-shadow:
+            0 0 20px #ffcc33,
+            0 0 40px #ff9900,
+            inset 0 0 20px rgba(255,200,50,0.4);
+        z-index: 10;
+    }
+
+    /* 🔥 左下 - 熔火終域 */
+    .lava:hover {
+        box-shadow:
+            0 0 20px #ff3300,
+            0 0 40px #ff0000,
+            inset 0 0 20px rgba(255,50,0,0.4);
+        z-index: 10;
+    }
+
+    /* 🪨 右下 - 蒼岩戰境 */
+    .rock:hover {
+        box-shadow:
+            0 0 20px #66ccff,
+            0 0 40px #3399ff,
+            inset 0 0 20px rgba(100,150,255,0.4);
+        z-index: 10;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div class="grid">
+
+    <!-- 左上 -->
+    <div class="area forest" onclick="location.href='5-1-map.html'">
+        <div class="label">
+            翠林原境<br>(五年級上學期)
+        </div>
+    </div>
+
+    <!-- 右上 -->
+    <div class="area desert" onclick="location.href='5-2-map.html'">
+        <div class="label">
+            烈陽沙洲<br>(五年級下學期)
+        </div>
+    </div>
+
+    <!-- 左下 -->
+    <div class="area lava" onclick="location.href='6-2-map.html'">
+        <div class="label">
+            熔火終域<br>(六年級下學期)
+        </div>
+    </div>
+
+    <!-- 右下 -->
+    <div class="area rock" onclick="location.href='6-1-map.html'">
+        <div class="label">
+            蒼岩戰境<br>(六年級上學期)
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
