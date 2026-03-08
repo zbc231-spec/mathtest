@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>冒險世界大地圖 - 呼吸動態版</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: url("b-map.jpg") no-repeat center center fixed;
+        background-size: cover;
+        font-family: "Microsoft JhengHei", sans-serif;
+        overflow: hidden;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        height: 100vh;
+    }
+
+    .area {
+        position: relative;
+        cursor: pointer;
+    }
+
+    /* 基礎文字樣式 */
+    .label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        /* 由於有動畫，這裡不放 transform 避免衝突，改用 margin 輔助 */
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        opacity: 1;
+        pointer-events: none;
+        line-height: 1.4;
+        
+        /* 綁定呼吸動畫：4秒一個循環，無限重複 */
+        animation: breathing 4s ease-in-out infinite;
+    }
+
+    /* 定義呼吸動畫效果 */
+    @keyframes breathing {
+        0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+            filter: brightness(1);
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.1); /* 稍微放大 */
+            filter: brightness(1.3); /* 增加亮度 */
+        }
+    }
+
+    /* --- 各區域專屬的白色文字發光效果 (搭配呼吸感) --- */
+
+    /* 🌲 翠林原境 */
+    .forest .label {
+        text-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88, 2px 2px 5px #000;
+    }
+
+    /* ☀ 烈陽沙洲 */
+    .desert .label {
+        text-shadow: 0 0 15px #ffcc33, 0 0 30px #ff9900, 2px 2px 5px #000;
+    }
+
+    /* 🔥 熔火終域 */
+    .lava .label {
+        text-shadow: 0 0 15px #ff3300, 0 0 30px #ff0000, 2px 2px 5px #000;
+    }
+
+    /* 🪨 蒼岩戰境 */
+    .rock .label {
+        text-shadow: 0 0 15px #66ccff, 0 0 30px #3399ff, 2px 2px 5px #000;
+    }
+
+    /* 平板與手機尺寸微調 */
+    @media (max-width: 768px) {
+        .label {
+            font-size: 22px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="grid">
+    <div class="area forest" onclick="location.href='a-5-1-map.html'">
+        <div class="label">翠林原境<br>(五年級上學期)</div>
+    </div>
+
+    <div class="area desert" onclick="location.href='a-5-2-map.html'">
+        <div class="label">烈陽沙洲<br>(五年級下學期)</div>
+    </div>
+
+    <div class="area lava" onclick="location.href='a-6-2-map.html'">
+        <div class="label">熔火終域<br>(六年級下學期)</div>
+    </div>
+
+    <div class="area rock" onclick="location.href='a-6-1-map.html'">
+        <div class="label">蒼岩戰境<br>(六年級上學期)</div>
+    </div>
+</div>
+
+</body>
+</html>

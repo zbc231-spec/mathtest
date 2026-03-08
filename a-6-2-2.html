@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六下-第二單元</title>
+    <style>
+        /* 1. 全域樣式：背景與基礎排版 */
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* 資訊欄 */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; 
+            padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #3498db; object-fit: cover; }
+        .player-name { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .stats { font-size: 2.5rem; font-weight: bold; display: flex; align-items: center; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.5rem; margin: 0 2px; }
+
+        /* 進度條 */
+        #progress-wrapper { width: 100%; height: 10px; background: #e0e0e0; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(to right, #2ecc71, #27ae60); transition: width 0.4s ease; }
+
+        /* 遊戲區域底圖 */
+        #bottom-panel { 
+            height: calc(85% - 10px); 
+            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background-size: cover; 
+            display: flex; justify-content: center; align-items: center; 
+        }
+        /* 修改 1：移除 min-height，改用 max-height 限制白框最高度 */
+.quiz-container { 
+    background: rgba(255, 255, 255, 0.96); 
+    padding: 30px; border-radius: 25px; text-align: center; 
+    width: 90%; max-width: 800px; /* 寬度可依需求調整 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+    z-index: 10;
+    
+    display: flex; flex-direction: column; 
+    max-height: 80vh; /* 鎖定白框最高不超過螢幕 80% */
+}
+
+/* 修改 2：讓播放階段具備自動縮放能力 */
+#quiz-play-phase {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止內部溢出 */
+}
+
+/* 修改 3：最關鍵！讓題目區在內容多時才變捲軸，內容少時不佔空間 */
+#question-text { 
+    font-size: 1.4rem; color: #000000; margin-bottom: 10px; 
+    
+    overflow-y: auto; /* 內容過長自動出捲軸 */
+    flex: 0 1 auto;   /* 關鍵：0=內容少時不撐開，1=空間不夠時縮小 */
+    min-height: 0;    /* 配合 Flexbox 捲軸必須設定 */
+    padding: 10px;
+}
+
+/* 額外小優化：確保圖片寬度適中，且不會被拉大 */
+#question-text img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
+}
+
+        /* 分數輸入與題目垂直分數顯示樣式 */
+        .q-text-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+        .q-fraction, .display-fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 5px; font-size: 1.6rem; }
+        .q-line, .display-line { border-top: 3px solid #333; width: 100%; margin: 2px 0; }
+        .fraction-container { display: inline-flex; align-items: center; gap: 10px; font-size: 2.2rem; }
+        .fraction-input input, .whole-number input { width: 65px; text-align: center; font-size: 1.5rem; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+        #ans-normal { font-size: 1.8rem; padding: 12px; width: 80%; text-align: center; border-radius: 10px; border: 2px solid #ddd; }
+
+        /* 三框架反饋佈局 (Grid) */
+        .feedback-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-top: 10px; }
+       /* 讓回饋區的左側（題目回顧、答案對照）具備捲軸功能 */
+.fb-left-top {
+    background: #fdfdfd; 
+    padding: 20px; 
+    border-radius: 15px; 
+    border: 1px solid #eee; 
+    text-align: left; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; /* 改成從頂端開始排列 */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02); 
+    color: #000000;
+    
+    /* 關鍵：加入捲軸限制 */
+    max-height: 400px;  /* 限制高度，避免圖片把按鈕推走 */
+    overflow-y: auto;   /* 必要時出現垂直捲軸 */
+}
+
+/* 確保回饋區內的圖片不會撐破框架 */
+.fb-left-top img {
+    max-width: 100%;
+    height: auto;
+}
+/* 2. 你的答案文字樣式 */
+#fb-user-answer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 1.3rem;
+}
+
+/* 3. 正確答案文字樣式 (增加淡藍色背景塊) */
+#fb-answer-reveal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: #e8f4fd; /* 淡藍色背景 */
+    border-radius: 8px;
+    width: fit-content; /* 寬度隨內容自動調整 */
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* 4. 分隔線樣式 */
+.fb-divider {
+    border: 0;
+    border-top: 1px dashed #ddd;
+    margin: 10px 0;
+}
+        .fb-right-top { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fb-bottom { grid-column: 1 / span 2; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; display: flex; justify-content: center; gap: 20px; }
+
+        #feedback-img { height: 300px; width: auto; border-radius: 10px; }
+        .hidden { display: none !important; }
+        .btn { padding: 15px 35px; font-size: 1.2rem; cursor: pointer; border-radius: 12px; border: none; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+
+        /* 結算頁面 */
+        .result-content { color: white; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="player-name">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<div id="hp-container"></div></div>
+        <div class="stats">💰：<span id="coin-val" style="color:#f39c12; margin-left:10px;">0</span></div>
+    </div>
+
+    <div id="progress-wrapper"><div id="progress-bar"></div></div>
+
+    <div id="bottom-panel">
+        <div id="game-area" class="quiz-container">
+            
+            <div id="quiz-play-phase">
+                <h2 id="question-text">載入中...</h2>
+                <div id="input-area" style="margin: 25px 0;"></div>
+                <button id="submit-btn" class="btn" onclick="checkAnswer()">提交答案</button>
+            </div>
+
+            <div id="feedback-area" class="hidden">
+                <div class="feedback-grid">
+                    <div class="fb-left-top">
+                    <div id="fb-question-review" style="font-size: 1.1rem; color: #000000; margin-bottom: 5px;"></div>
+    
+    <hr class="fb-divider">
+    
+    <div id="fb-user-answer"></div>
+    
+    <div id="fb-answer-reveal"></div>
+                    </div>
+                    <div class="fb-right-top">
+                        <img id="feedback-img" src="" alt="結果">
+                        <div id="battle-text" style="font-weight: bold; margin-top: 12px; font-size: 1.3rem;"></div>
+                    </div>
+                    <div class="fb-bottom">
+                        <button class="btn" onclick="nextQuestion()">挑戰下一關</button>
+                        <button class="btn" style="background:#95a5a6" onclick="endGame('stop')">結束挑戰</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="final-screen" class="result-content hidden">
+            <h1 id="final-status-text" style="font-size: 3rem; margin: 0;">速度太慢了，下次再來挑戰吧！</h1>
+            <div style="font-size: 4rem; color: #f1c40f;">💰 <span id="final-coins">0</span></div>
+            <p style="font-size: 1.5rem;">請至秘書處登記獎勵點數！</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 完整 50 題題庫
+      const masterQuestionBank = [
+       { q: "下面形體的體積是多少立方公分？<br><img src='z622-01.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "7920", type: "normal" },
+            { q: "下面形體(底面為梯形)的體積是多少立方公尺？<br><img src='z622-02.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "36", type: "normal" },
+            { q: "下圖是一個底面為平行四邊形的四角柱，此四角柱的表面積是多少平方公分？<br><img src='z622-03.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "116", type: "normal" },
+            { q: "下面柱體的表面積是多少平方公分？<br><img src='z622-04.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "471", type: "normal" },
+            { q: "有一個空心的水泥圓柱，柱高20公尺，外圍直徑12公尺，厚度1公尺，如下圖，水泥部分的體積大約是幾立方公尺？<br><img src='z622-05.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "690.8", type: "normal" },
+            { q: "有一個無蓋的長方體保麗龍盒，每邊厚度都是2公分，如下圖，保麗龍部分的體積是幾立方公分？<br><img src='z622-06.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2008", type: "normal" },
+            { q: "下面柱體的體積是多少立方公分？<br><img src='z622-07.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1000", type: "normal" },
+            { q: "下圖圓柱的表面積是多少平方公分？<br><img src='z622-08.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2512", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-09.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "240", type: "normal" },
+            { q: "下面形體的表面積是多少平方公尺？<br><img src='z622-10.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6280", type: "normal" },
+            { q: "下面無蓋圓柱容器的體積是多少立方公分？<br><img src='z622-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "383.08", type: "normal" },
+            { q: "如下圖，底面為平行四邊形的四角柱，表面積是幾平方公分？<br><img src='z622-12.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "262", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "119320", type: "normal" },
+            { q: "下面柱體的體積是幾立方公分？<br><img src='z622-14.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "64", type: "normal" },
+            { q: "下圖三角柱的表面積是幾平方公尺？<br><img src='z622-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "108", type: "normal" },
+            { q: "下面形體的體積是多少立方公尺？<br><img src='z622-16.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1800", type: "normal" },
+            { q: "下圖形體的體積是多少立方公尺？<br><img src='z622-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "160", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-18.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "77680", type: "normal" },
+            { q: "下圖是一個底面為梯形的四角柱，此四角柱的體積是幾立方公分？<br><img src='z622-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "120", type: "normal" },
+            { q: "下面柱體的表面積是多少平方公分？<br><img src='z622-20.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "324", type: "normal" },
+            { q: "下面形體的表面積是多少平方公分？<br><img src='z622-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "150", type: "normal" },
+            { q: "下面柱體的體積是多少立方公尺？<br><img src='z622-22.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1680", type: "normal" },
+            { q: "下面形體的體積是多少立方公尺？<br><img src='z622-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "7680", type: "normal" },
+            { q: "下圖圓柱的體積大約是幾立方公分？<br><img src='z622-24.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "401.92", type: "normal" },
+            { q: "下面柱體的表面積是多少平方公分？<br><img src='z622-25.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "336", type: "normal" },
+            { q: "有一個形體，如下圖，體積大約是幾立方公尺？<br><img src='z622-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "226.08", type: "normal" },
+            { q: "下面的形體體積是幾立方公分？<br><img src='z622-27.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "480", type: "normal" },
+            { q: "下面柱體的體積是多少立方公尺？<br><img src='z622-28.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "602.88", type: "normal" },
+            { q: "下圖圓柱的表面積大約是幾平方公分？<br><img src='z622-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "785", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-30.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "697.6", type: "normal" },
+            { q: "有一個正方體，底面積是36平方公分，體積是幾立方公分？<br><img src='z622-31.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "216", type: "normal" },
+            { q: "有一個無蓋的圓柱保麗龍盒，如下圖，保麗龍部分的體積大約是幾立方公分？<br><img src='z622-32.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3925", type: "normal" },
+            { q: "下面柱體的體積是多少立方公分？<br><img src='z622-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "7.8", type: "normal" },
+            { q: "下面形體的體積是多少立方公尺？<br><img src='z622-34.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6430", type: "normal" },
+            { q: "下面柱體的體積是多少立方公分？<br><img src='z622-35.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "13125", type: "normal" },
+            { q: "下圖是一個扇形柱體，底面是半徑6公尺、圓心角60°的扇形，柱高是10公尺，此柱體的體積大約是幾立方公尺？<br><img src='z622-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "188.4", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-37.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "26", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-38.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "540", type: "normal" },
+            { q: "下面柱體的體積是多少立方公尺？<br><img src='z622-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "37.68", type: "normal" },
+            { q: "下面柱體的體積是多少立方公分？<br><img src='z622-40.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "132", type: "normal" },
+            { q: "下面形體的體積是多少立方公尺？<br><img src='z622-41.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "10200", type: "normal" },
+            { q: "下面形體的體積是多少立方公分？<br><img src='z622-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3456", type: "normal" },
+            { q: "梯形積木的底面上底13公分、下底18公分、高5公分，積木厚3公分，小勇疊了6個，疊高的積木體積是幾立方公分？", a: "1395", type: "normal" },
+            { q: "下圖是一個空心的長方體水泥柱，水泥部分的體積是幾立方公分？<br><img src='z622-44.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1080", type: "normal" },
+            { q: "小南有兩個禮物盒要包裝，算包裝紙面積時不計算重疊黏貼處，甲圓柱禮物盒需要用的包裝紙比乙圓柱多大約幾平方公分？<br><img src='z622-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "100.48", type: "normal" },
+            { q: "長12公尺、寬5公尺、高9公尺的長方體，和底面積25平方公尺、高18公尺的三角柱，體積相差幾立方公尺？", a: "90", type: "normal" },
+            { q: "有一個長方體木塊，從中挖掉一個底面直徑10公分、柱高4公分的圓柱，如下圖，剩下的體積大約是多少立方公分？<br><img src='z622-47.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "710", type: "normal" },
+            { q: "底面積81平方公尺的正方體，體積是幾立方公尺？", a: "729", type: "normal" },
+            { q: "有一個底面為平行四邊形的四角柱，體積是768立方公分，底面的底 is 8公分，高是6公分，此四角柱的柱高是幾公分？<br><img src='z622-49.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "16", type: "normal" },
+            { q: "下圖是底面為扇型的柱體，它的體積是56.52立方公尺，這個柱體的柱高大約是幾公尺？<br><img src='z622-50.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6", type: "normal" }
+
+];
+        let currentQuestions = [], currentIndex = 0, hp = 5, coins = 0;
+        const totalQuizCount = 30;
+        const today = new Date().toDateString();
+//修改啟動邏輯 (window.onload)
+ window.onload = function() {
+    console.log("遊戲啟動中...");
+    try {
+        // 直接啟動，不檢查次數
+        initGame(); 
+        console.log("遊戲啟動成功！");
+    } catch (error) {
+        console.error("啟動失敗，錯誤原因：", error);
+        document.getElementById('question-text').innerText = "❌ 程式載入出錯，請檢查控制台。";
+    }
+};
+
+        function initGame() {
+            hp = 5; coins = 0; currentIndex = 0;
+            updateHearts();
+            updateProgressBar();
+            currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
+            renderQuestion();
+        }
+
+        function updateHearts() {
+            const container = document.getElementById('hp-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                container.innerHTML += (i < hp) ? '<span class="heart">❤️</span>' : '<span class="heart" style="opacity:0.1; filter:grayscale(1);">❤️</span>';
+            }
+        }
+
+        function updateProgressBar() {
+            document.getElementById('progress-bar').style.width = (currentIndex / totalQuizCount) * 100 + "%";
+        }
+
+        // 題目渲染：自動將題目字串轉為垂直分數
+        function renderQuestion() {
+            const qData = currentQuestions[currentIndex];
+            let rawQ = qData.q;
+            
+            // 轉換帶分數
+            let displayQ = rawQ.replace(/(\d+)又(\d+)\/(\d+)/g, `<span class="q-text-wrapper">$1<div class="q-fraction"><span class="q-num">$2</span><span class="q-line"></span><span class="q-den">$3</span></div></span>`);
+            // 轉換純分數
+            displayQ = displayQ.replace(/(\d+)\/(\d+)/g, `<div class="q-fraction"><span class="q-num">$1</span><span class="q-line"></span><span class="q-den">$2</span></div>`);
+
+            document.getElementById('question-text').innerHTML = `【第 ${currentIndex + 1} 題】<br><span class="q-main-content">${displayQ}</span>`;
+            
+            const inputArea = document.getElementById('input-area');
+            inputArea.innerHTML = '';
+
+            if (qData.type === 'fraction') {
+                inputArea.innerHTML = `
+                    <div class="fraction-container">
+                        <div class="whole-number"><input type="number" id="ans-whole" placeholder="整"></div>
+                        <div class="fraction-input">
+                            <input type="number" id="ans-num" placeholder="子"><div class="line"></div><input type="number" id="ans-den" placeholder="母">
+                        </div>
+                    </div>`;
+            } else {
+                inputArea.innerHTML = `<input type="text" id="ans-normal" placeholder="請輸入答案">`;
+            }
+        }
+
+        function checkAnswer() {
+            const qData = currentQuestions[currentIndex];
+            let isCorrect = false;
+            let finalAnsHTML = "";
+            let userAnsHTML = ""; // 用來存放學生輸入的內容
+// --- 插入防呆邏輯開始 ---
+        if (qData.type === 'fraction') {
+            const rawW = document.getElementById('ans-whole').value;
+            const rawN = document.getElementById('ans-num').value;
+            const rawD = document.getElementById('ans-den').value;
+            // 如果整數、分子、分母全部都是空的，就攔截
+            if (rawW === "" && rawN === "" && rawD === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        } else {
+            const rawVal = document.getElementById('ans-normal').value.trim();
+            if (rawVal === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        }
+        // --- 插入防呆邏輯結束 ---
+
+
+            if (qData.type === 'fraction') {
+        const w = document.getElementById('ans-whole').value || "0";
+        const n = document.getElementById('ans-num').value || "0";
+        const d = document.getElementById('ans-den').value || "1";
+        
+        // 記錄學生的答案 (轉成垂直分數格式顯示)
+        let wPart = (w === "0" || w === "") ? "" : w;
+        if (n === "0" || n === "") {
+            userAnsHTML = w || "0";
+        } else {
+            userAnsHTML = `${wPart}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+        }
+
+        if (w == qData.a.whole && n == qData.a.num && d == qData.a.den) isCorrect = true;
+        
+        // 正確答案 HTML (這部分原本就有)
+        if (qData.a.num == "0") {
+            finalAnsHTML = qData.a.whole;
+        } else {
+            let cwPart = qData.a.whole == "0" ? "" : qData.a.whole;
+            finalAnsHTML = `${cwPart}<div class="display-fraction"><span class="q-num">${qData.a.num}</span><span class="display-line"></span><span class="q-den">${qData.a.den}</span></div>`;
+        }
+    } else {
+        const val = document.getElementById('ans-normal').value.trim();
+        userAnsHTML = val || "(空白)";
+        finalAnsHTML = qData.a;
+        if (val == qData.a) isCorrect = true;
+    }
+
+    // --- 介面顯示與填入 ---
+    document.getElementById('quiz-play-phase').classList.add('hidden');
+    document.getElementById('feedback-area').classList.remove('hidden');
+
+    // 填入內容
+    let currentFullQ = document.querySelector('.q-main-content').innerHTML;
+    document.getElementById('fb-question-review').innerHTML = `題目：${currentFullQ}`;
+    
+    // 顯示對照
+    // --- 修改後的樣子 ---
+document.getElementById('fb-user-answer').innerHTML = `你的答案：<span style="color:${isCorrect ? '#27ae60' : '#e74c3c'}">${userAnsHTML}</span>`;
+
+// 多了這兩行：先抓圖，再顯示
+let extraImg = qData.ansImg || ""; 
+document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalAnsHTML}${extraImg}`;
+
+            const fImg = document.getElementById('feedback-img');
+            const bText = document.getElementById('battle-text');
+
+            if (isCorrect) {
+                fImg.src = "b-6-2-2-1.gif";
+                bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
+                bText.style.color = "#27ae60";
+                coins++;
+                document.getElementById('coin-val').innerText = coins;
+            } else {
+                fImg.src = "b-6-2-2-0.gif";
+                bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
+                bText.style.color = "#e74c3c";
+                hp--;
+                updateHearts();
+            }
+
+            if (hp <= 0) setTimeout(() => endGame('lose'), 2500);
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            updateProgressBar();
+            if (currentIndex >= totalQuizCount) {
+                endGame('win');
+            } else {
+                document.getElementById('quiz-play-phase').classList.remove('hidden');
+                document.getElementById('feedback-area').classList.add('hidden');
+                renderQuestion();
+            }
+        }
+
+        function endGame(status) {
+    // 1. 隱藏遊戲主容器
+    document.getElementById('game-area').classList.add('hidden');
+    
+    let statusTxt = document.getElementById('final-status-text');
+    let bgImg = "stop.jpg"; // 預設背景（中途停止）
+    let detailTxt = "";    // 用來存額外的描述文字
+
+    // 2. 根據不同狀態給予對應的文字與背景
+    if (status === 'win') { 
+        statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        coins += (hp * 2); // 贏了才有血量獎勵分
+        bgImg = "b-win.jpg";
+    } else if (status === 'lose') { 
+        statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-lose.jpg";
+    } else if (status === 'stop') {
+        statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-stop.jpg";
+    }
+    
+    // 3. 更新畫面內容
+    document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
+    document.getElementById('final-coins').innerText = coins;
+    
+    // 這裡我假設你的 HTML 裡結算頁面有個 <p> 標籤，我們把詳細文字塞進去
+    const pTag = document.querySelector('#final-screen p');
+    if (pTag) pTag.innerText = detailTxt;
+
+    // 4. 顯示結算畫面
+    document.getElementById('final-screen').classList.remove('hidden');
+}
+    </script>
+</body>
+</html>

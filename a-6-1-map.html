@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六上蒼岩戰境關卡地圖</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 核心修正：讓容器的比例與圖片相同 (這張圖大約是 3:2) */
+        .map-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 66.66vw; /* 根據圖片寬高比調整 (高/寬) */
+            max-height: 100vh;
+            max-width: 150vh; /* 避免高度溢出 */
+        }
+
+        .map-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain; /* 確保圖片完整顯示 */
+        }
+
+        /* 發光熱點樣式 */
+        .hotspot {
+            position: absolute;
+            width: 5%;  /* 使用相對於圖片寬度的比例 */
+            aspect-ratio: 1 / 1; /* 保持圓形 */
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            animation: pulse-glow 1s infinite;
+        }
+
+        @keyframes pulse-glow {
+    0% { 
+        /* 起始：深青藍色核心，光芒集中 */
+        box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.9); 
+    }
+    50% {
+        /* 中間：光環擴散並帶入白色調，增加亮度 */
+        box-shadow: 0 0 0 10px rgba(200, 240, 255, 0.5);
+    }
+    70% { 
+        /* 擴散：最終以純白光暈消散 */
+        box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); 
+    }
+    100% { 
+        /* 結束 */
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); 
+    }
+}
+
+        /* --- 修正後的精確座標 (基於圖片原始位置) --- */
+        .spot-0 { top: 71.2%; left: 66.5%; }
+        .spot-1 { top: 55.1%; left: 55.5%; }
+        .spot-2 { top: 64.0%; left: 42.8%; }
+        .spot-3 { top: 53.5%; left: 23.3%; }
+        .spot-4 { top: 43.7%; left: 33.3%; }
+        .spot-5 { top: 31.0%; left: 45.5%; }
+        .spot-6 { top: 6.0%; left: 47.7%; }
+        .spot-7 { top: 25.0%; left: 64.1%; }
+        .spot-8 { top: 38.2%; left: 82.5%; }
+        
+        /* 提示文字 */
+        .hotspot::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .hotspot:hover::after { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="map-wrapper">
+    <img src="b-6-1-map.jpg" alt="岩地" class="map-image">
+
+    <a href="5-2-0.html" class="hotspot spot-0" title="熱身單元"></a>
+    <a href="5-2-1.html" class="hotspot spot-1" title="第1單元"></a>
+    <a href="5-2-2.html" class="hotspot spot-2" title="第2單元"></a>
+    <a href="5-2-3.html" class="hotspot spot-3" title="第3單元"></a>
+    <a href="5-2-4.html" class="hotspot spot-4" title="第4單元"></a>
+    <a href="5-2-5.html" class="hotspot spot-5" title="第5單元"></a>
+    <a href="5-2-6.html" class="hotspot spot-6" title="第6單元"></a>
+    <a href="5-2-7.html" class="hotspot spot-7" title="第7單元"></a>
+    <a href="5-2-8.html" class="hotspot spot-8" title="第8單元"></a>
+
+
+</div>
+
+</body>
+</html>

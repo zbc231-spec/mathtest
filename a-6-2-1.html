@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六下-第一單元</title>
+    <style>
+        /* 1. 全域樣式：背景與基礎排版 */
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* 資訊欄 */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; 
+            padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #3498db; object-fit: cover; }
+        .player-name { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .stats { font-size: 2.5rem; font-weight: bold; display: flex; align-items: center; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.5rem; margin: 0 2px; }
+
+        /* 進度條 */
+        #progress-wrapper { width: 100%; height: 10px; background: #e0e0e0; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(to right, #2ecc71, #27ae60); transition: width 0.4s ease; }
+
+        /* 遊戲區域底圖 */
+        #bottom-panel { 
+            height: calc(85% - 10px); 
+            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background-size: cover; 
+            display: flex; justify-content: center; align-items: center; 
+        }
+        /* 修改 1：移除 min-height，改用 max-height 限制白框最高度 */
+.quiz-container { 
+    background: rgba(255, 255, 255, 0.96); 
+    padding: 30px; border-radius: 25px; text-align: center; 
+    width: 90%; max-width: 800px; /* 寬度可依需求調整 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+    z-index: 10;
+    
+    display: flex; flex-direction: column; 
+    max-height: 80vh; /* 鎖定白框最高不超過螢幕 80% */
+}
+
+/* 修改 2：讓播放階段具備自動縮放能力 */
+#quiz-play-phase {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止內部溢出 */
+}
+
+/* 修改 3：最關鍵！讓題目區在內容多時才變捲軸，內容少時不佔空間 */
+#question-text { 
+    font-size: 1.4rem; color: #000000; margin-bottom: 10px; 
+    
+    overflow-y: auto; /* 內容過長自動出捲軸 */
+    flex: 0 1 auto;   /* 關鍵：0=內容少時不撐開，1=空間不夠時縮小 */
+    min-height: 0;    /* 配合 Flexbox 捲軸必須設定 */
+    padding: 10px;
+}
+
+/* 額外小優化：確保圖片寬度適中，且不會被拉大 */
+#question-text img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
+}
+
+        /* 分數輸入與題目垂直分數顯示樣式 */
+        .q-text-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+        .q-fraction, .display-fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 5px; font-size: 1.6rem; }
+        .q-line, .display-line { border-top: 3px solid #333; width: 100%; margin: 2px 0; }
+        .fraction-container { display: inline-flex; align-items: center; gap: 10px; font-size: 2.2rem; }
+        .fraction-input input, .whole-number input { width: 65px; text-align: center; font-size: 1.5rem; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+        #ans-normal { font-size: 1.8rem; padding: 12px; width: 80%; text-align: center; border-radius: 10px; border: 2px solid #ddd; }
+
+        /* 三框架反饋佈局 (Grid) */
+        .feedback-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-top: 10px; }
+       /* 讓回饋區的左側（題目回顧、答案對照）具備捲軸功能 */
+.fb-left-top {
+    background: #fdfdfd; 
+    padding: 20px; 
+    border-radius: 15px; 
+    border: 1px solid #eee; 
+    text-align: left; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; /* 改成從頂端開始排列 */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02); 
+    color: #000000;
+    
+    /* 關鍵：加入捲軸限制 */
+    max-height: 400px;  /* 限制高度，避免圖片把按鈕推走 */
+    overflow-y: auto;   /* 必要時出現垂直捲軸 */
+}
+
+/* 確保回饋區內的圖片不會撐破框架 */
+.fb-left-top img {
+    max-width: 100%;
+    height: auto;
+}
+/* 2. 你的答案文字樣式 */
+#fb-user-answer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 1.3rem;
+}
+
+/* 3. 正確答案文字樣式 (增加淡藍色背景塊) */
+#fb-answer-reveal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: #e8f4fd; /* 淡藍色背景 */
+    border-radius: 8px;
+    width: fit-content; /* 寬度隨內容自動調整 */
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* 4. 分隔線樣式 */
+.fb-divider {
+    border: 0;
+    border-top: 1px dashed #ddd;
+    margin: 10px 0;
+}
+        .fb-right-top { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fb-bottom { grid-column: 1 / span 2; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; display: flex; justify-content: center; gap: 20px; }
+
+        #feedback-img { height: 300px; width: auto; border-radius: 10px; }
+        .hidden { display: none !important; }
+        .btn { padding: 15px 35px; font-size: 1.2rem; cursor: pointer; border-radius: 12px; border: none; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+
+        /* 結算頁面 */
+        .result-content { color: white; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="player-name">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<div id="hp-container"></div></div>
+        <div class="stats">💰：<span id="coin-val" style="color:#f39c12; margin-left:10px;">0</span></div>
+    </div>
+
+    <div id="progress-wrapper"><div id="progress-bar"></div></div>
+
+    <div id="bottom-panel">
+        <div id="game-area" class="quiz-container">
+            
+            <div id="quiz-play-phase">
+                <h2 id="question-text">載入中...</h2>
+                <div id="input-area" style="margin: 25px 0;"></div>
+                <button id="submit-btn" class="btn" onclick="checkAnswer()">提交答案</button>
+            </div>
+
+            <div id="feedback-area" class="hidden">
+                <div class="feedback-grid">
+                    <div class="fb-left-top">
+                    <div id="fb-question-review" style="font-size: 1.1rem; color: #000000; margin-bottom: 5px;"></div>
+    
+    <hr class="fb-divider">
+    
+    <div id="fb-user-answer"></div>
+    
+    <div id="fb-answer-reveal"></div>
+                    </div>
+                    <div class="fb-right-top">
+                        <img id="feedback-img" src="" alt="結果">
+                        <div id="battle-text" style="font-weight: bold; margin-top: 12px; font-size: 1.3rem;"></div>
+                    </div>
+                    <div class="fb-bottom">
+                        <button class="btn" onclick="nextQuestion()">挑戰下一關</button>
+                        <button class="btn" style="background:#95a5a6" onclick="endGame('stop')">結束挑戰</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="final-screen" class="result-content hidden">
+            <h1 id="final-status-text" style="font-size: 3rem; margin: 0;">速度太慢了，下次再來挑戰吧！</h1>
+            <div style="font-size: 4rem; color: #f1c40f;">💰 <span id="final-coins">0</span></div>
+            <p style="font-size: 1.5rem;">請至秘書處登記獎勵點數！</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 完整 50 題題庫
+      const masterQuestionBank = [
+        { q: "3/4 ×（5.69－3.29） = ?", a: "1.8", type: "normal" },
+    { q: "20 ＋ 5又1/3 ÷ 0.2 = ?", a: { whole: "46", num: "2", den: "3" }, type: "fraction" },
+    { q: "（7/12 － 3/8） ÷ 0.25 = ?", a: { whole: "0", num: "5", den: "6" }, type: "fraction" },
+    { q: "0.75 ＋ 2又3/8 = ?", a: "3.125", type: "normal" },
+    { q: "0.5 ×（2/5 ＋ 1.6） = ?", a: "1", type: "normal" },
+    { q: "（7/10 － 2/3） ÷ 0.64 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
+    { q: "3又4/15 × 0.8 ＋ 1又9/10 × 0.8 = ?", a: { whole: "4", num: "2", den: "15" }, type: "fraction" },
+    { q: "4又1/3 × 0.375 － 3/5 × 0.375 = ?", a: { whole: "1", num: "2", den: "5" }, type: "fraction" },
+    { q: "5.6 × 22/88 ＋ 14.4 × 22/88 = ?", a: "5", type: "normal" },
+    { q: "9又2/5 － 9/10 × 4/5 = ?", a: { whole: "8", num: "17", den: "25" }, type: "fraction" },
+    { q: "25/123 ×（3/5 ＋ 1/12） = ?", a: { whole: "0", num: "5", den: "36" }, type: "fraction" },
+    { q: "（7/10 － 2/3） ÷ 16/25 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
+    { q: "3又7/15 － 2又5/6 ＋ 3又7/15 = ?", a: { whole: "4", num: "1", den: "10" }, type: "fraction" },
+    { q: "1又2/13 × 7又4/5 ＋ 5又3/4 = ?", a: { whole: "14", num: "3", den: "4" }, type: "fraction" },
+    { q: "1又2/7 × 1又23/27 ÷ 10/49 = ?", a: { whole: "11", num: "2", den: "3" }, type: "fraction" },
+    { q: "11又1/4 ÷（4又1/2 × 2又4/7） = ?", a: { whole: "0", num: "35", den: "36" }, type: "fraction" },
+    { q: "3/4 ＋ 3/10 ＋ 3/5 = ?", a: { whole: "1", num: "13", den: "20" }, type: "fraction" },
+    { q: "42 × 5/18 ÷ 4又1/6 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
+    { q: "3又3/5 ×（7又1/15 － 2又2/5） = ?", a: { whole: "16", num: "4", den: "5" }, type: "fraction" },
+    { q: "5/14 × 2又1/10 ＋ 5又1/2 = ?", a: { whole: "6", num: "1", den: "4" }, type: "fraction" },
+    { q: "0.47 × 2.8 ＋ 0.53 × 2.8 = ?", a: "2.8", type: "normal" },
+    { q: "（9.125 ＋ 10.75） ÷ 7.5 = ?", a: "2.65", type: "normal" },
+    { q: "6.3 × 20 ÷ 1.8 = ?", a: "70", type: "normal" },
+    { q: "3.84 ＋ 2.61 × 4.9 = ?", a: "16.629", type: "normal" },
+    { q: "18.6 ＋ 2.5 × 9.2 = ?", a: "41.6", type: "normal" },
+    { q: "4.5 × 1.8 ÷ 2.7 = ?", a: "3", type: "normal" },
+    { q: "7.4 × 5.24 ＋ 8.7 = ?", a: "47.476", type: "normal" },
+    { q: "4.2 ÷ 0.21 × 1.5 = ?", a: "30", type: "normal" },
+    { q: "6.1 × 30.5 ＋ 2.96 = ?", a: "189.01", type: "normal" },
+    { q: "2.25 × 4.5 ÷ 2.7 = ?", a: "3.75", type: "normal" },
+    { q: "阿茂昨天跑步的速率是每小時5.6公里，今天是每小時6.4公里，這兩天都跑了2 1/2小時，他共跑了幾公里？", a: "30", type: "normal"  },
+    { 
+        q: "南南飲料店上午製作了4.8公升的西瓜汁，已知每0.32公升裝成1瓶，每3瓶裝成一袋，可以裝成幾袋？", 
+        a: "5", 
+        type: "normal" 
+    },
+    { 
+        q: "有一塊4.2公畝的農地，其中的3/10作為菜園，菜園的5/7種洋蔥，種洋蔥的面積是幾公畝？", 
+        a: { whole: "0", num: "9", den: "10" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "1包綠豆重3/5公斤，1包薏仁重13/20公斤，奶奶煮甜湯各用了3 1/5包，綠豆和薏仁共用了幾公斤？", 
+        a: "4", 
+        type: "normal" 
+    },
+    { 
+        q: "有一張正方形海報的周長是8 2/9公尺，正方形周長是另一張正三角形海報周長的2倍，正三角形的邊長是幾公尺？", 
+        a: { whole: "1", num: "10", den: "27" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "玩具車賽道一圈長18 3/4公尺，玩具車跑第一圈花了4.75秒鐘，跑第二圈花了6 1/2秒鐘，玩具車的平均速率是幾公尺∕秒？", 
+        a: { whole: "3", num: "1", den: "3" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "梯形的面積是27.6平方公尺，高是3 5/6公尺，上底是6 2/5公尺，下底是幾公尺？", 
+        a: "8", 
+        type: "normal" 
+    },
+    { 
+        q: "羽芯快走1小時可走6 2/5公里， 已知羽芯已經走了1 1/4公里，再快走1/2小時，羽芯共走了幾公里？", 
+        a: { whole: "4", num: "9", den: "20" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "3本相同的字典疊在一起，厚度是13.5公分，3本相同的繪本厚度是2.4公分，1本字典比1本繪本厚幾公分？", 
+        a: "3.7", 
+        type: "normal" 
+    },
+    { 
+        q: "正方形周長是12 4/5公尺，正三角形邊長是1 3/4公尺，正方形的邊長和正三角形的邊長相差幾公尺？", 
+        a: { whole: "1", num: "9", den: "20" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "1瓶鮮奶1.85公升，5桶紅茶共有19.2公升，用1瓶鮮奶和1桶紅茶混合在一起，混合後的紅茶牛奶共有幾公升？", 
+        a: "5.69", 
+        type: "normal" 
+    },
+    { 
+        q: "佑子身高是140公分，米奇身高是佑子身高的1.2倍，米妮身高是150公分，米奇身高是米妮身高的幾倍？", 
+        a: "1.12", 
+        type: "normal" 
+    },
+    { 
+        q: "佩佩和安安的行李箱重量比是1：4/5，已知兩人的行李箱共重14 3/5公斤，佩佩的行李箱重幾公斤？", 
+        a: { whole: "8", num: "1", den: "9" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "紅彩帶和黃彩帶的長度比是9/2：1，已知兩條彩帶共長2 3/4公尺，黃彩帶長幾公尺？", 
+        a: { whole: "0", num: "1", den: "2" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "白色星砂有0.2公斤，藍色星砂有2/25公斤，混合後平分成7堆，每堆的星砂是幾公斤？", 
+        a: "0.04", 
+        type: "normal" 
+    },
+    { 
+        q: "甲數是50，甲數的0.5倍剛好是乙數的2/3，乙數是多少？", 
+        a: { whole: "37", num: "1", den: "2" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "有一個長方體，體積是6 5/12立方公尺，長是2 3/4公尺，寬是1 1/5公尺，高是幾公尺？", 
+        a: { whole: "1", num: "17", den: "18" }, 
+        type: "fraction" 
+    },
+    { 
+        q: "媽媽做了45個麵包，其中的4/5是甜甜圈，哥哥拿了甜甜圈的3/4去送給同學，哥哥拿了幾個甜甜圈？", 
+        a: "27", 
+        type: "normal" 
+    },
+    { 
+        q: "豆芽菜1臺斤售價16元，媽媽買了8.25臺斤，阿姨買了6 3/8臺斤，兩人買豆芽菜的錢相差幾元？", 
+        a: "30", 
+        type: "normal" 
+    },
+    { 
+        q: "一桶沙拉油有4 3/8公升，炸蝦餅用掉全部的4/5後，炸薯條用掉4/5公升，剩下幾公升的沙拉油？", 
+        a: { whole: "0", num: "3", den: "40" }, 
+        type: "fraction" 
+    }
+
+];
+        let currentQuestions = [], currentIndex = 0, hp = 5, coins = 0;
+        const totalQuizCount = 30;
+        const today = new Date().toDateString();
+//修改啟動邏輯 (window.onload)
+ window.onload = function() {
+    console.log("遊戲啟動中...");
+    try {
+        // 直接啟動，不檢查次數
+        initGame(); 
+        console.log("遊戲啟動成功！");
+    } catch (error) {
+        console.error("啟動失敗，錯誤原因：", error);
+        document.getElementById('question-text').innerText = "❌ 程式載入出錯，請檢查控制台。";
+    }
+};
+
+        function initGame() {
+            hp = 5; coins = 0; currentIndex = 0;
+            updateHearts();
+            updateProgressBar();
+            currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
+            renderQuestion();
+        }
+
+        function updateHearts() {
+            const container = document.getElementById('hp-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                container.innerHTML += (i < hp) ? '<span class="heart">❤️</span>' : '<span class="heart" style="opacity:0.1; filter:grayscale(1);">❤️</span>';
+            }
+        }
+
+        function updateProgressBar() {
+            document.getElementById('progress-bar').style.width = (currentIndex / totalQuizCount) * 100 + "%";
+        }
+
+        // 題目渲染：自動將題目字串轉為垂直分數
+        function renderQuestion() {
+            const qData = currentQuestions[currentIndex];
+            let rawQ = qData.q;
+            
+            // 轉換帶分數
+            let displayQ = rawQ.replace(/(\d+)又(\d+)\/(\d+)/g, `<span class="q-text-wrapper">$1<div class="q-fraction"><span class="q-num">$2</span><span class="q-line"></span><span class="q-den">$3</span></div></span>`);
+            // 轉換純分數
+            displayQ = displayQ.replace(/(\d+)\/(\d+)/g, `<div class="q-fraction"><span class="q-num">$1</span><span class="q-line"></span><span class="q-den">$2</span></div>`);
+
+            document.getElementById('question-text').innerHTML = `【第 ${currentIndex + 1} 題】<br><span class="q-main-content">${displayQ}</span>`;
+            
+            const inputArea = document.getElementById('input-area');
+            inputArea.innerHTML = '';
+
+            if (qData.type === 'fraction') {
+                inputArea.innerHTML = `
+                    <div class="fraction-container">
+                        <div class="whole-number"><input type="number" id="ans-whole" placeholder="整"></div>
+                        <div class="fraction-input">
+                            <input type="number" id="ans-num" placeholder="子"><div class="line"></div><input type="number" id="ans-den" placeholder="母">
+                        </div>
+                    </div>`;
+            } else {
+                inputArea.innerHTML = `<input type="text" id="ans-normal" placeholder="請輸入答案">`;
+            }
+        }
+
+        function checkAnswer() {
+            const qData = currentQuestions[currentIndex];
+            let isCorrect = false;
+            let finalAnsHTML = "";
+            let userAnsHTML = ""; // 用來存放學生輸入的內容
+// --- 插入防呆邏輯開始 ---
+        if (qData.type === 'fraction') {
+            const rawW = document.getElementById('ans-whole').value;
+            const rawN = document.getElementById('ans-num').value;
+            const rawD = document.getElementById('ans-den').value;
+            // 如果整數、分子、分母全部都是空的，就攔截
+            if (rawW === "" && rawN === "" && rawD === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        } else {
+            const rawVal = document.getElementById('ans-normal').value.trim();
+            if (rawVal === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        }
+        // --- 插入防呆邏輯結束 ---
+
+
+            if (qData.type === 'fraction') {
+        const w = document.getElementById('ans-whole').value || "0";
+        const n = document.getElementById('ans-num').value || "0";
+        const d = document.getElementById('ans-den').value || "1";
+        
+        // 記錄學生的答案 (轉成垂直分數格式顯示)
+        let wPart = (w === "0" || w === "") ? "" : w;
+        if (n === "0" || n === "") {
+            userAnsHTML = w || "0";
+        } else {
+            userAnsHTML = `${wPart}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+        }
+
+        if (w == qData.a.whole && n == qData.a.num && d == qData.a.den) isCorrect = true;
+        
+        // 正確答案 HTML (這部分原本就有)
+        if (qData.a.num == "0") {
+            finalAnsHTML = qData.a.whole;
+        } else {
+            let cwPart = qData.a.whole == "0" ? "" : qData.a.whole;
+            finalAnsHTML = `${cwPart}<div class="display-fraction"><span class="q-num">${qData.a.num}</span><span class="display-line"></span><span class="q-den">${qData.a.den}</span></div>`;
+        }
+    } else {
+        const val = document.getElementById('ans-normal').value.trim();
+        userAnsHTML = val || "(空白)";
+        finalAnsHTML = qData.a;
+        if (val == qData.a) isCorrect = true;
+    }
+
+    // --- 介面顯示與填入 ---
+    document.getElementById('quiz-play-phase').classList.add('hidden');
+    document.getElementById('feedback-area').classList.remove('hidden');
+
+    // 填入內容
+    let currentFullQ = document.querySelector('.q-main-content').innerHTML;
+    document.getElementById('fb-question-review').innerHTML = `題目：${currentFullQ}`;
+    
+    // 顯示對照
+    // --- 修改後的樣子 ---
+document.getElementById('fb-user-answer').innerHTML = `你的答案：<span style="color:${isCorrect ? '#27ae60' : '#e74c3c'}">${userAnsHTML}</span>`;
+
+// 多了這兩行：先抓圖，再顯示
+let extraImg = qData.ansImg || ""; 
+document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalAnsHTML}${extraImg}`;
+
+            const fImg = document.getElementById('feedback-img');
+            const bText = document.getElementById('battle-text');
+
+            if (isCorrect) {
+                fImg.src = "b-6-2-1-1.gif";
+                bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
+                bText.style.color = "#27ae60";
+                coins++;
+                document.getElementById('coin-val').innerText = coins;
+            } else {
+                fImg.src = "b-6-2-1-0.gif";
+                bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
+                bText.style.color = "#e74c3c";
+                hp--;
+                updateHearts();
+            }
+
+            if (hp <= 0) setTimeout(() => endGame('lose'), 2500);
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            updateProgressBar();
+            if (currentIndex >= totalQuizCount) {
+                endGame('win');
+            } else {
+                document.getElementById('quiz-play-phase').classList.remove('hidden');
+                document.getElementById('feedback-area').classList.add('hidden');
+                renderQuestion();
+            }
+        }
+
+        function endGame(status) {
+    // 1. 隱藏遊戲主容器
+    document.getElementById('game-area').classList.add('hidden');
+    
+    let statusTxt = document.getElementById('final-status-text');
+    let bgImg = "stop.jpg"; // 預設背景（中途停止）
+    let detailTxt = "";    // 用來存額外的描述文字
+
+    // 2. 根據不同狀態給予對應的文字與背景
+    if (status === 'win') { 
+        statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        coins += (hp * 2); // 贏了才有血量獎勵分
+        bgImg = "b-win.jpg";
+    } else if (status === 'lose') { 
+        statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-lose.jpg";
+    } else if (status === 'stop') {
+        statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-stop.jpg";
+    }
+    
+    // 3. 更新畫面內容
+    document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
+    document.getElementById('final-coins').innerText = coins;
+    
+    // 這裡我假設你的 HTML 裡結算頁面有個 <p> 標籤，我們把詳細文字塞進去
+    const pTag = document.querySelector('#final-screen p');
+    if (pTag) pTag.innerText = detailTxt;
+
+    // 4. 顯示結算畫面
+    document.getElementById('final-screen').classList.remove('hidden');
+}
+    </script>
+</body>
+</html>
