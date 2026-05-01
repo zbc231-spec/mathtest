@@ -65,7 +65,7 @@
     <div class="line" id="line2">你必須直面數學大魔王的挑戰</div>
     <div class="line" id="line3">唯有理解與思考</div>
     <div class="line" id="line4">才能贏得這場戰鬥</div>
-
+    <div class="line" id="line5">同時，你也要提防文字的暗影</div>
     <button id="startBtn" onclick="location.href='a-map.html'">
         進入冒險
     </button>
@@ -76,7 +76,8 @@
         document.getElementById("line1"),
         document.getElementById("line2"),
         document.getElementById("line3"),
-        document.getElementById("line4")
+        document.getElementById("line4"),
+        document.getElementById("line5")
     ];
     const button = document.getElementById("startBtn");
 
@@ -92,6 +93,6 @@
     setTimeout(() => {
         button.style.opacity = "1";
         button.style.pointerEvents = "auto";
-    }, 6500); // 這是最推薦的節奏點
+    }, 9500); // 這是最推薦的節奏點
 </script></body>
 </html>

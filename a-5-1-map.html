@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五上翠林園境關卡地圖</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 核心修正：讓容器的比例與圖片相同 (這張圖大約是 3:2) */
+        .map-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 66.66vw; /* 根據圖片寬高比調整 (高/寬) */
+            max-height: 100vh;
+            max-width: 150vh; /* 避免高度溢出 */
+        }
+
+        .map-image {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain; /* 確保圖片完整顯示 */
+        }
+
+        /* 發光熱點樣式 */
+        .hotspot {
+            position: absolute;
+            width: 5%;  /* 使用相對於圖片寬度的比例 */
+            aspect-ratio: 1 / 1; /* 保持圓形 */
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            animation: pulse-glow 1s infinite;
+        }
+
+     @keyframes pulse-glow {
+        0% {
+            /* 初始狀態：中間有一個小白點，外面包著電光綠 */
+            box-shadow: 
+                0 0 5px #ffffff, 
+                0 0 0 0 rgba(172, 255, 47, 0.9);
+            transform: scale(1);
+        }
+        70% {
+            /* 擴散狀態：綠光噴射到 25px，並轉為透明 */
+            box-shadow: 
+                0 0 10px rgba(255, 255, 255, 0), 
+                0 0 0 25px rgba(172, 255, 47, 0);
+            transform: scale(1.1); /* 稍微放大，呼吸感更明顯 */
+        }
+        100% {
+            /* 結束狀態：縮回原點 */
+            box-shadow: 
+                0 0 0 0 rgba(255, 255, 255, 0), 
+                0 0 0 0 rgba(172, 255, 47, 0);
+            transform: scale(1);
+        }
+    }
+
+        /* --- 修正後的精確座標 (基於圖片原始位置) --- */
+        .spot-0 { top: 70.5%; left: 40.8%; }
+        .spot-1 { top: 61.5%; left: 61.5%; }
+        .spot-2 { top: 58.0%; left: 76.0%; }
+        .spot-3 { top: 34.5%; left: 76.5%; }
+        .spot-4 { top: 41.5%; left: 59.8%; }
+        .spot-5 { top: 50.5%; left: 44.8%; }
+        .spot-6 { top: 46.0%; left: 33.5%; }
+        .spot-7 { top: 41.3%; left: 19.6%; }
+        .spot-8 { top: 23.7%; left: 36.9%; }
+        .spot-9 { top: 31.1%; left: 49.8%; }
+        .spot-10 { top: 13.9%; left: 58.9%; }
+        
+        /* 提示文字 */
+        .hotspot::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .hotspot:hover::after { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="map-wrapper">
+    <img src="b-5-1-map.jpg" alt="森林" class="map-image">
+
+    <a href="5-2-0.html" class="hotspot spot-0" title="熱身單元"></a>
+    <a href="5-2-1.html" class="hotspot spot-1" title="第1單元"></a>
+    <a href="5-2-2.html" class="hotspot spot-2" title="第2單元"></a>
+    <a href="5-2-3.html" class="hotspot spot-3" title="第3單元"></a>
+    <a href="5-2-4.html" class="hotspot spot-4" title="第4單元"></a>
+    <a href="5-2-5.html" class="hotspot spot-5" title="第5單元"></a>
+    <a href="5-2-6.html" class="hotspot spot-6" title="第6單元"></a>
+    <a href="5-2-7.html" class="hotspot spot-7" title="第7單元"></a>
+    <a href="5-2-8.html" class="hotspot spot-8" title="第8單元"></a>
+    <a href="5-2-9.html" class="hotspot spot-9" title="第9單元"></a>
+    <a href="5-2-10.html" class="hotspot spot-10" title="第10單元"></a>
+
+</div>
+
+</body>
+</html>

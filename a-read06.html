@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>閱讀理解 - 勇者同步版</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄：完全同步熱身單元樣式 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+        .coin-icon { color: #f39c12; font-size: 2.2rem; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：半透明書卷感 */
+        .content-card {
+            background: rgba(255, 253, 245, 0.0); /* 羊皮紙色且透出底圖 */
+            width: 95%; height: 95%;
+            border-radius: 20px; display: flex; overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(212, 163, 115, 0.4);
+        }
+
+        /* 左側文章區 */
+    .article-pane {
+    width: 50%;             /* 寬度固定 50% */
+    height: 100%;           /* 高度鎖定為容器的 100% */
+    flex: none;             /* 禁用彈性縮放 */
+    box-sizing: border-box; /* 重要：讓 padding 往內縮，不撐開寬高 */
+    padding: 70px;          /* 現在您可以隨意調這裡，寬高都不會動了 */
+    overflow-y: auto;       /* 超過高度自動產生捲軸 */
+    border-right: 2px solid rgba(212, 163, 115, 0.2);
+}
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 25px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.4rem; line-height: 2.2; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目區 */
+  .quiz-pane {
+    width: 50%;             /* 寬度固定 50% */
+    height: 100%;           /* 高度鎖定為容器的 100% */
+    flex: none;             /* 禁用彈性縮放 */
+    box-sizing: border-box; /* 重要：讓 padding 往內縮 */
+    padding: 40px;          
+    overflow-y: auto;       
+    background: rgba(255, 255, 255, 0.0);
+    display: flex;          /* 內部維持彈性佈局以支撐題目內容 */
+    flex-direction: column;
+}
+
+        .q-block { margin-bottom: 35px; background: rgba(255, 255, 255, 0.0); padding: 20px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.4rem; font-weight: bold; color: #2c3e50; margin-bottom: 15px; }
+        .opt-item { 
+            display: block; margin-bottom: 12px; padding: 15px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.2rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 12px; transform: scale(1.4); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 15px; padding: 18px; border-radius: 10px; display: none;
+            font-size: 1.15rem; line-height: 1.6; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 */
+        .btn-box { text-align: center; padding: 30px 0; }
+        .btn { 
+            padding: 18px 60px; font-size: 1.4rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <div id="game-container" class="content-card">
+            <div class="article-pane">
+                <div id="display-title" class="a-title"></div>
+                <div id="display-content" class="a-text"></div>
+            </div>
+            <div class="quiz-pane">
+                <div id="quiz-list"></div>
+                <div class="btn-box">
+                    <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                    <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="finish-card" class="hidden" style="text-align:center; color:white;">
+            <h1 style="font-size:5rem; text-shadow:3px 3px 15px #000;">闖關完成！</h1>
+            <h2 style="font-size:3.5rem; color:#f1c40f; text-shadow:2px 2px 10px #000;">獲得總獎勵：<span id="final-score">0</span> 💰</h2>
+            <button class="btn btn-submit" onclick="location.reload()">再讀一遍</button>
+        </div>
+    </div>
+
+    <script>
+      const db = [
+    {
+        t: "第一篇：李白的一生",
+        c: "李白（公元701—762年），字太白。他的籍貫、祖先、家世、出生地，乃至種族都不能十分確定。一般認為他的祖籍在隴西成紀（今甘肅省天水附近），先世移居中亞碎葉，李白就在當地出生。他5歲時隨父親遷居綿州（即今四川省江油縣），所以他自稱是蜀人，也就是四川人。他父親沒有做過官，可能是一個富商，當時的人稱他「李客」。\n\n李白少年時代所受的教育是多方面的，不限於儒家。他在20歲前後遊歷了成都、峨嵋山等地，還和一位隱士東嚴子在青城山隱居了好幾年。他曾跟趙蕤學習，趙蕤著有《長短經》十卷，論王霸之道，這對李白後來的思想和經歷有所影響。開元十三年（公元725年），李白25歲，為了實現自己的抱負，便離開四川開始漫遊。他出蜀之後，南遊洞庭，東訪金陵、揚州，後來回到江夏一帶，在湖北安陸和唐高宗時作過宰相的許圉師的孫女結婚，遂定居安陸。後又北遊洛陽、太原，東走齊魯，寓家任城（今山東省濟寧）。天寶初，南遊會稽，與道士吳筠隱於剡中。在十數年間，他幾乎漫遊了半個中國，寫了許多優秀詩篇，顯示了高度的藝術才能。在這段期間，李白很可能去過首都長安，但是沒有得到施展其政治抱負的機會。\n\n唐玄宗天寶元年（公元742年），李白42歲，被唐玄宗徵召入京。李白初到長安，受到玄宗禮遇。據說玄宗下輦迎接，又以七寶床賜食，親手為李白調羹。玄宗將李白置於金鑾殿，出入翰林中，問以國政，潛草詔誥。可惜李白只是以文學辭章見重，並沒有實際的官職，更沒有政治實權。他那「濟蒼生」、「安社稷」的抱負得不到施展機會。在天寶三年（公元744年），他44歲時失望地離開了長安。從天寶三年（公元744年）到天寶十四年（公元755年），他不停流浪。天寶四年（公元745年）他受道菉於齊州紫極宮，成為一名道士，此後更熱衷於求仙訪道。\n\n天寶十四年（公元755年）十一月爆發安史之亂，李白輾轉逃難到廬山。他寫了一些反映戰亂的詩歌，表達了憂國憂民的心情。肅宗至德元年（公元756年）十二月，李白出於報國安民的誠意，加入了李璘的幕府。但他沒有料到，肅宗深怕李璘搶奪帝位，於是發兵征討。至德二年（公元757年）李璘兵敗被殺，李白也因此被捕入潯陽獄中，第二年流放夜郎（今貴州省桐梓一帶），行至三峽，遇赦放還。肅宗上元二年（公元761年），李白61歲，聽到李光弼率大軍征討史朝義的消息，便請纓從軍，半道因病而還，到安徽投靠族叔當塗縣令李陽冰。肅宗寶應元年（公元762年）十一月病逝。",
+        q: [
+            { txt: "根據文章內容，李白在 5 歲時跟隨父親遷居到哪裡，因此他自稱是「蜀人」？", opts: ["隴西成紀", "中亞碎葉", "綿州（今四川省江油縣）", "湖北安陸"], a: 2, s: 1, fb: "文章第一段明確提到：「他 5 歲時隨父親遷居綿州……所以他自稱是蜀人」。" },
+            { txt: "文中提到唐玄宗對李白「親手為其調羹」、「賜食七寶床」，這說明了李白初到長安時的情況為何？", opts: ["李白的廚藝精湛，深受皇帝喜愛", "唐玄宗非常禮遇並看重李白的文學才華", "李白當時身體虛弱，需要皇帝親自照顧", "唐玄宗打算冊封李白為當時的宰助"], a: 1, s: 1, fb: "這些具體動作（下輦迎接、調羹）是用來表現唐玄宗對李白的「禮遇」，顯示對其才華的器重。" },
+            { txt: "關於李白離開長安的原因，下列哪一個推論最合理？", opts: ["因為他熱衷於求仙訪道，想去齊州當道士", "因為安史之亂爆發，他必須趕快逃難到廬山", "因為他只想做文學創作，不想參與任何國事問答", "因為他雖受禮遇卻無實權，無法實現治理國家的抱負"], a: 3, s: 1, fb: "文中提到李白雖在翰林，但「並沒有實際的官職，更沒有政治實權」，因此感到「失望地離開了長安」。" },
+            { txt: "縱觀李白的一生，下列哪一項最能描述他晚年（55歲以後）的處境？", opts: ["一帆風順，在朝廷擔任高官直到病逝", "雖然經歷戰亂與流放，仍保有報效國家的熱誠", "隱居山林不問世事，完全切斷與外界的聯繫", "轉行成為富商，過著如他父親般優渥的生活"], a: 1, s: 2, fb: "李白在安史之亂後（55歲以後）雖經歷入獄、流放，但 61 歲時仍「請纓從軍」，顯示其憂國憂民與報國之心。" }
+        ]
+    },
+    {
+        t: "第二篇：國小人際關係篇",
+        c: "「人際關係」就是指人與人之間正面和負面的互動關係，無分性別、年齡，任何人都須仰賴人際關係過生活，然而和人相處可能會使彼此間親近，也可能會使彼此產生敵意，因此維持良好的人際溝通並不是一件容易的事情。\n\n現今社會過於發達，不僅科技快速進步、人口與日俱增等因素，都促使人們的價值觀漸趨現實、功利，在一個狹小的空間要共同使用有限的資源，人們往往會意見分歧，只顧慮自己的利益和感受，在這樣的狀況下要建立一個友善的互動，確實是一門很大的學問。\n\n父母及家中長輩從小就是孩童模仿與學習的對象，年幼的孩子模仿能力相當強，甚至超越大部分的青少年及成人，他們能夠藉由眼睛看見的事物，將其吸收至大腦並快速的轉換成自己的行為顯現出來，如此一來，家長自身對孩子來說是一種潛移默化的影響，無時無刻不在進行著。倘若家長的觀念已如上述所說的被社會化，無形中就會為孩子建立同樣的概念，「畢竟學習人際關係最初，也是時間最長的場所就是家中」，這對大部分的孩子可不是件好事，因為每個孩子都必須要上學，必須要在學校和同儕度過上課、下課時間，或是一起遊戲、運動；或是一起讀書、討論課題；或是一起聊天、共同解決困難……因此孩子應該從小就開始培養利他的心，以及「己所不欲，勿施於人」的觀念，不可凡事只想到自己。\n\n【3Ｃ產品的影響】\n影響孩子的人際關係不只是社會的功利主義，事實上，還包含孩子所處的「環境」和「人格特質」。所謂的「環境」大多是指孩子所生長的周遭環境，包含家庭結構、街坊鄰居的組成，現在的孩子不像早期一般家中有５～８位兄弟姊妹，少了經常和兄弟姊妹的相處，就少了許多與人溝通的機會，而小家庭的結構以及居住在大樓林立的都市裡，已經失去了過去時常和鄰居們往來、玩耍的自然環境，然而，現在的孩子真的在乎嗎？大多數卻是不在乎有無手足陪伴與一起遊玩的，他們的生活充斥著電子產品（電腦、平板電腦、手機、電視等），認為能不能利用最多的時間玩最多的電動或是玩具，才是最重要的事情。雖然孩子沉迷於電視、3Ｃ產品時是最沉默的時候，但家長應該仔細思考，若讓孩子沉迷於這些事物，不僅讓孩子不善於與同儕互動，甚至會影響到孩子學習語言的能力，還可能因此養成孩子在虛擬世界尋求慰藉的習慣，進而妨礙自身的人格發展。\n\n【個性帶來的影響】\n另一方面，「人格特質」是指一個人的性格，個性絕對是影響人際的主要因素，有些孩子樂觀外向、態度大方，容易與同儕「打成一片」，面對陌生人也不會退避，會主動營造話題；有些孩子害羞內向、沒有自信，看見陌生人會不自覺畏畏縮縮；有些孩子喜歡和別人比較、愛計較，不懂得分享，總是認為別人擁有的不能比自己多；有些孩子樂於默默助人，不在意自己付出多少，且不會要求回報；有些孩子脾氣衝動，不能忍受不公平的事，經常和別人發生衝突，但卻很講義氣……當然，每個孩子都有不同的人格特質，因此種類是無法一一列出的，家長切勿以為孩子還小，不會在意同儕的個性如何，即使是低年級的孩子，他們也會自行判斷哪一種人能夠成為人見人愛的對象，哪一種則容易被排擠、被嫌惡，而這些具備的特質只有大約一成是來自於先天，大部分則是來自後天，父母若希望孩子在校園生活中有著良好的人際關係，絕不可放棄教育孩子的機會，必須從孩子開始有能力學習語言的時候，同時給予教導、培養其適當的人格。",
+        q: [
+            { txt: "根據文章內容，下列哪一個因素「不是」造成現代孩子減少與人溝通機會的原因？", opts: ["家庭結構多為小家庭", "居住在都市失去與鄰居往來機會", "生活充斥著電子產品", "學校縮短了課間活動時間"], a: 3, s: 1, fb: "文中提到的因素包含小家庭、居住環境及電子產品，並未提及學校縮短活動時間。" },
+            { txt: "文章中提到「學習人際關係最初，也是時間最長的場所就是家中」，這主要在強調什麼？", opts: ["孩子不需太早去上學", "家長的價值觀會潛移默化影響孩子", "家庭空間狹小是意見分歧主因", "有足夠3C產品就能培養人際關係"], a: 1, s: 1, fb: "文章強調家長是模仿對象，其觀念與社會化行為會直接影響孩子。" },
+            { txt: "文中提到孩子沉迷於 3C 產品時雖然最「沉默」，但可能隱藏什麼隱憂？", opts: ["導致聽力受損", "養成在虛擬世界尋求慰藉習慣，影響人格", "會變得過於活潑大方", "增加對社會功利主義的了解"], a: 1, s: 1, fb: "作者指出沉迷 3C 會使孩子不擅與同儕互動，並可能在虛擬世界尋求慰藉。" },
+            { txt: "關於「人格特質」對人際關係的影響，下列哪一項敘述最符合文中觀點？", opts: ["人格特質完全由先天決定", "低年級孩子不會判斷同儕個性好壞", "良好的社交特質多來自後天培養", "害羞內向的孩子在人際中最受歡迎"], a: 2, s: 2, fb: "文末提到人格特質僅一成來自先天，大部分來自後天，父母應及早教導。" }
+        ]
+    },
+    {
+        t: "第三篇：清明掃墓出遊要留意！３招防護恙蟲病",
+        c: "我國全年皆有恙蟲病病例發生，病例通報數自4至5月開始上升。而清明假期將至，若要去山區掃墓或出遊，就要更留心防蟲措施。恙蟎會趁機躲在草叢，伺機爬到行經的動物與人類身上叮咬。務必做好個人防護措施，避免被恙蟲附著叮咬而感染恙蟲病。\n\n【得恙蟲病會怎樣？】\n若被帶有立克次體的恙蟲（恙蟎）叮咬，恙蟲病潛伏期約 9 至 12 天，患者會出現持續性高燒、頭痛、盜汗、淋巴結腫大等症狀。而約發燒 1 週後皮膚出現紅色斑狀丘疹，恙蟲叮咬處通常會出現無痛性焦痂，是此疾病的重要特徵。恙蟲病有時甚至會併發肺炎或肝功能異常，若沒有經過適當治療，死亡率可高達60%。\n\n【3 項防護措施降低恙蟲叮咬風險】\n1. 穿著淺色衣物：前往山區、野外時，穿著淺色長袖衣褲、手套、長筒襪及長靴，將褲管紮入襪內。\n2. 攜帶有效成分的防蚊藥劑：使用含敵避 (DEET)、派卡瑞丁 (Picaridin) 或伊默克 (IR3535) 成分的藥劑。\n3. 離開後迅速沐浴更衣：離開草叢地點後，應儘速沐浴並更換全身衣物，避免恙蟎附著。",
+        q: [
+            { txt: "根據文章內容，下列哪一項是診斷恙蟲病時非常重要的生理特徵？", opts: ["皮膚會出現綠色的斑點", "叮咬處通常會出現無痛性的焦痂", "傷口會劇烈疼痛且難以癒合", "潛伏期大約只有 1 到 2 天"], a: 1, s: 1, fb: "文本中明確指出：「恙蟲叮咬處通常會出現無痛性焦痂，是此疾病的重要特徵」。" },
+            { txt: "文章提到「將褲管紮入襪內」的主要目的是什麼？", opts: ["為了穿搭更有型", "為了減輕長筒襪壓力", "為了封閉衣物縫隙，防止恙蟎爬入", "為了增加跑步的速度"], a: 2, s: 1, fb: "這是物理性防護的具體手段，意即堵住蟲子爬入衣物的路徑。" },
+            { txt: "若清明掃墓後出現持續高燒與頭痛症狀，下列哪一種做法最不恰當？", opts: ["儘速就醫並告知曾去過草叢", "檢查是否有不明紅色丘疹", "自行去藥局買退燒藥吃，不理會病因", "警覺可能是恙蟲病"], a: 2, s: 1, fb: "文中提到恙蟲病若沒經過適當治療死亡率極高，自行服藥不就醫非常危險。" },
+            { txt: "關於預防恙蟲病的「三招」防護措施，下列敘述何者正確？", opts: ["只要噴防蚊液就不需穿長袖", "穿深色衣物更易發現恙蟎", "離開後迅速沐浴是為了洗掉附著的恙蟎", "只有在 4 到 5 月需要防範"], a: 2, s: 2, fb: "沐浴更衣能移除尚未叮咬的恙蟎；深色不易發現蟲子，且全年皆有病例。" }
+        ]
+    },
+    {
+        t: "第四篇：盤古開天地",
+        c: "《三五歷紀》記載，極遠古以前，那時還沒有人類，也沒有天地萬物，只有一片混沌。就像雞蛋孕育著生命一樣，這個混沌中孕育著天地和萬物。我們這個宇宙的原始神盤古，就在漫長的歲月中化生而成。\n\n盤古在混沌中孕育而生的同時，天地也隨著盤古的化生而慢慢分離成形了。經過了一萬八千年，陽清之氣逐漸上升為天，陰濁之氣下降為地。盤古在其中變化無窮，他在天為神，在地為聖人，與天地一體，為天地之靈。盤古每天長高一丈，天隨之每天增高一丈，地每天也增厚一丈，如此又經過一萬八千年，天升到了極高，地增到了極厚，盤古與天地一起生長成形。經過了這漫長的歲月，天地終於開闢完成了。\n\n到了後來，隨著人類觀念變化，這個傳說被不斷修改。如有的版本說，盤古醒來後使用巨斧將天地劈開，然後用身體將天地撐開。這個版本明顯被加進了更多世俗內容，使神話變得膚淺、幼稚，但一般人更容易聽得懂。\n\n另有的版本說，世界是盤古的身體化成的。他的氣息變成了風與雲，聲音化為雷霆，左眼變成太陽，右眼化為月亮，四肢與頭化為大地的四極與五嶽，血液變成江河，皮毛成了草木，汗水化為雨澤，週身所生的蟲子，化生為人類……也有的說盤古高興了就是晴天，憤怒時就是陰天。",
+        q: [
+            { txt: "根據《三五歷紀》的早期記載，宇宙在原始神盤古化生之前是什麼樣子的？", opts: ["璀璨夜空", "一片混沌，像雞蛋孕育生命一樣", "已有山川河流", "由五嶽與江河組成"], a: 1, s: 1, fb: "第一段明確提到：「那時還沒有人類……只有一片混沌。就像雞蛋孕育著生命一樣」。" },
+            { txt: "文中提到後期傳說加入了「使用巨斧劈開天地」，作者對此改變的看法為何？", opts: ["認為更深奧有哲理", "認為形象變得更溫柔", "認為雖易懂但使神話變得膚淺幼稚", "認為真實記錄了工具歷史"], a: 2, s: 1, fb: "第三段指出：「這個版本明顯被加進了更多世俗內容，使神話變得膚淺、幼稚」。" },
+            { txt: "在「身體化為自然」的版本中，盤古的「左眼」與「右眼」分別化成了什麼？", opts: ["太陽與月亮", "閃電與雷霆", "珍珠與玉石", "長江與黃河"], a: 0, s: 1, fb: "第四段描述盤古化身自然時提到：「左眼變成太陽，右眼化為月亮」。" },
+            { txt: "綜合全文所述，盤古在不同版本的傳說中都扮演了什麼樣的核心角色？", opts: ["教導人類耕種的智者", "宇宙開創者，其生長或身體化成萬物", "尋找火焰的英雄", "負責管理天氣的官員"], a: 1, s: 2, fb: "無論哪個版本，盤古都與「天地的形成」密不可分，他是世界的起源。" }
+        ]
+    }
+];
+        let idx = 0;
+        let totalScore = 0;
+
+        function render() {
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerText = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.opts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            document.querySelector('.quiz-pane').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<4; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            for(let i=0; i<4; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(userVal === item.a) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${item.opts[item.a]}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                document.getElementById('game-container').classList.add('hidden');
+                document.getElementById('finish-card').classList.remove('hidden');
+                document.getElementById('final-score').innerText = totalScore;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

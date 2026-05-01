@@ -253,7 +253,7 @@
             { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
 
 ];
-        let currentQuestions = [], currentIndex = 0, hp = 5, coins = 0;
+        let currentQuestions = [], currentIndex = 0, hp = 30, coins = 0;
         const totalQuizCount = 30;
         const today = new Date().toDateString();
 //修改啟動邏輯 (window.onload)
@@ -270,20 +270,18 @@
 };
 
         function initGame() {
-            hp = 5; coins = 0; currentIndex = 0;
+            hp = 30; coins = 0; currentIndex = 0;
             updateHearts();
             updateProgressBar();
             currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
             renderQuestion();
         }
 
-        function updateHearts() {
-            const container = document.getElementById('hp-container');
-            container.innerHTML = '';
-            for (let i = 0; i < 5; i++) {
-                container.innerHTML += (i < hp) ? '<span class="heart">❤️</span>' : '<span class="heart" style="opacity:0.1; filter:grayscale(1);">❤️</span>';
-            }
-        }
+       function updateHearts() {
+    const container = document.getElementById('hp-container');
+    // 直接顯示 ❤️ × 剩餘血量，字體大小設為 1.8rem 讓數字清楚
+    container.innerHTML = `<span class="heart">❤️</span> <span style="font-size:1.8rem; font-weight:bold; color:#e74c3c; margin-left:5px;">× ${hp}</span>`;
+}
 
         function updateProgressBar() {
             document.getElementById('progress-bar').style.width = (currentIndex / totalQuizCount) * 100 + "%";
@@ -431,7 +429,10 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
     if (status === 'win') { 
         statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
         detailTxt = "請至秘書處登記獎勵點數！";
-        coins += (hp * 2); // 贏了才有血量獎勵分
+        // 修改這裡：如果滿血(30滴)通關，額外加 5 點，否則不加。
+    if (hp >= 30) {
+        coins += 5; 
+    }
         bgImg = "b-win.jpg";
     } else if (status === 'lose') { 
         statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 

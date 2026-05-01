@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>智識之域 - 週讀選單</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: "Microsoft JhengHei", sans-serif;
+        overflow: hidden;
+    }
+
+    #library-container {
+        position: relative;
+        /* 根據圖片比例鎖定寬高 */
+        width: 100vw; 
+        height: 100vh;
+        background: url("b-book.jpg") no-repeat center center;
+        background-size: cover;
+    }
+
+    /* 書本點擊區域網格：對齊圖片中的書架位置 */
+    .book-grid {
+        position: absolute;
+        top: 25%; 
+        left: 17%;
+        width: 65%;
+        height: 52%;
+        display: grid;
+        grid-template-columns: repeat(10, 1fr); 
+        grid-template-rows: repeat(2, 1fr);    
+        gap: 8px;
+    }
+
+    .book-slot {
+        cursor: not-allowed;
+        position: relative;
+        filter: grayscale(100%) brightness(0.4); /* 未開啟的書呈現暗灰色 */
+        transition: all 0.4s ease;
+        border-radius: 4px;
+    }
+
+    /* --- 當週點亮的書：藍白色霓虹燈效果 --- */
+    .book-slot.active {
+        cursor: pointer;
+        filter: grayscale(0%) brightness(1.2);
+        /* 疊加藍白色多層外陰影 */
+        box-shadow: 
+            0 0 10px #ffffff,               
+            0 0 20px #00d2ff,               
+            0 0 30px rgba(0, 210, 255, 0.6); 
+        animation: book-glow-blue 2s infinite ease-in-out;
+        z-index: 2;
+    }
+
+    /* --- 週數標籤：亮藍色發光底座 --- */
+    .week-label {
+        position: absolute;
+        top: -45px;          /* 移至書本上方 */
+        left: 50%;
+        transform: translateX(-50%);
+        
+        font-size: 16px;     
+        font-weight: normal; /* 正常粗細，不加粗 */
+        color: #ffffff;      
+        white-space: nowrap; 
+        
+        background: rgba(0, 168, 255, 0.85); /* 亮藍色背景 */
+        padding: 4px 14px;
+        border-radius: 20px; /* 膠囊狀外觀 */
+        
+        /* 藍色霓虹發光 */
+        box-shadow: 0 0 12px #00d2ff, 0 0 20px rgba(0, 210, 255, 0.5);
+        border: 1px solid #ffffff; /* 白色細邊框增加精緻感 */
+        
+        text-shadow: 1px 1px 2px #000; 
+        pointer-events: none; 
+        z-index: 5;
+    }
+
+    /* 已讀過的書 */
+    .book-slot.completed {
+        filter: grayscale(80%) brightness(0.6);
+        cursor: default;
+    }
+    .book-slot.completed::after {
+        content: "✔️";
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        font-size: 30px;
+      /* 核心關鍵：用濾鏡把 Emoji 的亮度拉高，並轉為白色系 */
+        filter: brightness(2) contrast(1.2) grayscale(1); 
+        
+        /* 增加強烈黑影，讓白色勾號在任何書本顏色上都超明顯 */
+        text-shadow: 0 0 8px rgba(0,0,0,1), 0 0 3px rgba(0,0,0,1);
+    }
+
+    /* 藍白色發光呼吸動畫 */
+    @keyframes book-glow-blue {
+        0%, 100% { 
+            box-shadow: 0 0 10px #ffffff, 0 0 20px #00d2ff, 0 0 30px rgba(0, 210, 255, 0.4); 
+            transform: scale(1); 
+        }
+        50% { 
+            box-shadow: 0 0 15px #ffffff, 0 0 50px #00d2ff, 0 0 80px rgba(0, 210, 255, 0.8); 
+            transform: scale(1.03); 
+        }
+    }
+
+    @media (max-width: 768px) {
+        #library-container { width: 100%; height: auto; aspect-ratio: 1000/667; }
+        .week-label { font-size: 16px; top: -35px; }
+    }
+</style>
+</head>
+<body>
+
+<div id="library-container">
+    <div class="book-grid" id="bookGrid">
+        </div>
+</div>
+
+<script>
+    // --- 老師設定區 ---
+    const startDate = new Date("2026-02-23"); // 設定開學第一週的週一
+    const totalWeeks = 20;
+
+    function initBooks() {
+        const grid = document.getElementById('bookGrid');
+        const now = new Date();
+        
+        // 計算目前是開學後第幾週 (0 代表第一週)
+        const diffTime = now - startDate;
+        const currentWeek = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+
+        for (let i = 1; i <= totalWeeks; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'book-slot';
+            
+            // 將數字轉為兩位數格式 (例如: 1 變成 01, 10 維持 10)
+            const weekSuffix = i.toString().padStart(2, '0');
+            const weekId = `week_${weekSuffix}`;
+            const isCompleted = localStorage.getItem(`read_done_${weekId}`);
+            
+            // 建立標籤
+            const label = document.createElement('div');
+            label.className = 'week-label';
+            label.innerText = `第${i}週`;
+
+            // 邏輯判斷：當週、過去、未來
+            if (i - 1 === currentWeek) {
+                if (isCompleted) {
+                    // 本週已完成
+                    slot.classList.add('completed');
+                    label.style.background = "rgba(80, 80, 80, 0.8)";
+                    label.style.boxShadow = "none";
+                    label.style.border = "1px solid #999";
+                } else {
+                    // 本週待挑戰：啟動藍白色發光
+                    slot.classList.add('active');
+                    slot.onclick = () => {
+                        // --- 這裡已改為兩位數格式 ---
+                        location.href = `a-read${weekSuffix}.html`;
+                    };
+                }
+            } else if (i - 1 < currentWeek) {
+                // 過去的週數
+                slot.classList.add('completed');
+                label.style.background = "rgba(50, 50, 50, 0.6)";
+                label.style.boxShadow = "none";
+                label.style.opacity = "0.7";
+            } else {
+                // 未來的週數：隱藏標籤
+                label.style.display = "none"; 
+            }
+
+            slot.appendChild(label);
+            grid.appendChild(slot);
+        }
+    }
+
+    // 提醒：在 e-read01.html 等測驗頁面完成後，記得執行：
+    // localStorage.setItem('read_done_week_01', 'true');
+
+    window.onload = initBooks;
+</script>
+</body>
+</html>
