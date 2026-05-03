@@ -1,32 +1,458 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>敬請期待</title>
+    <title>六下-第六單元</title>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* 防止出現捲動條 */
-            background-color: #000; /* 圖片載入前的底色 */
+        /* 1. 全域樣式：背景與基礎排版 */
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
+        
+        /* 資訊欄 */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; 
+            padding: 0 20px;
         }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #3498db; object-fit: cover; }
+        .player-name { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .stats { font-size: 2.5rem; font-weight: bold; display: flex; align-items: center; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.5rem; margin: 0 2px; }
 
-        .background {
-            width: 100vw;
-            height: 100vh;
-            background-image: url('b-wait.jpg');
-            background-size: cover;    /* 讓圖片填滿整個畫面 */
-            background-position: center; /* 圖片置中 */
-            background-repeat: no-repeat;
+        /* 進度條 */
+        #progress-wrapper { width: 100%; height: 10px; background: #e0e0e0; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(to right, #2ecc71, #27ae60); transition: width 0.4s ease; }
+
+        /* 遊戲區域底圖 */
+        #bottom-panel { 
+            height: calc(85% - 10px); 
+            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background-size: cover; 
+            display: flex; justify-content: center; align-items: center; 
         }
+        /* 修改 1：移除 min-height，改用 max-height 限制白框最高度 */
+.quiz-container { 
+    background: rgba(255, 255, 255, 0.96); 
+    padding: 30px; border-radius: 25px; text-align: center; 
+    width: 90%; max-width: 800px; /* 寬度可依需求調整 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+    z-index: 10;
+    
+    display: flex; flex-direction: column; 
+    max-height: 80vh; /* 鎖定白框最高不超過螢幕 80% */
+}
+
+/* 修改 2：讓播放階段具備自動縮放能力 */
+#quiz-play-phase {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 防止內部溢出 */
+}
+
+/* 修改 3：最關鍵！讓題目區在內容多時才變捲軸，內容少時不佔空間 */
+#question-text { 
+    font-size: 1.4rem; color: #000000; margin-bottom: 10px; 
+    
+    overflow-y: auto; /* 內容過長自動出捲軸 */
+    flex: 0 1 auto;   /* 關鍵：0=內容少時不撐開，1=空間不夠時縮小 */
+    min-height: 0;    /* 配合 Flexbox 捲軸必須設定 */
+    padding: 10px;
+}
+
+/* 額外小優化：確保圖片寬度適中，且不會被拉大 */
+#question-text img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
+}
+
+        /* 分數輸入與題目垂直分數顯示樣式 */
+        .q-text-wrapper { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+        .q-fraction, .display-fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 5px; font-size: 1.6rem; }
+        .q-line, .display-line { border-top: 3px solid #333; width: 100%; margin: 2px 0; }
+        .fraction-container { display: inline-flex; align-items: center; gap: 10px; font-size: 2.2rem; }
+        .fraction-input input, .whole-number input { width: 65px; text-align: center; font-size: 1.5rem; padding: 8px; border-radius: 8px; border: 2px solid #ddd; }
+        #ans-normal { font-size: 1.8rem; padding: 12px; width: 80%; text-align: center; border-radius: 10px; border: 2px solid #ddd; }
+
+        /* 三框架反饋佈局 (Grid) */
+        .feedback-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; margin-top: 10px; }
+       /* 讓回饋區的左側（題目回顧、答案對照）具備捲軸功能 */
+.fb-left-top {
+    background: #fdfdfd; 
+    padding: 20px; 
+    border-radius: 15px; 
+    border: 1px solid #eee; 
+    text-align: left; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: flex-start; /* 改成從頂端開始排列 */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.02); 
+    color: #000000;
+    
+    /* 關鍵：加入捲軸限制 */
+    max-height: 400px;  /* 限制高度，避免圖片把按鈕推走 */
+    overflow-y: auto;   /* 必要時出現垂直捲軸 */
+}
+
+/* 確保回饋區內的圖片不會撐破框架 */
+.fb-left-top img {
+    max-width: 100%;
+    height: auto;
+}
+/* 2. 你的答案文字樣式 */
+#fb-user-answer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    font-size: 1.3rem;
+}
+
+/* 3. 正確答案文字樣式 (增加淡藍色背景塊) */
+#fb-answer-reveal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    background: #e8f4fd; /* 淡藍色背景 */
+    border-radius: 8px;
+    width: fit-content; /* 寬度隨內容自動調整 */
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* 4. 分隔線樣式 */
+.fb-divider {
+    border: 0;
+    border-top: 1px dashed #ddd;
+    margin: 10px 0;
+}
+        .fb-right-top { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .fb-bottom { grid-column: 1 / span 2; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ccc; display: flex; justify-content: center; gap: 20px; }
+
+        #feedback-img { height: 300px; width: auto; border-radius: 10px; }
+        .hidden { display: none !important; }
+        .btn { padding: 15px 35px; font-size: 1.2rem; cursor: pointer; border-radius: 12px; border: none; background: #3498db; color: white; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #2980b9; transform: translateY(-2px); }
+
+        /* 結算頁面 */
+        .result-content { color: white; text-align: center; text-shadow: 2px 2px 10px rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
 
-    <div class="background"></div>
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="player-name">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<div id="hp-container"></div></div>
+        <div class="stats">💰：<span id="coin-val" style="color:#f39c12; margin-left:10px;">0</span></div>
+    </div>
 
+    <div id="progress-wrapper"><div id="progress-bar"></div></div>
+
+    <div id="bottom-panel">
+        <div id="game-area" class="quiz-container">
+            
+            <div id="quiz-play-phase">
+                <h2 id="question-text">載入中...</h2>
+                <div id="input-area" style="margin: 25px 0;"></div>
+                <button id="submit-btn" class="btn" onclick="checkAnswer()">提交答案</button>
+            </div>
+
+            <div id="feedback-area" class="hidden">
+                <div class="feedback-grid">
+                    <div class="fb-left-top">
+                    <div id="fb-question-review" style="font-size: 1.1rem; color: #000000; margin-bottom: 5px;"></div>
+    
+    <hr class="fb-divider">
+    
+    <div id="fb-user-answer"></div>
+    
+    <div id="fb-answer-reveal"></div>
+                    </div>
+                    <div class="fb-right-top">
+                        <img id="feedback-img" src="" alt="結果">
+                        <div id="battle-text" style="font-weight: bold; margin-top: 12px; font-size: 1.3rem;"></div>
+                    </div>
+                    <div class="fb-bottom">
+                        <button class="btn" onclick="nextQuestion()">挑戰下一關</button>
+                        <button class="btn" style="background:#95a5a6" onclick="endGame('stop')">結束挑戰</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="final-screen" class="result-content hidden">
+            <h1 id="final-status-text" style="font-size: 3rem; margin: 0;">速度太慢了，下次再來挑戰吧！</h1>
+            <div style="font-size: 4rem; color: #f1c40f;">💰 <span id="final-coins">0</span></div>
+            <p style="font-size: 1.5rem;">請至秘書處登記獎勵點數！</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. 完整 50 題題庫
+   const masterQuestionBank = [
+    { q: "下面是晨良去年度各項費用支出的圓形圖，晨良去年花費最多的占多少％？<br><img src='z626-01.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "35" },
+    { q: "下面是庭書公司上個月各項支出的圓形圖，人事支出是多少元？<br><img src='z626-02.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "56000" },
+    { q: "下面是阿土伯蔬果店上個月賣出蔬果重量的圓形圖，上個月賣出的玉米重量占全部的多少％？<br><img src='z626-03.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "15" },
+    { q: "下面是鴻圖國小全校學生參加社團人數的圓形圖，請問參加游泳社的比圍棋社的少多少人？<br><img src='z626-04.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "75" },
+    { q: "下面是西園國小全校學生最喜歡顏色的圓形圖，全校學生最喜歡黑色的人數最少，占多少％？<br><img src='z626-05.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3" },
+    { q: "下面是六年甲班課外讀物種類的圓形圖，歷史類書籍占多少％？<br><img src='z626-06.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "15" },
+    { q: "右圖是芳熏5月的生活支出費用圓形圖，芳熏5月的飲食費用是18500元，芳熏5月總支出費用是幾元？<br><img src='z626-07.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "50000" },
+    { q: "佳佳有40顆果凍，下圖是各種口味果凍數量圓形圖，算算看，草莓口味所占的百分率是多少？<br><img src='z626-08.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "10" },
+    { q: "臺灣本島依照位置、人口、資源和經濟活動等因素作為畫分，分成四大區域──北部、中部、南部和東部。請問北部區域人口所占的百分率是多少？（用四捨五入法求商到小數點後第二位，再化成百分率）<br><img src='z626-09.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "46" },
+    { q: "下圖是凱凱今年壓歲錢使用情形圓形圖，凱凱的壓歲錢有8000元，請問買科學小百科使用金額是幾元？<br><img src='z626-10.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2240" },
+    { q: "下圖是珍愛藻礁公投案民調結果圓形圖，已知參與珍愛藻礁公投案民調有2400個人，選擇同意項目的人數有幾個？<br><img src='z626-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1152" },
+    { q: "正義國小的學生有500個人，下面是學生票選圖書館大樓命名得票率統計表。假設每個學生都投1票，請算出悅讀樓的得票數。<br><img src='z626-12.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "200" },
+    { q: "下面是忠孝國小六年級學生上學期向圖書館借閱書籍數量的統計表，請問雜誌類占的百分率是多少？<br><img src='z626-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "15" },
+    { q: "下面是融融每個月投資理財統計表，請算出儲蓄險所占的百分率。<br><img src='z626-14.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "25" },
+    { q: "下面是調查臺大國小六年級畢業生就讀各國中人數統計表，算出六年級學生就讀創新國中人數所占的圓心角。<br><img src='z626-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "36" },
+    { q: "下面是快樂郵局 8月賣出郵票數量的圓形圖。快樂郵局8月賣出的郵票，3.5元郵票和5元郵票合起來的數量是其他郵票合起來數量的幾倍？<br><img src='z626-16.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1.5" },
+    { q: "下面是50個學生放學方式統計表，請算出家長接送所占的百分率。<br><img src='z626-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "40" },
+    { q: "下面是調查40個六年級男生最喜歡的休閒運動人數統計表，請算出喜歡躲避球人數所占的圓心角。<br><img src='z626-18.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "54" },
+    { q: "爺爺家養了150隻雞，豬的數量是雞的1.6倍，鵝的數量是雞操作的0.6倍，鴨的數量是雞的0.8倍，請算出雞所占的百分率。<br><img src='z626-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "25" },
+    { q: "下面是新興國小全校各年級學生人數的長條圖，算出一年級學生人數的百分率是多少？<br><img src='z626-20.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "23" },
+    { q: "下面是阿芬調查六年級學生最常從事的運動統計表，請算出喜歡足球人數所占的百分率。<br><img src='z626-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "13" },
+    { q: "下面是小明家上個月支出費用統計表，請算出雜支所占的百分率。<br><img src='z626-22.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "20" },
+    { q: "下面是三民國小調查全校六年級學生家長職業的統計表。算出從事農業人數所占的百分率。（先以四捨五入法取到小數第二位，再換算成百分率）<br><img src='z626-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "15" },
+    { q: "下面是安平社區居民的年齡分布統計表，算出11歲~20歲人數所占的百分率。<br><img src='z626-24.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "28" },
+    { q: "下面是六年級學生參加各項球類比賽的統計表，請算出參加排球比賽人數所占的圓心角。<br><img src='z626-25.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "90" },
+    { q: "下面是調查60個六年級女生最喜歡的數位產品統計表。請算出手機在圓形圖所占的圓心角。<br><img src='z626-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "90" },
+    { q: "下面是新新國小運動會吉祥物的票選統計表，請算出小白兔得票數所占的百分率。<br><img src='z626-27.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "19" },
+    { q: "下面是五年忠班課外讀物冊數之統計表。請算出故事冊數占全部冊數的百分率。<br><img src='z626-28.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "34" },
+    { q: "下面是一年級學生家長職業統計表。請算出從事商業人數占全部人數的百分率。<br><img src='z626-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "25" },
+    { q: "下面是宏豪家7月分各種農作物收入情形的統計表，請問宏豪家7月分各種農作物的收入共多少元？<br><img src='z626-30.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "54200" },
+    { q: "下面是隆儀上個月各項消費的支出統計表，請算出水電費所占的百分率。<br><img src='z626-31.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "14" },
+    { q: "下面是新興國小各年級體重過重人數的統計表，請算出六年級人數所占的百分率。(先用四捨五入法取到小數第二位，再換算成百分率)<br><img src='z626-32.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "23" },
+    { q: "下面是愛心國小票選校運吉祥物的得票數統計表，請算出鍬形蟲得票數所占的圓心角。<br><img src='z626-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "84" },
+    { q: "下面是圖書館各種書籍數量的統計表，請算出心靈成長類所占的圓心角。<br><img src='z626-34.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "72" },
+    { q: "下面是新平國小圖書館的藏書統計表，請算出文學類所占的百分率。<br><img src='z626-35.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "32" },
+    { q: "下面是平安國小六年級學生通勤方式的統計表，請算出坐公車人數所占的圓心角。<br><img src='z626-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "54" },
+    { q: "下面是元圓國小全校學生最喜歡動物的統計表，請算出喜歡國王企鵝人數所占的百分率。<br><img src='z626-37.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "21" },
+    { q: "下圖為六年三班全班學生早餐用餐地點統計長條圖，請算出在家吃早餐人數所占的百分率。<br><img src='z626-38.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "30" },
+    { q: "下面是凱欣8月分各項支出費用統計表，請算出電話費所占的百分率。<br><img src='z626-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "10" },
+    { q: "下面是來來超商昨日販賣飲料數量的統計表，請算出最受歡迎的飲料所占的百分率。<br><img src='z626-40.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "27" },
+    { q: "下面是美柔這個月各項支出的統計表，美柔這個月的各項支出共多少元？<br><img src='z626-41.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "30000" },
+    { q: "下圖是青青國小六年級的學生人數長條圖，圖形上不小心沾了汙漬，讓丙班和丁班的人數看不清楚，已知六年級人數共有150人，而且甲班和丙班的人數合起來是乙班人數的2倍。請問丙班人數有多少人？<br><img src='z626-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "27" },
+    { q: "下圖是弟弟收集寶貝怪獸卡的數量圓形圖， 從弟弟的卡牌中抽一張，抽到1星卡的可能性？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-43.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4" },
+    { q: "卓方很喜歡用手機拍照，下圖是卓方的手機照片分類圓形圖，卓方任意點開一張照片，會是出遊的照片嗎？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-44.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1" },
+    { q: "超商舉辦買飲料打折的抽籤活動，下圖是各折數張數的統計表。任意抽一張籤，抽到1折的可能性？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3" },
+    { q: "佩琪很喜歡拍照，下圖是佩琪手機照片分類圓形圖，任意點開一張照片，會是出遊的照片嗎？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-46.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1" },
+    { q: "學校舉辦閱讀嘉年華活動，致恩憑閱讀小學士獎狀可抽獎一次。下面是閱讀嘉年華活動得獎人數統計表。致恩抽到參加獎的可能性 (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-47.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1" },
+    { q: "箱子裡有200個桌球，下圖是依照球的顏色資料繪製而成的圓形圖，任意拿一個球，會是粉色桌球的可能性？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-48.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4" },
+    { q: "薇安在餐點平臺訂購飲料，但老闆忘了將品項標籤貼在杯子上，下圖是薇安訂購飲料品項圓形圖，薇安拿一杯飲料，會拿到金萱高山茶嗎？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-49.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3" },
+    { q: "箱子裡有100個桌球，下圖是依照球的顏色資料繪製而成的圓形圖，任意拿一個球，會是綠色桌球的可能性？ (1.很有可能，2.一定能，3.很不可能，4.一定不能)<br><img src='z626-50.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4" }
+];
+        let currentQuestions = [], currentIndex = 0, hp = 30, coins = 0;
+        const totalQuizCount = 30;
+        const today = new Date().toDateString();
+//修改啟動邏輯 (window.onload)
+ window.onload = function() {
+    console.log("遊戲啟動中...");
+    try {
+        // 直接啟動，不檢查次數
+        initGame(); 
+        console.log("遊戲啟動成功！");
+    } catch (error) {
+        console.error("啟動失敗，錯誤原因：", error);
+        document.getElementById('question-text').innerText = "❌ 程式載入出錯，請檢查控制台。";
+    }
+};
+
+        function initGame() {
+            hp = 30; coins = 0; currentIndex = 0;
+            updateHearts();
+            updateProgressBar();
+            currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
+            renderQuestion();
+        }
+
+       function updateHearts() {
+    const container = document.getElementById('hp-container');
+    // 直接顯示 ❤️ × 剩餘血量，字體大小設為 1.8rem 讓數字清楚
+    container.innerHTML = `<span class="heart">❤️</span> <span style="font-size:1.8rem; font-weight:bold; color:#e74c3c; margin-left:5px;">× ${hp}</span>`;
+}
+
+        function updateProgressBar() {
+            document.getElementById('progress-bar').style.width = (currentIndex / totalQuizCount) * 100 + "%";
+        }
+
+        // 題目渲染：自動將題目字串轉為垂直分數
+        function renderQuestion() {
+            const qData = currentQuestions[currentIndex];
+            let rawQ = qData.q;
+            
+            // 轉換帶分數
+            let displayQ = rawQ.replace(/(\d+)又(\d+)\/(\d+)/g, `<span class="q-text-wrapper">$1<div class="q-fraction"><span class="q-num">$2</span><span class="q-line"></span><span class="q-den">$3</span></div></span>`);
+            // 轉換純分數
+            displayQ = displayQ.replace(/(\d+)\/(\d+)/g, `<div class="q-fraction"><span class="q-num">$1</span><span class="q-line"></span><span class="q-den">$2</span></div>`);
+
+            document.getElementById('question-text').innerHTML = `【第 ${currentIndex + 1} 題】<br><span class="q-main-content">${displayQ}</span>`;
+            
+            const inputArea = document.getElementById('input-area');
+            inputArea.innerHTML = '';
+
+            if (qData.type === 'fraction') {
+                inputArea.innerHTML = `
+                    <div class="fraction-container">
+                        <div class="whole-number"><input type="number" id="ans-whole" placeholder="整"></div>
+                        <div class="fraction-input">
+                            <input type="number" id="ans-num" placeholder="子"><div class="line"></div><input type="number" id="ans-den" placeholder="母">
+                        </div>
+                    </div>`;
+            } else {
+                inputArea.innerHTML = `<input type="text" id="ans-normal" placeholder="請輸入答案">`;
+            }
+        }
+
+        function checkAnswer() {
+            const qData = currentQuestions[currentIndex];
+            let isCorrect = false;
+            let finalAnsHTML = "";
+            let userAnsHTML = ""; // 用來存放學生輸入的內容
+// --- 插入防呆邏輯開始 ---
+        if (qData.type === 'fraction') {
+            const rawW = document.getElementById('ans-whole').value;
+            const rawN = document.getElementById('ans-num').value;
+            const rawD = document.getElementById('ans-den').value;
+            // 如果整數、分子、分母全部都是空的，就攔截
+            if (rawW === "" && rawN === "" && rawD === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        } else {
+            const rawVal = document.getElementById('ans-normal').value.trim();
+            if (rawVal === "") {
+                alert("請輸入答案後再提交喔！");
+                return;
+            }
+        }
+        // --- 插入防呆邏輯結束 ---
+
+
+            if (qData.type === 'fraction') {
+        const w = document.getElementById('ans-whole').value || "0";
+        const n = document.getElementById('ans-num').value || "0";
+        const d = document.getElementById('ans-den').value || "1";
+        
+        // 記錄學生的答案 (轉成垂直分數格式顯示)
+        let wPart = (w === "0" || w === "") ? "" : w;
+        if (n === "0" || n === "") {
+            userAnsHTML = w || "0";
+        } else {
+            userAnsHTML = `${wPart}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+        }
+
+        if (w == qData.a.whole && n == qData.a.num && d == qData.a.den) isCorrect = true;
+        
+        // 正確答案 HTML (這部分原本就有)
+        if (qData.a.num == "0") {
+            finalAnsHTML = qData.a.whole;
+        } else {
+            let cwPart = qData.a.whole == "0" ? "" : qData.a.whole;
+            finalAnsHTML = `${cwPart}<div class="display-fraction"><span class="q-num">${qData.a.num}</span><span class="display-line"></span><span class="q-den">${qData.a.den}</span></div>`;
+        }
+    } else {
+        const val = document.getElementById('ans-normal').value.trim();
+        userAnsHTML = val || "(空白)";
+        finalAnsHTML = qData.a;
+        if (val == qData.a) isCorrect = true;
+    }
+
+    // --- 介面顯示與填入 ---
+    document.getElementById('quiz-play-phase').classList.add('hidden');
+    document.getElementById('feedback-area').classList.remove('hidden');
+
+    // 填入內容
+    let currentFullQ = document.querySelector('.q-main-content').innerHTML;
+    document.getElementById('fb-question-review').innerHTML = `題目：${currentFullQ}`;
+    
+    // 顯示對照
+   // --- 修改後的樣子 ---
+document.getElementById('fb-user-answer').innerHTML = `你的答案：<span style="color:${isCorrect ? '#27ae60' : '#e74c3c'}">${userAnsHTML}</span>`;
+
+// 多了這兩行：先抓圖，再顯示
+let extraImg = qData.ansImg || ""; 
+document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalAnsHTML}${extraImg}`;
+
+            const fImg = document.getElementById('feedback-img');
+            const bText = document.getElementById('battle-text');
+
+            if (isCorrect) {
+                fImg.src = "b-6-2-6-1.gif";
+                bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
+                bText.style.color = "#27ae60";
+                coins++;
+                document.getElementById('coin-val').innerText = coins;
+            } else {
+                fImg.src = "b-6-2-6-0.gif";
+                bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
+                bText.style.color = "#e74c3c";
+                hp--;
+                updateHearts();
+            }
+
+            if (hp <= 0) setTimeout(() => endGame('lose'), 2500);
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            updateProgressBar();
+            if (currentIndex >= totalQuizCount) {
+                endGame('win');
+            } else {
+                document.getElementById('quiz-play-phase').classList.remove('hidden');
+                document.getElementById('feedback-area').classList.add('hidden');
+                renderQuestion();
+            }
+        }
+
+        function endGame(status) {
+    // 1. 隱藏遊戲主容器
+    document.getElementById('game-area').classList.add('hidden');
+    
+    let statusTxt = document.getElementById('final-status-text');
+    let bgImg = "stop.jpg"; // 預設背景（中途停止）
+    let detailTxt = "";    // 用來存額外的描述文字
+
+    // 2. 根據不同狀態給予對應的文字與背景
+    if (status === 'win') { 
+        statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        // 修改這裡：如果滿血(30滴)通關，額外加 5 點，否則不加。
+    if (hp >= 30) {
+        coins += 5; 
+    }
+        bgImg = "b-win.jpg";
+    } else if (status === 'lose') { 
+        statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-lose.jpg";
+    } else if (status === 'stop') {
+        statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-stop.jpg";
+    }
+    
+    // 3. 更新畫面內容
+    document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
+    document.getElementById('final-coins').innerText = coins;
+    
+    // 這裡我假設你的 HTML 裡結算頁面有個 <p> 標籤，我們把詳細文字塞進去
+    const pTag = document.querySelector('#final-screen p');
+    if (pTag) pTag.innerText = detailTxt;
+
+    // 4. 顯示結算畫面
+    document.getElementById('final-screen').classList.remove('hidden');
+}
+    </script>
 </body>
 </html>
