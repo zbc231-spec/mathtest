@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>閱讀理解 - 勇者同步版</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-pane::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-pane::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目區 / 結算圖片區 */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 30px 50px;          
+            overflow-y: auto;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 */
+        .btn-box { text-align: center; padding: 20px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：平時放題目，結算時放 b-finish.jpg -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <div id="quiz-list"></div>
+                    <div class="btn-box">
+                        <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                        <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                    </div>
+                </div>
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+        {
+            t: "西遊記-第一章-美猴王大鬧天宮",
+            c: "請在親師生平台中，進入Hami書城，搜尋「名著好好讀-西遊記」，閱讀第一章 美猴王大鬧天宮後，回答問題。",
+            q: [
+                { txt: "孫悟空在瑤池喝醉酒後，跌跌撞撞地闖入了哪位神仙的宮殿，並把那裡的仙丹吃得乾乾淨淨？", opts: ["玉皇大帝", "太上老君", "如來佛祖", "托塔天王李靖"], a: 1, s: 1, fb: "根據文本直接提取訊息，文中明確提到「孫悟空喝得醉醺醺……跑到太上老君的宮內，見四下無人，把丹爐裡的仙丹，吃得乾乾淨淨。」" },
+                { txt: "根據故事內容，孫悟空之所以決定搖身一變假扮成「赤腳大仙」前往瑤池，最主要的原因是什麼？", opts: ["他想幫忙仙官們一起籌備蟠桃宴", "他得知王母娘娘沒有邀請他，心中不服氣，想親自去一探究竟", "他想去瑤池偷摘九千年才成熟一次的蟠桃", "赤腳大仙是他的好朋友，他答應代替對方出席宴會"], a: 1, s: 1, fb: "文本中七仙女搖頭表示王母娘娘沒有邀請孫悟空，接著提到「孫悟空知道後很生氣，用法術讓仙女動彈不得；於是……變成赤腳大仙的模樣，來到瑤池。」由此可推論他是因為沒被邀請而感到憤怒、面子掛不住，才決定喬裝前往。" },
+                { txt: "關於孫悟空與如來佛祖的打賭，下列哪一個敘述最符合故事中所表現的實際情況？", opts: ["孫悟空的筋斗雲速度太慢，所以沒能飛出五指山", "孫悟空在山邊灑尿和寫字，證明他確實成功逃出了如來佛祖的掌心", "孫悟空雖然神通廣大，但他的法力與眼界依然無法超越如來佛祖的境界", "如來佛祖趁孫悟空不注意時，偷偷把那座五指山移到了自己的手上"], a: 2, s: 1, fb: "孫悟空自認飛了三萬六千里、看到了五指山並留下痕跡，但回來後才發現自己寫字的地方只是如來佛祖的手指。這暗喻了孫悟空雖然有七十二變和高超本領，但在智慧與法力更高深的如來佛祖面前，他的一切掙扎與自滿都顯得渺小，無法跳脫對方的掌控。" },
+                { txt: "孫悟空雖然擁有七十二變與如意金箍棒，能連連擊敗十萬天兵天將，但最終仍被壓在五行山下。結合他在天宮與如來佛祖面前的種種行為，下列哪一項是導致他最終失敗的核心性格原因？", opts: ["缺乏與他人合作的團隊精神，總是單打獨鬥", "個性任性妄為且過度自傲，缺乏敬畏之心與自知之明", "心思不夠細膩，沒有看穿天庭與如來佛祖佈下的陷阱", "容易受到酒精的誘惑，因貪杯而誤了大事"], a: 1, s: 2, fb: "這一題需要整合孫悟空在文本中的多處表現。他因為沒被邀請就定住仙女（任性）、在瑤池大肆破壞、偷吃仙丹（妄為），面對佛祖時更盲目自信地答應打賭，甚至在自以為是的山邊灑尿寫字（自傲、缺乏自知之明）。正是這種無法無天、自視過高的性格缺點，才讓他最終踢到鐵板，這也是大鬧天宮故事的核心寓意。" }
+            ]
+        },
+        {
+            t: "西遊記-第二章-高老莊降豬八戒",
+            c: "請在親師生平台中，進入Hami書城，搜尋「名著好好讀-西遊記」，閱讀第二章-高老莊降豬八戒後，回答問題。",
+            q: [
+                { txt: "根據文章內容，豬八戒（豬悟能）在聽到孫悟空提及何事時，態度發生劇烈轉變，並要求立刻去見唐三藏？", opts: ["聽到高老爺請來道士和和尚要驅趕他", "聽到孫悟空現出真面目並拿出金箍棒", "聽到孫悟空正在保護唐三藏前往西方取經", "聽到高翠蘭被父親關在房間裡不讓他見面"], a: 2, s: 1, fb: "文本中提到，當孫悟空追到雲棧洞並說明「老孫我現在保護師父西方取經」時，豬悟能一聽便驚呼「唐三藏在哪裡？快點帶我去見他！觀音菩薩要我在這裡等他！」，展現出態度大轉變。其他選項中，(A)(B)選項促使他逃跑，(D)選項則非他態度轉變的主要關鍵細節。" },
+                { txt: "豬八戒在決定跟隨孫悟空回去見唐三藏之前，為什麼要「一把火燒了雲棧洞」？", opts: ["為了宣洩被孫悟空打敗並追趕的憤怒", "為了向孫悟空展現自己斬斷過去、去西方取經的決心", "為了毀滅高老莊居民追查他的所有線索與證據", "為了逼迫藏身在洞穴深處的孫悟空現身交手"], a: 1, s: 1, fb: "文本指出孫悟空起初不相信豬悟能是觀音菩薩安排的人，豬悟能因而「一把火燒了雲棧洞以示決心」。燒毀自己原本棲身的老巢，代表斷絕後路、徹底離開洞府，以此行動證明自己改過向善、真心隨唐三藏取經的動機與誠意。" },
+                { txt: "唐三藏收豬悟能為徒後，為他取了法號「八戒」，並要求他「不吃五葷」。這個命名與要求在情節中具有什麼深層含意？", opts: ["象徵豬悟能必須戒除過往的慾望與惡習，才算真正踏上修行的道路", "說明高老莊的宴席缺乏蔬菜，因此需要事先約束徒弟的飲食習慣", "暗示豬悟能的法力來源是食物，戒食五葷能削弱他的妖怪法力", "顯示唐三藏因為豬八戒長相奇特而對他實施嚴厲的懲罰"], a: 0, s: 1, fb: "「八戒」意指戒除世俗的慾望與貪嗔癡（包含飲食上的五葷與雜念）。豬悟能原本在高老莊因慾望（強娶民女、貪吃貪戀）而被視為妖精；唐三藏賜名「八戒」，暗喻修行的核心在於自律與克制慾望，是將一個妖怪轉化為修行者的精神象徵。" },
+                { txt: "綜合全文，孫悟空與豬八戒雖然過去都曾犯錯或身為妖怪，但最終都能成為唐三藏的弟子。這段故事主要傳達成什麼主題寓意？", opts: ["只要擁有強大的法力，就能在社會上獲得別人的尊重與接納", "取經之路危險重重，唯有靠欺騙與變身術才能順利克服困難", "只要心存善念並勇於改過，人人都有機會重新開始並成就善果", "師徒之間的信任建立在嚴厲的刑罰（如頭箍咒）之上才能維持"], a: 2, s: 2, fb: "全文整合來看，孫悟空曾是大鬧天宮的潑猴，豬八戒則是騷擾山莊的妖精，但兩人受觀音菩薩點化、經唐三藏收留後，都選擇改過向善（如孫悟空護師取經、豬八戒燒洞拜師）。故事核心表達出「放下執念、改過自新即可獲得救贖並踏上正道」的主題。" }
+            ]
+        },
+        {
+            t: "孩子不會交朋友！？5種實用方法學交友",
+c: '請點選連結 <a href="https://class.tn.edu.tw/modules/tad_web/page.php?WebID=13851&PageID=22671" target="_blank">點此閱讀文章</a>，閱讀完後回答問題。',
+            q: [
+                { txt: "根據文章內容，當害羞的孩子遇到其他小朋友主動前來親近，但孩子一時緊張不知道該說什麼時，文章建議孩子首先應該採取哪種做法？", opts: ["立刻轉頭離開，尋求身邊大人的協助與保護", "保持笑容，並先以點頭等非口語方式進行回應", "大聲說出自己的姓名與興趣以展現友善態度", "靜止不動思索應答方式，等想好後再開口說話"], a: 1, s: 1, fb: "文本在「3. 友善行為表現法」中明確指出，當別人主動親近而孩子不知道該說什麼時，「重點是要先保持笑容，可以先用非口語的方式回應，如點頭，其他就先別想了」。(A)與(D)會讓對方誤以為被拒絕或感到怪異，(C)則非文中當下建議的應對做法。" },
+                { txt: "文章提到，當孩子心裡常想「大家會不會不喜歡我」時，大人必須主動引導孩子進行「正向自我對話」。這樣做的主要原因是什麼？", opts: ["避免孩子因負面思考產生「自證預言」，最終真的演變成被討厭的結果", "強制改變孩子的性格，讓害羞內向的孩子快速轉變成外向活潑的人", "幫孩子建立防禦心態，以便在被同儕拒絕時能立刻反擊對方", "讓孩子背誦固定台詞，以便在自我介紹時獲得全班同學的掌聲"], a: 0, s: 1, fb: "文本在「1. 正向自我對話法」中解釋，孩子越負面就越容易產生心理學上的「自證預言效應」——也就是自己預設會被討厭，久了就真的變成被討厭的人。因此大人引導正向對話，目的是為了打破負面語言的傷害，避免自證預言發生。" },
+                { txt: "文章在「5. 團體融入安心法」中建議，大人幫孩子安排小團體活動時應該「見好就收，不要玩太久」。這種安排在社交學習中蘊含了什麼深層含意？", opts: ["暗示孩子社交是非常消耗體力的事，應減少與他人接觸的時間", "透過限制遊戲時間，讓其他小朋友產生渴望並主動追著孩子玩", "藉由及時結束以保留高品質的成功體驗，累積孩子的社交信心", "讓大人可以快速退出遊戲，避免干涉孩子之間的紛爭與競爭"], a: 2, s: 1, fb: "文中指出遊戲時間太長容易出現紛爭或無聊，「見好就收才能讓社交經驗留下好的回憶」，進而讓孩子產生「自己做得到」的自信。這暗喻了社交學習初期，「創造成功且愉快的情感記憶」比「長時間的社交互動」更具關鍵影響力。" },
+                { txt: "綜合全文，關於孩子「不會交朋友」的核心原因與大人的輔導策略，下列哪一項敘述最符合本文的主旨？", opts: ["孩子交不到朋友主因是個性太過被動，大人應直接將孩子帶入大團體中強迫適應", "孩子交不到朋友常源於負面顧慮與焦慮，大人應提供具體情境演練與安心 Support", "交朋友主要依賴天生的性格，後天的正向對話與行為演練對於改善人際關係效果有限", "只要教導孩子大聲打招呼與稱讚他人，就能徹底解決同儕間所有可能的排擠問題"], a: 1, s: 2, fb: "文章開宗明義指出孩子不會交朋友「不是主動與被動的問題，而是『想太多』的問題（負面思考與顧慮）」，隨後提出的五種方法（正向對話、打招呼演練、友善表現、共同話題、團體融入安心法）均著重於「降低焦慮、建立信心與提供具體演練方法」。因此(B)選項最能完整概括全篇核心主題。" }
+            ]
+        },
+        {
+            t: "病媒蚊不只有登革熱，你必須知道的5種蚊子傳染病！",
+            c: '請點選連結 <a href="https://www.ecohukurou.com.tw/blog/posts/knowledge21" target="_blank">點此閱讀文章</a>，閱讀完後回答問題。',
+            q: [
+                { txt: "根據文章內容，下列關於各項蚊子傳染病的病媒蚊或傳播途徑，何者說明完全正確？", opts: ["日本腦炎在台灣主要的病媒蚊為埃及斑蚊與白線斑蚊", "屈公病屬於「城市循環」時，主要的傳播途徑包含直接的人傳人", "瘧疾除了經由瘧蚊叮咬外，也可透過輸血、器官移植等血液交換途徑傳染", "登革熱會透過咳嗽、打噴嚏等空氣飛沫方式在人與人之間直接傳播"], a: 2, s: 1, fb: "文本中明確提及：「感染瘧疾的途徑，除了被瘧蚊叮咬……還有人與人之間，受感染的血液交換，像是輸血、器官移植、共用針頭等。」，故選項 (C) 正確。(A) 日本腦炎在台灣主要病媒蚊為三斑家蚊、環紋家蚊及白頭家蚊；(B) 屈公病在城市循環為「人-蚊-人」，不會直接人傳人；(D) 登革熱不會經由空氣或接觸直接人傳人。" },
+                { txt: "根據文章內容，為什麼即便感染茲卡病毒大多數人在一週後可自然痊癒，但公共衛生單位仍特別強調「孕婦」必須特別注意防範？", opts: ["因為孕婦感染茲卡病毒後，致死率高達 20%～30%", "因為孕婦無法透過自身免疫力恢復，會轉變成登革出血熱", "因為學界認為孕婦感染茲卡病毒與胎兒腦部嚴重缺陷存在因果關係", "因為茲卡病毒會破壞孕婦的關節，導致終身無法正常行走"], a: 2, s: 1, fb: "文本在「4蚊子傳染病：茲卡病毒」一節最後明確指出：「目前學界認為，感染茲卡病毒與胎兒腦部嚴重缺陷有因果關係，孕婦必須特別注意！」，因此孕婦防範茲卡病毒的核心原因在於避免影響胎兒腦部發育。" },
+                { txt: "文章提到台灣於 1965 年被列為瘧疾根除地區，現今案例多為境外移入；然而近年全球經貿發展與人口頻繁遷移，2019 年台灣卻首度出現本土屈公病病例。這個對比在文章中有何深層含意？", opts: ["說明過往的防疫經驗對於防範新型蚊子傳染病毫無效果", "暗示全球化與人口流動使得跨國病媒蚊傳染病成為無法預測的隨機事件", "警示現代全球化社會中，區域性的傳染病防治隨時可能因跨國交流而打破界線，公衛防線不可鬆懈", "證明台灣的氣候已經從亞熱帶轉變為熱帶，因此更容易滋生非洲傳來的病毒"], a: 2, s: 1, fb: "文章藉由過往已根除瘧疾，但近年因「全球經貿發展，加上人口遷移」導致原本遠在非洲的屈公病在台灣出現本土病例，暗喻傳染病防範不是「根除一種就一勞永逸」，在大交通與全球化時代，病原體傳播無國界，衛衛與防治必須持續警覺與更新。" },
+                { txt: "綜合全文，作者撰寫本文的最主要目的與核心傳達訊息是什麼？", opts: ["說明蚊子傳染病皆會直接人傳人，因此發現患者時應立即進行嚴密隔離", "破除民眾「防蚊只需注意登革熱」的迷思，強調多種蚊媒疾病的危害並提升全面防蚊意識", "證明世界衛生組織對病媒蚊疾病的統計資料有誤，台灣並非高風險地區", "倡導全面停止跨國旅遊與貿易，以徹底斷絕蚊子傳染病的境外移入"], a: 1, s: 2, fb: "文本開頭與標題即點明「病媒蚊不只有登革熱，你必須知道的5種蚊子傳染病！」，全文系統性介紹了屈公病、日本腦炎、瘧疾、茲卡病毒與登革熱的病媒、傳播方式與危害。整體整合旨在翻轉大眾僅關注登革熱的刻板印象，喚起對各類蚊子傳染病與日常防蚊的重視。" }
+            ]
+        }
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 1 * 60 * 1000;
+        let cooldownInterval = null;
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            // 在載入題目前檢查冷卻狀態
+            if (checkCooldown()) return;
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            document.querySelector('.quiz-pane').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 【關鍵】完成了全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

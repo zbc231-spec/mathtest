@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第六單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -200,58 +200,57 @@
     <script>
         // 1. 完整 50 題題庫
       const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
+ // 追加的分數加減法 50 題題庫 (完全保留原始敘述)
+  { "q": "5 1/6 - 2 4/15", "a": { "whole": "2", "num": "9", "den": "10" }, "type": "fraction" },
+  { "q": "10/21 + 11/9", "a": { "whole": "1", "num": "44", "den": "63" }, "type": "fraction" },
+  { "q": "27/8 - 2 5/12", "a": { "whole": "0", "num": "23", "den": "24" }, "type": "fraction" },
+  { "q": "15/34 + 3/17", "a": { "whole": "0", "num": "21", "den": "34" }, "type": "fraction" },
+  { "q": "43/63 - 12/21", "a": { "whole": "0", "num": "1", "den": "9" }, "type": "fraction" },
+  { "q": "15/12 + 2 7/18", "a": { "whole": "3", "num": "23", "den": "36" }, "type": "fraction" },
+  { "q": "9/5 - 9/8", "a": { "whole": "0", "num": "27", "den": "40" }, "type": "fraction" },
+  { "q": "3/16 + 1/4", "a": { "whole": "0", "num": "7", "den": "16" }, "type": "fraction" },
+  { "q": "9/14 - 1/3", "a": { "whole": "0", "num": "13", "den": "42" }, "type": "fraction" },
+  { "q": "5/6 + 6/7", "a": { "whole": "1", "num": "29", "den": "42" }, "type": "fraction" },
+  { "q": "63/91 - 9/13", "a": "0", "type": "normal" },
+  { "q": "48/36 + 50/45", "a": { "whole": "2", "num": "4", "den": "9" }, "type": "fraction" },
+  { "q": "2/5 + 7/8", "a": { "whole": "1", "num": "11", "den": "40" }, "type": "fraction" },
+  { "q": "104/48 - 143/78", "a": { "whole": "0", "num": "1", "den": "3" }, "type": "fraction" },
+  { "q": "2 4/5 - 5/4", "a": { "whole": "1", "num": "11", "den": "20" }, "type": "fraction" },
+  { "q": "3 5/6 + 2 5/8", "a": { "whole": "6", "num": "11", "den": "24" }, "type": "fraction" },
+  { "q": "23/18 - 13/12", "a": { "whole": "0", "num": "7", "den": "36" }, "type": "fraction" },
+  { "q": "1 12/42 + 2 28/56", "a": { "whole": "3", "num": "11", "den": "14" }, "type": "fraction" },
+  { "q": "4/15 + 9/10", "a": { "whole": "1", "num": "1", "den": "6" }, "type": "fraction" },
+  { "q": "3 35/56 - 1 84/96", "a": { "whole": "1", "num": "3", "den": "4" }, "type": "fraction" },
+  { "q": "13/8 + 5/12", "a": { "whole": "2", "num": "1", "den": "24" }, "type": "fraction" },
+  { "q": "45/27 - 16/72", "a": { "whole": "1", "num": "4", "den": "9" }, "type": "fraction" },
+  { "q": "7/8 - 3/7", "a": { "whole": "0", "num": "25", "den": "56" }, "type": "fraction" },
+  { "q": "1 3/5 + 8/3", "a": { "whole": "4", "num": "4", "den": "15" }, "type": "fraction" },
+  { "q": "2/5 + 4/9", "a": { "whole": "0", "num": "38", "den": "45" }, "type": "fraction" },
+  { "q": "11/15 - 7/10", "a": { "whole": "0", "num": "1", "den": "30" }, "type": "fraction" },
+  { "q": "9/14 + 8/21", "a": { "whole": "1", "num": "1", "den": "42" }, "type": "fraction" },
+  { "q": "5/12 - 1/3", "a": { "whole": "0", "num": "1", "den": "12" }, "type": "fraction" },
+  { "q": "4 2/10 - 2 4/20", "a": "2", "type": "normal" },
+  { "q": "2/27 + 4/9", "a": { "whole": "0", "num": "14", "den": "27" }, "type": "fraction" },
+  { "q": "師傅把 4 15/20公斤的杏仁粉倒入鐵桶後，連鐵桶共重6 21/35公斤，鐵桶的重量是幾公斤？", "a": { "whole": "1", "num": "17", "den": "20" }, "type": "fraction" },
+  { "q": "辰語家原有2 12/18箱柚子，吃掉1 11/12箱後，家裡剩下幾箱柚子？", "a": { "whole": "0", "num": "3", "den": "4" }, "type": "fraction" },
+  { "q": "有尼龍繩和麻繩各一捆，麻繩長5 2/5公尺，比尼龍繩短1 24/25公尺，尼龍繩長幾公尺？", "a": { "whole": "7", "num": "9", "den": "25" }, "type": "fraction" },
+  { "q": "膠管長7/8公尺，木棒長2/5公尺，塑膠管比木棒長幾公尺？", "a": { "whole": "0", "num": "19", "den": "40" }, "type": "fraction" },
+  { "q": "超商昨天進貨1 12/15箱雞蛋，今天進貨3 18/20箱雞蛋，這兩天共進貨幾箱雞蛋？", "a": { "whole": "5", "num": "7", "den": "10" }, "type": "fraction" },
+  { "q": "芮語從家裡出發，前往相距4 2/7公里的奶奶家，她已經走了11/3公里，距奶奶家還剩下幾公里？", "a": { "whole": "0", "num": "13", "den": "21" }, "type": "fraction" },
+  { "q": "小吃店進貨一桶醬油膏，用掉3 9/15公升後，剩下1 8/20公升，這桶醬油膏原有幾公升？", "a": "5", "type": "normal" },
+  { "q": "水桶裡原有5/8公升的水，再倒入7/12公升後，水桶裡現在有幾公升的水？", "a": { "whole": "1", "num": "5", "den": "24" }, "type": "fraction" },
+  { "q": "有一個箱子，裝入6 3/4公斤的木炭後，連箱子共重8 3/5公斤，箱子重幾公斤？", "a": { "whole": "1", "num": "17", "den": "20" }, "type": "fraction" },
+  { "q": "阿邦上午採收了4 12/40公斤的橘子，下午採收了5 15/25公斤，阿邦今天共採收了幾公斤的橘子？", "a": { "whole": "9", "num": "9", "den": "10" }, "type": "fraction" },
+  { "q": "大水缸裝了21/12公升的水，小水缸裝了56/35公升的水，大水缸比小水缸多裝了幾公升的水？", "a": { "whole": "0", "num": "3", "den": "20" }, "type": "fraction" },
+  { "q": "小田練習賽跑，上午跑了8/10公里，下午跑了20/15公里，他共跑了幾公里？", "a": { "whole": "2", "num": "2", "den": "15" }, "type": "fraction" },
+  { "q": "雜貨店裡有4 5/8桶巧克力球，這星期賣出11/6桶，雜貨店裡還剩下幾桶巧克力球？", "a": { "whole": "2", "num": "19", "den": "24" }, "type": "fraction" },
+  { "q": "藍色緞帶長12/10公尺，藍色緞帶比黃色緞帶短3/8公尺，黃色緞帶長幾公尺？", "a": { "whole": "1", "num": "23", "den": "40" }, "type": "fraction" },
+  { "q": "超商昨天進貨1 12/15箱雞蛋，今天進貨3 18/20箱雞蛋，這兩天共進貨幾箱雞蛋？", "a": { "whole": "5", "num": "7", "den": "10" }, "type": "fraction" },
+  { "q": "小溪從家裡出發，前往相距2 6/10公里的美術館，他已經走了1 6/8 公里，小溪距離美術館還剩下幾公里？", "a": { "whole": "0", "num": "17", "den": "20" }, "type": "fraction" },
+  { "q": "鐵桶重11/5公斤，師傅倒入一些麵粉後，連鐵桶共重8 1/4公斤，師傅倒入幾公斤的麵粉？", "a": { "whole": "6", "num": "1", "den": "20" }, "type": "fraction" },
+  { "q": "師傅把4 15/20公斤的杏仁粉倒入鐵桶後，連鐵桶共重6 21/35公斤，鐵桶的重量是幾公斤？", "a": { "whole": "1", "num": "17", "den": "20" }, "type": "fraction" },
+  { "q": "大瓶子的容量是19/12公升，小瓶子的容量是21/16公升，大瓶子的容量比小瓶子多幾公升？", "a": { "whole": "0", "num": "13", "den": "48" }, "type": "fraction" },
+  { "q": "小亦從家裡走到學校要48/10分鐘，從學校走到郵局要5 15/25分鐘，小亦從家裡經過學校走到郵局要幾分鐘？", "a": { "whole": "10", "num": "2", "den": "5" }, "type": "fraction" }
 ];
         let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
@@ -389,13 +388,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-6-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-6-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -417,7 +416,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             }
         }
 
-  function endGame(status) {
+ function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             

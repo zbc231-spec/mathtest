@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五下-第七單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -199,62 +199,62 @@
 
     <script>
         // 1. 完整 50 題題庫
+// 1. 完整 50 題題庫 (完全保留原始敘述，分數採用符合網頁 RegEx 渲染之格式)
       const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
+  { "q": "尚宣想買一臺定價28000元的冷氣機，各家商店有不同的促銷活動。\n1號店：全館一律9折，折扣後滿1000元，再享9折。\n2號店：全館18％ off\n3號店：服飾8折、家電85折，日用品9折"。他在幾號店買的冷氣機會最便宜？, "a": "1", "type": "normal" },
+  { "q": "哈哈國小的男生人數占全校人數的比率是 8/15，全校有1200人，男生有（　　）人。", "a": "640", "type": "normal" },
+  { "q": "哈哈國小的男生人數占全校人數的比率是 8/15，全校有1200人，女生有（　　）人。", "a": "560", "type": "normal" },
+  { "q": "一本哈利波特有860頁，亦泰已經讀完全部的 3/4，請問剩下的頁數是（　　）頁。", "a": "215", "type": "normal" },
+  { "q": "小胖練習投籃，每投5球就進3球，假設命中率維持不變，他投40球會投進（　　）球。", "a": "24", "type": "normal" },
+  { "q": "雄雄參加籃球比賽，他上半場兩分球出手20次，命中率是0.4，他上半場可得（　　）分。", "a": "16", "type": "normal" },
+  { "q": "沛君班上有40人，這次數學考試成績及格的人數占全班人數的85％，不及格的人數有（　　）人。", "a": "6", "type": "normal" },
+  { "q": "一位棒球選手的打擊率是三成五，表示擊出安打的百分率是（　　）％。", "a": "35", "type": "normal" },
+  { "q": "把定價500元的物品減少30％的價錢賣出，是打了幾折？", "a": "7", "type": "normal" },
+  { "q": "政芬參加法律常識測驗40題，答錯的題目占全部的15％，政芬答對的題目有（　　）題。", "a": "34", "type": "normal" },
+  { "q": "將小數化成百分率。0.037＝（　　）％", "a": "3.7", "type": "normal" },
+  { "q": "將小數化成百分率.0.055＝（　　）％", "a": "5.5", "type": "normal" },
+  { "q": "將小數化成百分率。0.099＝（　　）％", "a": "9.9", "type": "normal" },
+  { "q": "將小數化成百分率。0.798＝（　　）％", "a": "79.8", "type": "normal" },
+  { "q": "將小數化成百分率。0.062＝（　　）％", "a": "6.2", "type": "normal" },
+  { "q": "將分數化成百分率。3/5＝（　　）％", "a": "60", "type": "normal" },
+  { "q": "將分數化成百分率。3/8＝（　　）％", "a": "37.5", "type": "normal" },
+  { "q": "將分數化成百分率。4/5＝（　　）％", "a": "80", "type": "normal" },
+  { "q": "將分數化成百分率。49/50＝（　　）％", "a": "98", "type": "normal" },
+  { "q": "將分數化成百分率。7/8＝（　　）％", "a": "87.5", "type": "normal" },
+  { "q": "把百分率換算成小數：\n45％＝（　　）", "a": "0.45", "type": "normal" },
+  { "q": "把百分率換算成小數：\n43.5％＝（　　）", "a": "0.435", "type": "normal" },
+  { "q": "把百分率換算成最簡分數：\n26％＝（　　）", "a": { "whole": "0", "num": "13", "den": "50" }, "type": "fraction" },
+  { "q": "把百分率換算成小數：\n64％＝（　　）", "a": "0.64", "type": "normal" },
+  { "q": "把百分率換算成小數：\n0.63％＝（　　）", "a": "0.0063", "type": "normal" },
+  { "q": "把百分率換算成小數：\n2.3％＝（　　）", "a": "0.023", "type": "normal" },
+  { "q": "把百分率換算成小數：\n72.8％＝（　　）", "a": "0.728", "type": "normal" },
+  { "q": "把百分率換算成小數：\n8.2％＝（　　）", "a": "0.082", "type": "normal" },
+  { "q": "把百分率換算成小數：\n0.5％＝（　　）", "a": "0.005", "type": "normal" },
+  { "q": "把百分率換算成小數：\n8％＝（　　）", "a": "0.08", "type": "normal" },
+  { "q": "三多國小舉行自治縣長選舉，有1250人參加投票，1號候選人的得票率是46.8％，2號候選人的得票率是 52/100，兩人的得票數相差幾票？", "a": "65", "type": "normal" },
+  { "q": "東東百貨週年慶，全館八折，媽媽買了一件定價3500元的衣服，要花幾元？", "a": "2800", "type": "normal" },
+  { "q": "一臺電視機的成本是29000元，加上10％當定價，再打七折出售，售價是多少元？", "a": "22330", "type": "normal" },
+  { "q": "一件毛衣的定價是1600元，打九折出售，售價是幾元？", "a": "1440", "type": "normal" },
+  { "q": "400公克的拿鐵咖啡中，含有72公克的濃縮咖啡，濃縮咖啡占拿鐵咖啡的多少％？", "a": "18", "type": "normal" },
+  { "q": "美術社進貨150瓶的油畫顏料，紅色占全部的23％，綠色占全部的17％，黃色占全部的8％，藍色占全部的12％，剩下的是黑色，黑色顏料有幾瓶？", "a": "60", "type": "normal" },
+  { "q": "立法委員選舉，欣平里有投票權的人數是750人，欣平里的投票率是六成，欣平里當天實際投票人數有幾人？", "a": "450", "type": "normal" },
+  { "q": "六年甲班學生有25人，這次期中考考90分以上的有6人；六年乙班有學生27人，這次期中考考90分以上的有7人，兩班學生合計考90分以上的百分率是多少%？", "a": "25", "type": "normal" },
+  { "q": "雜貨店老闆以每公斤30元買進雞蛋50公斤，但在搬運過程中有10％的雞蛋打破了。如果他想有20％的盈利，那麼雞蛋每公斤要賣多少元？", "a": "40", "type": "normal" },
+  { "q": "一杯600㏄的木瓜牛奶中，有30㏄的果糖，果糖占木瓜牛奶的多少％？", "a": "5", "type": "normal" },
+  { "q": "中央選舉委員會規定，市長參選人需要繳交200萬元的參選保證金，若得票率達到總投票數的10％，就可以拿回保證金。若今年臺南市市長選舉的總投票數是1546860票，候選人想拿回保證金最少需要獲得幾票？", "a": "154686", "type": "normal" },
+  { "q": "定價1200元的行動電源打5折，售價是幾元？", "a": "600", "type": "normal" },
+  { "q": "五年甲班有25人，投票選出模範生，共有20人投票，五年甲班的投票率是多少%？", "a": "80", "type": "normal" },
+  { "q": "小全參加生活常識測驗，共有40題。若小全全部做完，且答對85％，他答錯了幾題？", "a": "6", "type": "normal" },
+  { "q": "百貨公司週年慶，電器用品一律打8折。一臺電視遊樂器定價8000元，售價是多少元？", "a": "6400", "type": "normal" },
+  { "q": "將本金1200000元存入銀行的一年定期存款，年利率是1.5％，一年後，全部本金含利息共可領回多少元？", "a": "1218000", "type": "normal" },
+  { "q": "光華國小的學生有1800人，男生人數占全部的62％，光華國小的男生有多少人？", "a": "1116", "type": "normal" },
+  { "q": "名星國小五年級共有500人，這次校外教學活動有450人參加，參加此次校外教學活動的人數占五年級學生人數的百分率是多少%？", "a": "90", "type": "normal" },
+  { "q": "一輛成本1500元的腳踏車，老闆加二成作為定價，定價是幾元？", "a": "1800", "type": "normal" },
+  { "q": "體育用品店的鞋子全面降2成出售，小律買了一雙定價2750元的球鞋，這雙球鞋的售價是幾元？", "a": "2200", "type": "normal" }
 ];
-        let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
-        const totalQuizCount = 20;
+
+        let currentQuestions = [], currentIndex = 0, hp = 30, coins = 0;
+        const totalQuizCount = 30;
         const today = new Date().toDateString();
 //修改啟動邏輯 (window.onload)
  window.onload = function() {
@@ -270,7 +270,7 @@
 };
 
         function initGame() {
-            hp = 15; coins = 0; currentIndex = 0;
+            hp = 30; coins = 0; currentIndex = 0;
             updateHearts();
             updateProgressBar();
             currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
@@ -389,13 +389,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-2-7-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-2-7-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -417,48 +417,44 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             }
         }
 
-  function endGame(status) {
-            // 1. 隱藏遊戲主容器
-            document.getElementById('game-area').classList.add('hidden');
-            
-            let statusTxt = document.getElementById('final-status-text');
-            let bgImg = "b-stop.jpg"; // 預設背景
-            let detailTxt = "請至秘書處登記獎勵點數！";    
+        function endGame(status) {
+    // 1. 隱藏遊戲主容器
+    document.getElementById('game-area').classList.add('hidden');
+    
+    let statusTxt = document.getElementById('final-status-text');
+    let bgImg = "stop.jpg"; // 預設背景（中途停止）
+    let detailTxt = "";    // 用來存額外的描述文字
 
-            // 2. 根據不同狀態與血量條件給予對應的文字與背景
-            if (status === 'win') { 
-                // 完成 20 關（win 代表打完所有題目）
-                if (hp >= 14) {
-                    // 血量在 14 以上：成功打敗魔王！
-                    statusTxt.innerText = "恭喜你通過考驗！打敗魔王！";
-                    bgImg = "b-win.jpg";
-                    coins += 5; // 如果滿血/高血量通關想額外加 5 點可以保留，不要的話刪除這行
-                } else {
-                    // 血量在 14 以下：雖然打完 20 關但血太少
-                    statusTxt.innerText = "差一點點！被魔王殘血逃跑了，下次加油！";
-                    bgImg = "b-stop.jpg";
-                }
-            } else if (status === 'lose') { 
-                // 挑戰失敗（血量歸零）
-                statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
-                bgImg = "b-lose.jpg";
-            } else if (status === 'stop') {
-                // 中途結束（點擊「結束挑戰」按鈕）
-                statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
-                bgImg = "b-stop.jpg";
-            }
-            
-            // 3. 更新畫面內容
-            document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
-            document.getElementById('final-coins').innerText = coins;
-            
-            const pTag = document.querySelector('#final-screen p');
-            if (pTag) pTag.innerText = detailTxt;
+    // 2. 根據不同狀態給予對應的文字與背景
+    if (status === 'win') { 
+        statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        // 修改這裡：如果滿血(30滴)通關，額外加 5 點，否則不加。
+    if (hp >= 30) {
+        coins += 5; 
+    }
+        bgImg = "b-win.jpg";
+    } else if (status === 'lose') { 
+        statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-lose.jpg";
+    } else if (status === 'stop') {
+        statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
+        detailTxt = "請至秘書處登記獎勵點數！";
+        bgImg = "b-stop.jpg";
+    }
+    
+    // 3. 更新畫面內容
+    document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
+    document.getElementById('final-coins').innerText = coins;
+    
+    // 這裡我假設你的 HTML 裡結算頁面有個 <p> 標籤，我們把詳細文字塞進去
+    const pTag = document.querySelector('#final-screen p');
+    if (pTag) pTag.innerText = detailTxt;
 
-            // 4. 顯示結算畫面
-            document.getElementById('final-screen').classList.remove('hidden');
-        }
-
+    // 4. 顯示結算畫面
+    document.getElementById('final-screen').classList.remove('hidden');
+}
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第三單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -198,62 +198,60 @@
     </div>
 
     <script>
-        // 1. 完整 50 題題庫
-      const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
-];
-        let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
+ // 追加的 50 題圖表題庫 (已完整包含 img 圖片標記與精確答案)
+   const masterQuestionBank = [
+// 50 題幾何與角度單元題庫
+  { q: "有一個等腰三角形，頂角是70度，兩個底角都是幾度？", a: "55", type: "normal" },
+  { q: "三角形有a、b、c三邊，a邊長是13公分，b邊長是12公分，c邊長的最大整數是多少公分？", a: "24", type: "normal" },
+  { q: "三角形內的3個角中，最多有幾個直角？", a: "1", type: "normal" },
+  { q: "一個三角形最多有幾個鈍角？", a: "1", type: "normal" },
+  { q: "下列選項中，哪一組長度的扣條可以組成一個三角形？<br>(1)5公分、5公分、10公分。<br>(2)2公分、2公分、7公分。<br>(3)3公分、4公分、9公分。<br>(4)4公分、5公分、7公分。", a: "4", type: "normal" },
+  { q: "阿倫將寬為15公分的長方形紙板隨意剪成兩部分，下列哪個圖形可能是阿倫剪出來的？(單位：公分)<br><img src='z513-06.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3", type: "normal" },
+  { q: "正五邊形有▲個一樣長的邊，◆個一樣大的角。請問▲＋◆＝？", a: "10", type: "normal" },
+  { q: "三角形的3個角不可能是下面哪一組？<br>(1)36、55、89。<br>(2)70、70、40。<br>(3)10、80、90。<br>(4)42、38、90。", a: "4", type: "normal" },
+  { q: "下面哪一組長度可以排成一個三角形？<br>(1)4.3 cm、6.7 cm、10cm。<br>(2)3 cm、4 cm、7cm。<br>(3)8cm、10cm、19cm。<br>(4)5cm、6cm、11cm。", a: "1", type: "normal" },
+  { q: "已知三角形兩邊長為8cm、19cm，第三邊的長可能是下面哪一個？<br>(1)28cm。<br>(2)27cm。<br>(3)11cm。<br>(4)12cm。", a: "4", type: "normal" },
+  { q: "下面圖形的內角和是（   ）度。<br><img src='z513-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "540", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-12.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "65", type: "normal" },
+  { q: "下面圖形的內角和是（   ）度。<br><img src='z513-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1080", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-14.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "70", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "127", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-16.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "30", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "35", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-18.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "115", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "60", type: "normal" },
+  { q: "算出下面圖形∠ㄅ的角度。<br><img src='z513-20.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "58", type: "normal" },
+  { q: "下圖中，三角形ABC和三角形CBD都是等腰三角形，∠1的角度是幾度？<br><img src='z513-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "21", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-22.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "85", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "54", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-24.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "50", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-25.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "75", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "50", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-27.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "100", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-28.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "115", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "75", type: "normal" },
+  { q: "算出下面圖形∠B的角度。<br><img src='z513-30.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "80", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-31.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "95", type: "normal" },
+  { q: "算出下面圖形∠1的角度。<br><img src='z513-32.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "118", type: "normal" },
+  { q: "算出下面圖形∠1的角度。<br><img src='z513-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "55", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-34.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "110", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-35.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "125", type: "normal" },
+  { q: "算出下面圖形∠ㄅ的角度。<br><img src='z513-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "70", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-37.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "85", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-38.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "47", type: "normal" },
+  { q: "算出下面圖形∠1的角度。<br><img src='z513-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "43", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-40.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "60", type: "normal" },
+  { q: "算出下面圖形∠1的角度。<br><img src='z513-41.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "105", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "80", type: "normal" },
+  { q: "算出下面圖形∠1的角度。<br><img src='z513-43.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "102", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-44.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "114", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "45", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-46.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "125", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-47.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "65", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-48.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "54", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-49.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "100", type: "normal" },
+  { q: "算出下面圖形（）裡的角度。<br><img src='z513-50.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "40", type: "normal" }    ];   
+ let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
         const today = new Date().toDateString();
 //修改啟動邏輯 (window.onload)
@@ -389,13 +387,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-3-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-3-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -416,8 +414,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
                 renderQuestion();
             }
         }
-
-  function endGame(status) {
+function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             
@@ -458,7 +455,6 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             // 4. 顯示結算畫面
             document.getElementById('final-screen').classList.remove('hidden');
         }
-
     </script>
 </body>
 </html>

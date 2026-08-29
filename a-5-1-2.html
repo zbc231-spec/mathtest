@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第二單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -198,61 +198,59 @@
     </div>
 
     <script>
-        // 1. 完整 50 題題庫
-      const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
-];
+ // 追加的 50 題圖表題庫 (已完整包含 img 圖片標記與精確答案)
+   const masterQuestionBank = [
+// 50 題因數與倍數單元題庫
+  { q: "75和90的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3/5/15", type: "normal" },
+  { q: "3325，6601，7730，22850，949572這5個數中，有哪些是10的倍數？(由小到大寫出，答案中間用/隔開)", a: "7730，22850", type: "normal" },
+  { q: "7和22的公倍數中最小的是多少？", a: "154", type: "normal" },
+  { q: "49的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/7/49", type: "normal" },
+  { q: "11×12＝132，132是（  ）和（  ）的倍數。(由小到大寫出，答案中間用/隔開)", a: "11/12", type: "normal" },
+  { q: "0和50的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/5/10", type: "normal" },
+  { q: "24 的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/3/4/6/8/12/24", type: "normal" },
+  { q: "28的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/4/7/14/28", type: "normal" },
+  { q: "21和42的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3/7/21", type: "normal" },
+  { q: "4和6的公倍數由小到大寫出3個。(答案中間用/隔開)", a: "12/24/36", type: "normal" },
+  { q: "12和30的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/3/6", type: "normal" },
+  { q: "47的倍數中，最接近2000的數是多少？", a: "2021", type: "normal" },
+  { q: "100的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/4/5/10/20/25/50/100", type: "normal" },
+  { q: "42的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/3/6/7/14/21/42", type: "normal" },
+  { q: "27和39的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3", type: "normal" },
+  { q: "63的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3/7/9/21/63", type: "normal" },
+  { q: "16和40的公倍數中最小的是多少？", a: "80", type: "normal" },
+  { q: "32的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/4/8/16/32", type: "normal" },
+  { q: "26和39的公倍數由小到大寫出3個。(答案中間用/隔開)", a: "78/156/234", type: "normal" },
+  { q: "39和117的公因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3/13/39", type: "normal" },
+  { q: "36的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/3/4/6/9/12/18/36", type: "normal" },
+  { q: "17的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/17", type: "normal" },
+  { q: "20和30的公倍數由小到大寫出3個。(答案中間用/隔開)", a: "60/120/180", type: "normal" },
+  { q: "8和14的公倍數中最小的是多少？", a: "56", type: "normal" },
+  { q: "56的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/2/4/7/8/14/28/56", type: "normal" },
+  { q: "在15×6＝90的算式中，15和6都是90的(  ）數，90是15的(  ）數，也是6的(  ）數。（按順序填因或倍，答案中間用/隔開）", a: "因/倍/倍", type: "normal" },
+  { q: "甲數能被乙數整除時，乙數就是甲數的（  ）數。（填因或倍）", a: "因", type: "normal" },
+  { q: "在12×6＝72的算式中，6和12都是72的（  ）數，而72是12的（  ）數，也是6的（  ）數。（按順序填因或倍，答案中間用/隔開）", a: "因/倍/倍", type: "normal" },
+  { q: "27的因數有哪些？(由小到大寫出，答案中間用/隔開)", a: "1/3/9/27", type: "normal" },
+  { q: "在13×6＝78的算式中，13和6都是78的（  ）數，而78是13的（  ）數，也是6的（  ）數。（按順序填因或倍，答案中間用/隔開）", a: "因/倍/倍", type: "normal" },
+  { q: "汽水的數量在50～70瓶之間，每8瓶裝成一盒可以剛好裝完，汽水可能有幾瓶？(由小到大寫出，答案中間用/隔開)", a: "56/64", type: "normal" },
+  { q: "27個紅球和18個白球分成數堆，每堆紅球一樣多，每堆的白球也一樣多，全部分完，最多可以分成幾堆？", a: "9", type: "normal" },
+  { q: "有一個比5大且比10小的數，能同時整除32和56，這個數是多少？", a: "8", type: "normal" },
+  { q: "45顆果凍要平分給幾個人，可以剛好分完？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/3/5/9/15/45", type: "normal" },
+  { q: "把24顆櫻桃和42顆番茄平分給小朋友，每個人分到的櫻桃一樣多，分到的番茄也一樣多，且全部分完，可以分給幾個小朋友？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/3/6", type: "normal" },
+  { q: "一袋彈珠不足100顆，每14顆裝成1包或21顆裝成1包，都剛好裝完，這袋彈珠有幾顆？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "42/84", type: "normal" },
+  { q: "汽水糖的數量在200～250顆之間，把汽水糖平分成15堆可以剛好分完，汽水糖有幾顆？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "210/225/240", type: "normal" },
+  { q: "老師有16枝鉛筆和20枝原子筆，要分給小朋友，每個人分到的鉛筆一樣多，原子筆也一樣多，且全部分完，最多能分給幾個小朋友？", a: "4", type: "normal" },
+  { q: "有一堆薄餅，每19片裝一盒剛好裝完。如果這堆薄餅的數量接近400片且比400片少，這堆薄餅最多有幾片？", a: "399", type: "normal" },
+  { q: "24個蘋果和32個棗子要分裝成禮盒，每盒蘋果一樣多，棗子也一樣多，全部分完，可能分成幾盒？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/4/8", type: "normal" },
+  { q: "小瑛有一些錢幣，平分成6堆、9堆，都剛好分完，小瑛最少有幾個錢幣？", a: "18", type: "normal" },
+  { q: "有42顆糖果分成每袋一樣多又剛好分完，可能分成幾袋？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/3/6/7/14/21/42", type: "normal" },
+  { q: "泓志有三十幾個公仔，平分成4堆，剛好分完，泓志可能有幾個公仔？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "32/36", type: "normal" },
+  { q: "能同時整除32和56的數中，比5大且比10小的數是多少？", a: "8", type: "normal" },
+  { q: "把一張長20公分、寬12公分的長方形圖畫紙剪成數個一樣大的小正方形，小正方形的邊長為整數公分且全部剪完，小正方形的最大的邊長是幾公分？", a: "4", type: "normal" },
+  { q: "40張明信片要平分成幾堆，才可以剛好分完？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/4/5/8/10/20/40", type: "normal" },
+  { q: "偉殷有16個手套和24枝球棒，要平分給小朋友，每人分到的手套一樣多，球棒一樣多，且全部分完，可以平分給幾個小朋友？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/4/8", type: "normal" },
+  { q: "五年甲班有36 人，進行分組遊戲，每組人數要一樣多。一組分成幾人時，可以剛好分完？（由小到大寫出所有可能的答案，答案中間用/隔開）", a: "1/2/3/4/6/9/12/18/36", type: "normal" },
+  { q: "用長28公分、寬21公分的長方形，緊密且不重疊地排出一個正方形，正方形的邊長最小是幾公分？", a: "84", type: "normal" },
+  { q: "老師把56張圖畫紙平分給班上學生，可以剛好分完，已知學生人數在20～30個之間，班上學生共有幾個人？", a: "28", type: "normal" }];
         let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
         const today = new Date().toDateString();
@@ -389,13 +387,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-2-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-2-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -416,8 +414,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
                 renderQuestion();
             }
         }
-
-  function endGame(status) {
+function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             
@@ -458,7 +455,6 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             // 4. 顯示結算畫面
             document.getElementById('final-screen').classList.remove('hidden');
         }
-
     </script>
 </body>
 </html>

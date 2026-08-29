@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第一單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -198,60 +198,59 @@
     </div>
 
     <script>
-        // 1. 完整 50 題題庫
-      const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
+ // 追加的 50 題圖表題庫 (已完整包含 img 圖片標記與精確答案)
+   const masterQuestionBank = [
+ // 追加的 50 題圖表題庫 (已套用您系統正常的 HTML 內嵌圖片格式)
+  { q: "下面是小加觀察4月30日9時到16時的氣溫變化折線圖，（  ）時的氣溫最高。<br><img src='z511-01.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "14", type: "normal" },
+  { q: "下面是小加觀察4月30日9時到16時的氣溫變化折線圖，相鄰的兩個時刻，從（  ）時到（  ）時的氣溫變化最大。【若有兩個答案，中間用/分開】<br><img src='z511-01.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "10/11", type: "normal" },
+  { q: "下面是向上國小五年級學生最喜歡的顏色長條圖，男生和女生最喜歡的顏色中，人數一樣多的是（  ）色。<br><img src='z511-03.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "紅", type: "normal" },
+  { q: "下面是向上國小五年級學生最喜歡的顏色長條圖，最喜歡黃色的男生和女生相差（  ）個人。<br><img src='z511-03.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面是東光國小五年級男生和女生的人數長條圖，五年級人數最多的班級是（  ）班。<br><img src='z511-05.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面是東光國小五年級男生和女生的人數長條圖，（  ）班的男生人數最多。<br><img src='z511-05.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面是玄武鎮一月～六月的平均氣溫折線圖，（  ）月的平均氣溫最低。<br><img src='z511-07.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "下面是玄武鎮一月～六月的平均氣溫折線圖，從（  ）月到（  ）月的平均氣溫是下降的。【若有兩個答案，中間用/分開】<br><img src='z511-07.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1/2", type: "normal" },
+  { q: "下面是曉明國小各年級學生人數折線圖，（  ）年級的學生人數最多。<br><img src='z511-09.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面是曉明國小各年級學生人數折線圖，（  ）年級的學生人數最少。<br><img src='z511-09.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面是吉利動物園去年下半年購票人次長條圖，（  ）月的購買總人次最多，是（  ）人次。【若有兩個答案，中間用/分開】<br><img src='z511-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "12/18000", type: "normal" },
+  { q: "下面是吉利動物園去年下半年購票人次長條圖，（  ）月的購買總人次最少，是（  ）人次。【若有兩個答案，中間用/分開】<br><img src='z511-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "9/9000", type: "normal" },
+  { q: "下面是好便宜便利商店一月～六月的營業收入統計表，（  ）月的營業收入最多。<br><img src='z511-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5", type: "normal" },
+  { q: "下面是好便宜便利商店一月～六月的營業收入統計表，（  ）月的營業收入最少。<br><img src='z511-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面是山泉國小五年級學生票選最喜歡的球類長條圖，喜歡排球的男生和女生共有（  ）個人。<br><img src='z511-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "11", type: "normal" },
+  { q: "下面是山泉國小五年級學生票選最喜歡的球類長條圖，（  ）男生和女生喜歡的人數一樣多。<br><img src='z511-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "桌球", type: "normal" },
+  { q: "下面是好用文具店一～五月賣出自動鉛筆的數量折線圖，從（  ）月到（  ）月自動鉛筆的銷售量是下降的。【若有兩個答案，中間用/分開】<br><img src='z511-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2/5", type: "normal" },
+  { q: "下面是好用文具店一～五月賣出自動鉛筆的數量折線圖，相鄰的兩個月，從（  ）月到（  ）月的銷售量變化最大。【若有兩個答案，中間用/分開】<br><img src='z511-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1/2", type: "normal" },
+  { q: "下面是123包子店上半年菜包和肉包的銷售量折線圖，肉包銷售量最少的是（  ）月，賣了（  ）個。【若有兩個答案，中間用/分開】<br><img src='z511-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3/260", type: "normal" },
+  { q: "下面是123包子店上半年菜包和肉包的銷售量折線圖，菜包和肉包銷售量相差最多的是（  ）月。<br><img src='z511-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面是四年6班全班學生社團分組活動的長條圖，四年6班參加舞蹈社的有（   ）人，參加文學社的有（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "9/5", type: "normal" },
+  { q: "下面是四年6班全班學生社團分組活動的長條圖，（   ）社參加的人數最多，是（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "舞蹈/9", type: "normal" },
+  { q: "下面是和平市一月～六月的平均氣溫折線圖，（  ）月的平均氣溫最高。<br><img src='z511-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6", type: "normal" },
+  { q: "下面是和平市一月～六月的平均氣溫折線圖，從（  ）月到（  ）月的平均氣溫是逐漸上升。【若有兩個答案，中間用/分開】<br><img src='z511-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2/6", type: "normal" },
+  { q: "下面是鳳凰國小全校學生最喜歡喝的茶品種類折線圖，喜歡喝（  ）的學生人數最多。<br><img src='z511-25.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "綠茶", type: "normal" },
+  { q: "下面是鳳凰國小全校學生最喜歡喝的茶品種類折線圖，喜歡喝（  ）的學生人數最少。<br><img src='z511-25.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "烏龍茶", type: "normal" },
+  { q: "下面是南一公司上半年的營業收入和支出折線圖，縱軸每一小格表示（  ）萬元。<br><img src='z511-27.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5", type: "normal" },
+  { q: "下面是南一公司上半年的營業收入和支出折線圖，南一公司上半年是賺或賠幾元？（  ），（ ）萬元。【若有兩個答案，中間用/分開】<br><img src='z511-27.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "賺/45", type: "normal" },
+  { q: "下面是四年忠班學生數學平時考成績長條圖，成績是70分的男生有（   ）人，女生有（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3/2", type: "normal" },
+  { q: "下面是四年忠班學生數學平時考成績長條圖，（   ）分的人數最少，是（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "70/5", type: "normal" },
+  { q: "下面是程程和祥祥一年級到六年級體重折線圖，祥祥的體重在相鄰的（  ）年級到（  ）年級之間增加最多。【若有兩個答案，中間用/分開】<br><img src='z511-31.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4/5", type: "normal" },
+  { q: "下面是程程和祥祥一年級到六年級體重折線圖，程程和祥祥在（  ）年級和（  ）年級時，兩人的體重皆是相差5公斤。【若有兩個答案，中間用/分開】<br><img src='z511-31.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5/6", type: "normal" },
+  { q: "下面是四年孝班家庭人口數的長條圖，家庭人口數是4人的學生人數有（  ）人，其中男生有（  ）人，女生有（  ）人。【若有兩個答案，中間用/分開】<br><img src='z511-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "10/6/4", type: "normal" },
+  { q: "下面是四年孝班家庭人口數的長條圖，家庭人口數最多的學生人數是（  ）人，家庭人口數最少的學生人數是（  ）人。【若有兩個答案，中間用/分開】<br><img src='z511-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5/4", type: "normal" },
+  { q: "下面是喬治和瑪莉1998年到2003年的年所得長條圖，兩人的年所得一樣多的年度是在（    ）年。<br><img src='z511-35.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2000", type: "normal" },
+  { q: "3下面是喬治和瑪莉1998年到2003年的年所得長條圖，喬治最高的年所得收入與瑪莉最高的年所得收入相差（    ）美元。<br><img src='z511-35.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5000", type: "normal" },
+  { q: "下面太陽神服飾店Ａ、Ｂ兩館上半年的營業額折線圖。A館和B館營業額相同的是（  ）月。<br><img src='z511-37.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "下面太陽神服飾店Ａ、Ｂ兩館上半年的營業額折線圖。上半年營業額持續增加的是（  ）館。<br><img src='z511-37.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "A", type: "normal" },
+  { q: "下面是新平國小 1年級到6年級男生、女生的平均體重折線圖，男生的體重從1年級到6年級是持續（  ）。（填入上升或下降）<br><img src='z511-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "上升", type: "normal" },
+  { q: "下面是新平國小 1年級到6年級男生、女生的平均體重折線圖，（  ）年級男生、女生的體重差距最小，相差（  ）公斤。【若有兩個答案，中間用/分開】<br><img src='z511-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2/2", type: "normal" },
+  { q: "下面是好吃麵包店上星期賣出紅豆麵包和桂圓麵包的數量折線圖，紅豆麵包在星期（  ）賣出最少，有（  ）個。【若有兩個答案，中間用/分開】<br><img src='z511-41.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5/35", type: "normal" },
+  { q: "下面是好吃麵包店上星期賣出紅豆麵包和桂圓麵包的數量折線圖，桂圓麵包在星期（  ）賣出最多，有（  ）個。【若有兩個答案，中間用/分開】<br><img src='z511-41.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3/60", type: "normal" },
+  { q: "下圖是民國97年到民國102年A和B農產品每公斤銷售價格折線圖，A農產品在民國（  ）年和（  ）年之間，價格漲幅最小。【若有兩個答案，中間用/分開】<br><img src='z511-43.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "97/98", type: "normal" },
+  { q: "下圖是民國97年到民國102年A和B農產品每公斤銷售價格折線圖，民國（  ）年A農產品和B農產品的價格相差最大。<br><img src='z511-43.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "99", type: "normal" },
+  { q: "下面是樂福調查全班同學最喜歡喝的飲料長條圖，最喜歡喝可樂的男生有（   ）人，女生有（  {人。【若有兩個答案，中間用/分開】<br><img src='z511-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "7/3", type: "normal" },
+  { q: "下面是樂福調查全班同學最喜歡喝的飲料長條圖，最喜歡喝紅茶的男生有（   ）人，女生有（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3/5", type: "normal" },
+  { q: "下面是市井國小各年級的性別人數長條圖，（   ）年級的總人數最多，有（   ）人。【若有兩個答案，中間用/分開】<br><img src='z511-47.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2/425", type: "normal" },
+  { q: "下面是市井國小各年級的性別人數長條圖，男生和女生一樣多的年級是（   ）年級和（   ）年級。【若有兩個答案，中間用/分開】<br><img src='z511-47.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1/5", type: "normal" },
+  { q: "下圖是大南遊樂園和東東遊樂園7月～12月營收折線圖，兩間遊樂園在（  ）月的營收差異最大。<br><img src='z511-49.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "12", type: "normal" },
+  { q: "下圖是大南遊樂園和東東遊樂園7月～12月營收折線圖，大南遊樂園在（  ）月和（  ）月之間的營收遞減最多。【若有兩個答案，中間用/分開】<br><img src='z511-49.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "8/9", type: "normal" }
 ];
         let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
@@ -389,13 +388,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-1-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-1-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -416,8 +415,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
                 renderQuestion();
             }
         }
-
-  function endGame(status) {
+function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             
@@ -458,7 +456,6 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             // 4. 顯示結算畫面
             document.getElementById('final-screen').classList.remove('hidden');
         }
-
     </script>
 </body>
 </html>

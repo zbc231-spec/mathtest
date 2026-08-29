@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>五上-熱身單元</title>
+    <title>五上-第四單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -200,56 +200,56 @@
     <script>
         // 1. 完整 50 題題庫
       const masterQuestionBank = [
-    { q: "52×625＝(　　)", a: "32500" },
-    { q: "60×800＝(　　)", a: "48000" },
-    { q: "62×600＝(　　)", a: "37200" },
-    { q: "66×939＝(　　)", a: "61974" },
-    { q: "80×469＝(　　)", a: "37520" },
-    { q: "60×100＝(　　)", a: "6000" },
-    { q: "25×198＝(　　)", a: "4950" },
-    { q: "48×500＝(　　)", a: "24000" },
-    { q: "40×314＝(　　)", a: "12560" },
-    { q: "12×500＝(　　)", a: "6000" },
-    { q: "40×700＝(　　)", a: "28000" },
-    { q: "95×550＝(　　)", a: "52250" },
-    { q: "95×200＝(　　)", a: "19000" },
-    { q: "80×712＝(　　)", a: "56960" },
-    { q: "58×406＝(　　)", a: "23548" },
-    { q: "65×800＝(　　)", a: "52000" },
-    { q: "19×700＝(　　)", a: "13300" },
-    { q: "71×184＝(　　)", a: "13064" },
-    { q: "90×500＝(　　)", a: "45000" },
-    { q: "24×734＝(　　)", a: "17616" },
-    { q: "88×100＝(　　)", a: "8800" },
-    { q: "70×419＝(　　)", a: "29330" },
-    { q: "18×253＝(　　)", a: "4554" },
-    { q: "65×400＝(　　)", a: "26000" },
-    { q: "74×602＝(　　)", a: "44548" },
-    { q: "7346÷119＝(　　)", a: "61" },
-    { q: "800÷100＝(　　)", a: "8" },
-    { q: "5330÷161＝(　　)", a: "33" },
-    { q: "900÷300＝(　　)", a: "3" },
-    { q: "3200÷400＝(　　)", a: "8" },
-    { q: "847÷121＝(　　)", a: "7" },
-    { q: "4900÷700＝(　　)", a: "7" },
-    { q: "4640÷232＝(　　)", a: "20" },
-    { q: "568÷142＝(　　)", a: "4" },
-    { q: "600÷300＝(　　)", a: "2" },
-    { q: "800÷200＝(　　)", a: "4" },
-    { q: "7560÷945＝(　　)", a: "8" },
-    { q: "1725÷575＝(　　)", a: "3" },
-    { q: "635÷127＝(　　)", a: "5" },
-    { q: "730÷146＝(　　)", a: "5" },
-    { q: "7905÷155＝(　　)", a: "51" },
-    { q: "9782÷134＝(　　)", a: "73" },
-    { q: "8883÷987＝(　　)", a: "9" },
-    { q: "4110÷137＝(　　)", a: "30" },
-    { q: "6048÷216＝(　　)", a: "28" },
-    { q: "750÷250＝(　　)", a: "3" },
-    { q: "9576÷456＝(　　)", a: "21" },
-    { q: "712÷178＝(　　)", a: "4" },
-    { q: "9625÷125＝(　　)", a: "77" },
-    { q: "9052÷146＝(　　)", a: "62" }
+  { q: "將下面分數用擴分的方法通分。 5/9,17/30(請照題目順序回答）", a: "50/90, 51/90", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 3/8,4/9(請照題目順序回答）", a: "27/72, 32/72", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 5/7,3/4(請照題目順序回答）", a: "20/28, 21/28", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 11/8,9/6(請照題目順序回答）", a: "33/24, 36/24", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 7/8,9/10(請照題目順序回答）", a: "35/40, 36/40", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 7/12,3/10(請照題目順序回答）", a: "35/60, 18/60", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 11/15,13/20(請照題目順序回答）", a: "44/60, 39/60", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 23/15,15/8(請照題目順序回答）", a: "184/120, 225/120", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 9/11,11/13(請照題目順序回答）", a: "117/143, 121/143", type: "normal" },
+  { q: "將下面分數用擴分的方法通分。 3/8,4/16(請照題目順序回答）", a: "6/16, 4/16", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 3/7,35/56(請照題目順序回答）", a: "24/56, 35/56", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 5/9,63/99(請照題目順序回答）", a: "55/99, 63/99", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 35/60,3/10(請照題目順序回答）", a: "35/60, 18/60", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 9/36,7/9(請照題目順序回答）", a: "9/36, 28/36", type: "normal" },
+  { q: "將下面分數用擴分的方法通分： 1 3/5,1 5/7(請照題目順序回答）", a: "1 21/35, 1 25/35", type: "normal" },
+  { q: "將下面分數化成分子相同的分數。2/5,5/16(請照題目順序回答）", a: "10/25, 10/32", type: "normal" },
+  { q: "將下面分數化成分子相同的分數。 4/13,5/11(請照題目順序回答）", a: "20/65, 20/44", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 13/17,22/34(請照題目順序回答）", a: "13/17, 11/17", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 30/48,9/16(請照題目順序回答）", a: "10/16, 9/16", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 6/27,10/18(請照題目順序回答）", a: "2/9, 5/9", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 24/28,30/42(請照題目順序回答）", a: "6/7, 5/7", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 30/34,33/51(請照題目順序回答）", a: "15/17, 11/17", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 18/26,24/39(請照題目順序回答）", a: "9/13, 8/13", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 9/15,20/25(請照題目順序回答）", a: "3/5, 4/5", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 15/40,35/56(請照題目順序回答）", a: "3/8, 5/8", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 15/25,2/5(請照題目順序回答）", a: "3/5, 2/5", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 1/4,18/24(請照題目順序回答）", a: "1/4, 3/4", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 3/8,30/48(請照題目順序回答）", a: "3/8, 5/8", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 12/42,6/7(請照題目順序回答）", a: "2/7, 6/7", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 36/78,8/1(請照題目順序回答）3", a: "6/13, 8/13", type: "normal" },
+  { q: "3/6 ＜ 3/0，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5", type: "normal" },
+  { q: "5/7 ＞ 0/14，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7/8/9", type: "normal" },
+  { q: "4/5 ＞ 0/10，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7", type: "normal" },
+  { q: "5/8 ＜ 5/0，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7", type: "normal" },
+  { q: "4/9 ＜ 4/0，0中可能是1、2、3……18、19、20的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7/8", type: "normal" },
+  { q: "1 3/4 = 1 0/8 = 1 0/12 = 1 30/0 （請由左至右寫出0的答案，答案中間用/隔開）", a: "6/9/40", type: "normal" },
+  { q: "154/182 = 0/13 = 77/0 = 0/117 （請由左至右寫出0的答案，答案中間用/隔開）", a: "11/91/99", type: "normal" },
+  { q: "9/12 = 0/24 = 45/0 = 54/0 = 0/108 （請由左至右寫出0的答案，答案中間用/隔開）", a: "18/60/72/81", type: "normal" },
+  { q: "28/24 = 0/6 = 14/0 = 0/30 （請由左至右寫出0的答案，答案中間用/隔開）", a: "7/12/35", type: "normal" },
+  { q: "64/48 = 0/3 = 8/0 = 0/9 （請由左至右寫出0的答案，答案中間用/隔開）", a: "4/6/12", type: "normal" },
+  { q: "5/9 = 10/0 = 0/45 = 50/0 （請由左至右寫出0的答案，答案中間用/隔開）", a: "18/25/90", type: "normal" },
+  { q: "18/72 = 0/36 = 3/0 = 1/0 （請由左至右寫出0的答案，答案中間用/隔開）", a: "9/12/4", type: "normal" },
+  { q: "7/13 = 28/0 = 0/91 （請由左至右寫出0的答案，答案中間用/隔開）", a: "52/49", type: "normal" },
+  { q: "3 45/50 = 3 0/10 = 3 18/0 = 3 0/30 （請由左至右寫出0的答案，答案中間用/隔開）", a: "9/20/27", type: "normal" },
+  { q: "26/39 = 0/3 = 0/6 = 10/0 = 0/30 （請由左至右寫出0的答案，答案中間用/隔開）", a: "2/4/15/20", type: "normal" },
+  { q: "用約分的方法找找看，和2 28/42一樣大的分數有哪些？(答案請依分母由小到大排列）", a: "2 2/3, 2 4/6, 2 14/21", type: "normal" },
+  { q: "用約分的方法找找看，和30/18一樣大的分數有哪些？(答案請依分母由小到大排列）", a: "3/5, 10/6, 15/9", type: "normal" },
+  { q: "利用擴分找出11/15所有分母小於100 的等值分數。(答案請依分母由小到大排列）", a: "22/30, 33/45, 44/60, 55/75, 66/90", type: "normal" },
+  { q: "用約分的方法找找看，和15/60一樣大的分數有哪些？(答案請依分母由小到大排列）", a: "1/4, 3/12, 5/20", type: "normal" },
+  { q: "用約分的方法找找看，和18/30一樣大的分數有哪些？(答案請依分母由小到大排列）", a: "3/5, 6/10, 9/15", type: "normal" }
 ];
         let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
@@ -285,14 +285,13 @@
             document.getElementById('progress-bar').style.width = (currentIndex / totalQuizCount) * 100 + "%";
         }
 
-        // 題目渲染：自動將題目字串轉為垂直分數
+// 題目渲染：自動智慧判斷真正的分數（如 35/60, 18/60）與一般分隔文字（如 1/2/3/4/5）
         function renderQuestion() {
             const qData = currentQuestions[currentIndex];
             let rawQ = qData.q;
             
-            // 轉換帶分數
+            // 轉換帶分數與純分數顯示
             let displayQ = rawQ.replace(/(\d+)又(\d+)\/(\d+)/g, `<span class="q-text-wrapper">$1<div class="q-fraction"><span class="q-num">$2</span><span class="q-line"></span><span class="q-den">$3</span></div></span>`);
-            // 轉換純分數
             displayQ = displayQ.replace(/(\d+)\/(\d+)/g, `<div class="q-fraction"><span class="q-num">$1</span><span class="q-line"></span><span class="q-den">$2</span></div>`);
 
             document.getElementById('question-text').innerHTML = `【第 ${currentIndex + 1} 題】<br><span class="q-main-content">${displayQ}</span>`;
@@ -300,15 +299,39 @@
             const inputArea = document.getElementById('input-area');
             inputArea.innerHTML = '';
 
+            // 判斷是否為「多個分數的答案」（用逗號隔開，且包含斜線，但斜線不超過 2 個）
+            const partsByComma = qData.a.split(/[,，]/).map(s => s.trim()).filter(s => s !== '');
+            const isMultiFraction = partsByComma.length > 1 && partsByComma.every(p => p.includes('/') && (p.match(/\//g) || []).length === 1);
+
             if (qData.type === 'fraction') {
                 inputArea.innerHTML = `
                     <div class="fraction-container">
-                        <div class="whole-number"><input type="number" id="ans-whole" placeholder="整"></div>
+                        <div class="whole-number"><input type="number" class="ans-whole" placeholder="整"></div>
                         <div class="fraction-input">
-                            <input type="number" id="ans-num" placeholder="子"><div class="line"></div><input type="number" id="ans-den" placeholder="母">
+                            <input type="number" class="ans-num" placeholder="子"><div class="line"></div><input type="number" class="ans-den" placeholder="母">
                         </div>
                     </div>`;
-            } else {
+            } 
+            else if (isMultiFraction) {
+                let containerHtml = `<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px;">`;
+                partsByComma.forEach((ans, idx) => {
+                    containerHtml += `
+                        <div class="multi-fraction-group fraction-container" style="font-size: 1.8rem;">
+                            <div class="whole-number"><input type="number" class="ans-whole" style="width:50px;" placeholder="整"></div>
+                            <div class="fraction-input">
+                                <input type="number" class="ans-num" style="width:50px;" placeholder="子">
+                                <div class="line"></div>
+                                <input type="number" class="ans-den" style="width:50px;" placeholder="母">
+                            </div>
+                        </div>
+                        ${idx < partsByComma.length - 1 ? '<span style="font-size: 2rem; font-weight: bold;">，</span>' : ''}
+                    `;
+                });
+                containerHtml += `</div>`;
+                inputArea.innerHTML = containerHtml;
+            } 
+            else {
+                // 一般文字框（1/2/3/4/5 或一般填空會走這裡）
                 inputArea.innerHTML = `<input type="text" id="ans-normal" placeholder="請輸入答案">`;
             }
         }
@@ -317,83 +340,128 @@
             const qData = currentQuestions[currentIndex];
             let isCorrect = false;
             let finalAnsHTML = "";
-            let userAnsHTML = ""; // 用來存放學生輸入的內容
-// --- 插入防呆邏輯開始 ---
-        if (qData.type === 'fraction') {
-            const rawW = document.getElementById('ans-whole').value;
-            const rawN = document.getElementById('ans-num').value;
-            const rawD = document.getElementById('ans-den').value;
-            // 如果整數、分子、分母全部都是空的，就攔截
-            if (rawW === "" && rawN === "" && rawD === "") {
-                alert("請輸入答案後再提交喔！");
-                return;
+            let userAnsHTML = "";
+
+            const groups = document.querySelectorAll('.multi-fraction-group');
+
+            if (groups.length > 0) {
+                let userAnswers = [];
+                let hasEmpty = false;
+
+                groups.forEach(group => {
+                    const w = group.querySelector('.ans-whole').value.trim();
+                    const n = group.querySelector('.ans-num').value.trim();
+                    const d = group.querySelector('.ans-den').value.trim();
+
+                    if (!n || !d) hasEmpty = true;
+
+                    let partStr = "";
+                    let displayStr = "";
+
+                    if (w && w !== "0") {
+                        partStr += w + " ";
+                        displayStr += w;
+                    }
+
+                    if (n && d) {
+                        partStr += `${n}/${d}`;
+                        displayStr += `<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+                    } else if (n) {
+                        partStr += n;
+                        displayStr += n;
+                    }
+
+                    userAnswers.push({ raw: partStr.trim(), html: displayStr || "(空白)" });
+                });
+
+                if (hasEmpty) {
+                    alert("請完整填寫所有分數的分子與分母喔！");
+                    return;
+                }
+
+                userAnsHTML = userAnswers.map(u => u.html).join(" <span style='font-size:1.5rem; font-weight:bold;'>，</span> ");
+                const userRawJoined = userAnswers.map(u => u.raw).join(",");
+
+                const correctClean = qData.a.replace(/\s+/g, '').replace(/，/g, ',');
+                const userClean = userRawJoined.replace(/\s+/g, '').replace(/，/g, ',');
+
+                if (userClean === correctClean) isCorrect = true;
+
+                const ansList = qData.a.split(/[,，]/).map(s => s.trim()).filter(s => s !== '');
+                finalAnsHTML = ansList.map(ans => {
+                    if (ans.includes(' ')) {
+                        const [w, f] = ans.split(' ');
+                        const [n, d] = f.split('/');
+                        return `${w}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+                    } else if (ans.includes('/')) {
+                        const [n, d] = ans.split('/');
+                        return `<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+                    }
+                    return ans;
+                }).join(" <span style='font-size:1.5rem; font-weight:bold;'>，</span> ");
+
+            } else if (qData.type === 'fraction') {
+                const rawW = document.getElementById('ans-whole').value;
+                const rawN = document.getElementById('ans-num').value;
+                const rawD = document.getElementById('ans-den').value;
+
+                if (rawW === "" && rawN === "" && rawD === "") {
+                    alert("請輸入答案後再提交喔！");
+                    return;
+                }
+
+                const w = rawW || "0";
+                const n = rawN || "0";
+                const d = rawD || "1";
+
+                let wPart = (w === "0" || w === "") ? "" : w;
+                if (n === "0" || n === "") {
+                    userAnsHTML = w || "0";
+                } else {
+                    userAnsHTML = `${wPart}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
+                }
+
+                if (w == qData.a.whole && n == qData.a.num && d == qData.a.den) isCorrect = true;
+
+                if (qData.a.num == "0") {
+                    finalAnsHTML = qData.a.whole;
+                } else {
+                    let cwPart = qData.a.whole == "0" ? "" : qData.a.whole;
+                    finalAnsHTML = `${cwPart}<div class="display-fraction"><span class="q-num">${qData.a.num}</span><span class="display-line"></span><span class="q-den">${qData.a.den}</span></div>`;
+                }
+            } else {
+                const val = document.getElementById('ans-normal').value.trim();
+                if (val === "") {
+                    alert("請輸入答案後再提交喔！");
+                    return;
+                }
+                userAnsHTML = val || "(空白)";
+                finalAnsHTML = qData.a;
+                if (val == qData.a) isCorrect = true;
             }
-        } else {
-            const rawVal = document.getElementById('ans-normal').value.trim();
-            if (rawVal === "") {
-                alert("請輸入答案後再提交喔！");
-                return;
-            }
-        }
-        // --- 插入防呆邏輯結束 ---
 
+            // --- 介面顯示與填入 ---
+            document.getElementById('quiz-play-phase').classList.add('hidden');
+            document.getElementById('feedback-area').classList.remove('hidden');
 
-            if (qData.type === 'fraction') {
-        const w = document.getElementById('ans-whole').value || "0";
-        const n = document.getElementById('ans-num').value || "0";
-        const d = document.getElementById('ans-den').value || "1";
-        
-        // 記錄學生的答案 (轉成垂直分數格式顯示)
-        let wPart = (w === "0" || w === "") ? "" : w;
-        if (n === "0" || n === "") {
-            userAnsHTML = w || "0";
-        } else {
-            userAnsHTML = `${wPart}<div class="display-fraction"><span class="q-num">${n}</span><span class="display-line"></span><span class="q-den">${d}</span></div>`;
-        }
+            let currentFullQ = document.querySelector('.q-main-content').innerHTML;
+            document.getElementById('fb-question-review').innerHTML = `題目：${currentFullQ}`;
+            document.getElementById('fb-user-answer').innerHTML = `你的答案：<span style="color:${isCorrect ? '#27ae60' : '#e74c3c'}">${userAnsHTML}</span>`;
 
-        if (w == qData.a.whole && n == qData.a.num && d == qData.a.den) isCorrect = true;
-        
-        // 正確答案 HTML (這部分原本就有)
-        if (qData.a.num == "0") {
-            finalAnsHTML = qData.a.whole;
-        } else {
-            let cwPart = qData.a.whole == "0" ? "" : qData.a.whole;
-            finalAnsHTML = `${cwPart}<div class="display-fraction"><span class="q-num">${qData.a.num}</span><span class="display-line"></span><span class="q-den">${qData.a.den}</span></div>`;
-        }
-    } else {
-        const val = document.getElementById('ans-normal').value.trim();
-        userAnsHTML = val || "(空白)";
-        finalAnsHTML = qData.a;
-        if (val == qData.a) isCorrect = true;
-    }
-
-    // --- 介面顯示與填入 ---
-    document.getElementById('quiz-play-phase').classList.add('hidden');
-    document.getElementById('feedback-area').classList.remove('hidden');
-
-    // 填入內容
-    let currentFullQ = document.querySelector('.q-main-content').innerHTML;
-    document.getElementById('fb-question-review').innerHTML = `題目：${currentFullQ}`;
-    
-    // 顯示對照
-   // --- 修改後的樣子 ---
-document.getElementById('fb-user-answer').innerHTML = `你的答案：<span style="color:${isCorrect ? '#27ae60' : '#e74c3c'}">${userAnsHTML}</span>`;
-
-// 多了這兩行：先抓圖，再顯示
-let extraImg = qData.ansImg || ""; 
-document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalAnsHTML}${extraImg}`;
+            let extraImg = qData.ansImg || ""; 
+            document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalAnsHTML}${extraImg}`;
 
             const fImg = document.getElementById('feedback-img');
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-5-1-0-1.gif";
+                fImg.src = "b-5-1-4-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-5-1-0-0.gif";
+                fImg.src = "b-5-1-4-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -402,7 +470,6 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
 
             if (hp <= 0) setTimeout(() => endGame('lose'), 2500);
         }
-
         function nextQuestion() {
             currentIndex++;
             updateProgressBar();

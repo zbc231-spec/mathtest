@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第七單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -200,58 +200,56 @@
     <script>
         // 1. 完整 50 題題庫
       const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
+  { "q": "125×314－125×274", "a": "5000", "type": "normal" },
+  { "q": "1200÷15÷4", "a": "20", "type": "normal" },
+  { "q": "999＋96＋6＋997＋3＋9", "a": "2110", "type": "normal" },
+  { "q": "473＋243÷27×32", "a": "761", "type": "normal" },
+  { "q": "936÷4－7×29", "a": "31", "type": "normal" },
+  { "q": "895－499－198＋99", "a": "297", "type": "normal" },
+  { "q": "173×59＋173", "a": "10380", "type": "normal" },
+  { "q": "970÷2÷5", "a": "97", "type": "normal" },
+  { "q": "910÷5÷91", "a": "2", "type": "normal" },
+  { "q": "937－183－37＋183", "a": "900", "type": "normal" },
+  { "q": "327×61＋673×61", "a": "61000", "type": "normal" },
+  { "q": "652×4÷652×25", "a": "100", "type": "normal" },
+  { "q": "27×439＋27×561", "a": "27000", "type": "normal" },
+  { "q": "59999＋5999＋599＋59", "a": "66656", "type": "normal" },
+  { "q": "9000÷25÷45", "a": "8", "type": "normal" },
+  { "q": "7200÷4÷25×2", "a": "144", "type": "normal" },
+  { "q": "32×998", "a": "31936", "type": "normal" },
+  { "q": "450－172－68－30", "a": "180", "type": "normal" },
+  { "q": "1380÷15÷92", "a": "1", "type": "normal" },
+  { "q": "642×51－642", "a": "32100", "type": "normal" },
+  { "q": "1003×123", "a": "123369", "type": "normal" },
+  { "q": "1248÷6÷52", "a": "4", "type": "normal" },
+  { "q": "45×18÷9×5", "a": "450", "type": "normal" },
+  { "q": "999×49－99×49", "a": "44100", "type": "normal" },
+  { "q": "243×80＋57×80", "a": "24000", "type": "normal" },
+  { "q": "314＋157＋56＋98", "a": "625", "type": "normal" },
+  { "q": "5000－399－1499－199", "a": "2903", "type": "normal" },
+  { "q": "850÷17÷5", "a": "10", "type": "normal" },
+  { "q": "772×35÷193×6", "a": "840", "type": "normal" },
+  { "q": "720÷3÷5÷6", "a": "8", "type": "normal" },
+  { "q": "1塊香草蛋糕賣48元，1塊栗子蛋糕賣72元，媽媽各買了18塊，共花幾元？", "a": "2160", "type": "normal" },
+  { "q": "文華買了一個625元的籃球、一組150元的護肘、一條25元的頭帶和一件背心，共付了1150元，一件背心賣幾元？", "a": "350", "type": "normal" },
+  { "q": "可可買了3盒紅豆麻糬和2盒花生麻糬共付了370元，1盒紅豆麻糬賣80元，1盒花生麻糬賣幾元？", "a": "65", "type": "normal" },
+  { "q": "小明、小華、小園和小晴的體重分別是32公斤、35公斤、38公斤和43公斤，這4人的平均體重是幾公斤？", "a": "37", "type": "normal" },
+  { "q": "有600個柳丁，每25個裝成1袋，每4袋裝成1箱，共可裝成幾箱？", "a": "6", "type": "normal" },
+  { "q": "服飾店舉辦特賣活動，1件牛仔褲特價1999元，今天售出85件，共賣得幾元？", "a": "169915", "type": "normal" },
+  { "q": "文具店裡1把直尺賣7元，8瓶膠水賣240元，小安買了1把直尺和16瓶膠水，共要付幾元？ ", "a": "487", "type": "normal" },
+  { "q": "長65公分、寬25公分的長方形面積比邊長25公分的正方形面積大幾平方公分？", "a": "1000", "type": "normal" },
+  { "q": "六年甲班舉辦烤肉活動，共有32人參加，每人預繳180元，活動結束共花了4608元，平均可退還每人幾元？", "a": "36", "type": "normal" },
+  { "q": "軟糖每包重465公克，棉花糖每包重135公克，倉庫裡有軟糖和棉花糖各40包，共重幾公克？", "a": "24000", "type": "normal" },
+  { "q": "有800個蓮霧，每25個裝成1盒，每4盒裝成1箱，共可裝成幾箱？ ", "a": "8", "type": "normal" },
+  { "q": "工人每天工作8小時，4個工人工作3天，工資共17280元，每個工人1小時工資是幾元？", "a": "180", "type": "normal" },
+  { "q": "偉杰的身高是145公分，佳欣比偉杰高4公分，昌宇比佳欣矮14 公分，他們3人的平均身高是幾公分？", "a": "143", "type": "normal" },
+  { "q": "巧克力球每包重465公克，洋芋片每包重135公克，雜貨店架上有巧克力球和洋芋片各40包，共重幾公克？", "a": "24000", "type": "normal" },
+  { "q": "報社有84捆報紙，每捆有16份報紙，1個送報員送48份\n報紙，15個送報員送完報紙後\n報社還剩下幾份報紙？ ", "a": "624", "type": "normal" },
+  { "q": "螞蟻參加昆蟲馬拉松比賽，繞邊長7公分的正方形外圍走25圈後，剩下276公分的路程，馬拉松比賽全程長幾公分？", "a": "976", "type": "normal" },
+  { "q": "1箱鈣片有24罐，每罐有150錠，1箱綜合維他命有24罐，每罐有180錠，1箱綜合維他命比1箱鈣片多幾錠？", "a": "720", "type": "normal" },
+  { "q": "鋼筆每枝76元，原子筆每枝24元，小琪各買了13枝，付完錢後身上剩下288元，小琪原本有幾元？", "a": "1588", "type": "normal" },
+  { "q": "1盒紅豆麻糬賣160元，1盒花生麻糬賣90元，可可帶了300元要買2盒紅豆麻糬和1盒花生麻糬，還不夠幾元？", "a": "110", "type": "normal" },
+  { "q": "天樂文具店裡1 枝自動鉛筆賣7 元，8本筆記簿賣240元，曉華買了1枝自動鉛筆和16本筆記簿，共要付幾元？", "a": "487", "type": "normal" }
 ];
         let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
@@ -389,13 +387,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-7-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-7-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -417,7 +415,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             }
         }
 
-  function endGame(status) {
+ function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             

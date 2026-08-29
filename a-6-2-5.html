@@ -251,8 +251,8 @@
             { q: "富榮的段考成績是數學92分、國語87分和社會85分，富榮的英語要考幾分才會讓4科的平均分數是90分？", a: "96" },
             { q: "媽媽參加為期8天的旅遊，平均每天的花費是4600元，已知前7天的平均花費是4400元，她第8天花了幾元？", a: "6000" }
         ];
-        let currentQuestions = [], currentIndex = 0, hp = 30, coins = 0;
-        const totalQuizCount = 30;
+        let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
+        const totalQuizCount = 20;
         const today = new Date().toDateString();
 //修改啟動邏輯 (window.onload)
  window.onload = function() {
@@ -268,7 +268,7 @@
 };
 
         function initGame() {
-            hp = 30; coins = 0; currentIndex = 0;
+            hp = 15; coins = 0; currentIndex = 0;
             updateHearts();
             updateProgressBar();
             currentQuestions = [...masterQuestionBank].sort(() => 0.5 - Math.random()).slice(0, totalQuizCount);
@@ -415,44 +415,48 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             }
         }
 
-        function endGame(status) {
-    // 1. 隱藏遊戲主容器
-    document.getElementById('game-area').classList.add('hidden');
-    
-    let statusTxt = document.getElementById('final-status-text');
-    let bgImg = "stop.jpg"; // 預設背景（中途停止）
-    let detailTxt = "";    // 用來存額外的描述文字
+ function endGame(status) {
+            // 1. 隱藏遊戲主容器
+            document.getElementById('game-area').classList.add('hidden');
+            
+            let statusTxt = document.getElementById('final-status-text');
+            let bgImg = "b-stop.jpg"; // 預設背景
+            let detailTxt = "請至秘書處登記獎勵點數！";    
 
-    // 2. 根據不同狀態給予對應的文字與背景
-    if (status === 'win') { 
-        statusTxt.innerText = "恭喜你通過考驗！打敗魔王！"; 
-        detailTxt = "請至秘書處登記獎勵點數！";
-        // 修改這裡：如果滿血(30滴)通關，額外加 5 點，否則不加。
-    if (hp >= 30) {
-        coins += 5; 
-    }
-        bgImg = "b-win.jpg";
-    } else if (status === 'lose') { 
-        statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
-        detailTxt = "請至秘書處登記獎勵點數！";
-        bgImg = "b-lose.jpg";
-    } else if (status === 'stop') {
-        statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
-        detailTxt = "請至秘書處登記獎勵點數！";
-        bgImg = "b-stop.jpg";
-    }
-    
-    // 3. 更新畫面內容
-    document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
-    document.getElementById('final-coins').innerText = coins;
-    
-    // 這裡我假設你的 HTML 裡結算頁面有個 <p> 標籤，我們把詳細文字塞進去
-    const pTag = document.querySelector('#final-screen p');
-    if (pTag) pTag.innerText = detailTxt;
+            // 2. 根據不同狀態與血量條件給予對應的文字與背景
+            if (status === 'win') { 
+                // 完成 20 關（win 代表打完所有題目）
+                if (hp >= 14) {
+                    // 血量在 14 以上：成功打敗魔王！
+                    statusTxt.innerText = "恭喜你通過考驗！打敗魔王！";
+                    bgImg = "b-win.jpg";
+                    coins += 5; // 如果滿血/高血量通關想額外加 5 點可以保留，不要的話刪除這行
+                } else {
+                    // 血量在 14 以下：雖然打完 20 關但血太少
+                    statusTxt.innerText = "差一點點！被魔王殘血逃跑了，下次加油！";
+                    bgImg = "b-stop.jpg";
+                }
+            } else if (status === 'lose') { 
+                // 挑戰失敗（血量歸零）
+                statusTxt.innerText = "這樣就敢來挑戰！菜就多練吧！"; 
+                bgImg = "b-lose.jpg";
+            } else if (status === 'stop') {
+                // 中途結束（點擊「結束挑戰」按鈕）
+                statusTxt.innerText = "速度太慢了，下次再來挑戰吧";
+                bgImg = "b-stop.jpg";
+            }
+            
+            // 3. 更新畫面內容
+            document.getElementById('bottom-panel').style.backgroundImage = `url('${bgImg}')`;
+            document.getElementById('final-coins').innerText = coins;
+            
+            const pTag = document.querySelector('#final-screen p');
+            if (pTag) pTag.innerText = detailTxt;
 
-    // 4. 顯示結算畫面
-    document.getElementById('final-screen').classList.remove('hidden');
-}
+            // 4. 顯示結算畫面
+            document.getElementById('final-screen').classList.remove('hidden');
+        }
+
     </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>六下-熱身單元</title>
+    <title>五上-第五單元</title>
     <style>
         /* 1. 全域樣式：背景與基礎排版 */
         body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", Arial, sans-serif; height: 100vh; overflow: hidden; }
@@ -28,7 +28,7 @@
         /* 遊戲區域底圖 */
         #bottom-panel { 
             height: calc(85% - 10px); 
-            background: url('b-6-2-bg.jpg') no-repeat center center; 
+            background: url('b-5-1-bg.jpg') no-repeat center center; 
             background-size: cover; 
             display: flex; justify-content: center; align-items: center; 
         }
@@ -198,62 +198,61 @@
     </div>
 
     <script>
-        // 1. 完整 50 題題庫
-      const masterQuestionBank = [
-       { q: "20/16 － 9/12 = ?", a: { whole: "0", num: "1", den: "2" }, type: "fraction" },
-            { q: "11/9 ＋ 3又5/6 = ?", a: { whole: "5", num: "1", den: "18" }, type: "fraction" },
-            { q: "15/9 ＋ 28/21 = ?", a: { whole: "3", num: "0", den: "1" }, type: "fraction" },
-            { q: "2又2/3 － 9/12 = ?", a: { whole: "1", num: "11", den: "12" }, type: "fraction" },
-            { q: "1/2 ＋ 2/5 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又14/21 － 2又28/35 = ?", a: { whole: "1", num: "13", den: "15" }, type: "fraction" },
-            { q: "3又5/6 + 16/9 = ?", a: { whole: "5", num: "11", den: "18" }, type: "fraction" },
-            { q: "6/4 － 7/5 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "2/3 － 4/11 = ?", a: { whole: "0", num: "10", den: "33" }, type: "fraction" },
-            { q: "2又5/7 ＋ 17/5 = ?", a: { whole: "6", num: "4", den: "35" }, type: "fraction" },
-            { q: "1又5/7 ÷ 3/11 = ?", a: { whole: "6", num: "2", den: "7" }, type: "fraction" },
-            { q: "15又1/5 ÷ 3又1/6 = ?", a: { whole: "4", num: "4", den: "5" }, type: "fraction" },
-            { q: "25 ÷ 10/3 = ?", a: { whole: "7", num: "1", den: "2" }, type: "fraction" },
-            { q: "5 ÷ 2又6/7 = ?", a: { whole: "1", num: "3", den: "4" }, type: "fraction" },
-            { q: "6又3/10 ÷ 2又1/4 = ?", a: { whole: "2", num: "4", den: "5" }, type: "fraction" },
-            { q: "7又3/5 ÷ 19/15 = ?", a: { whole: "6", num: "0", den: "1" }, type: "fraction" },
-            { q: "23 ÷ 9/4 = ?", a: { whole: "10", num: "2", den: "9" }, type: "fraction" },
-            { q: "2又7/10 ÷ 9/3 = ?", a: { whole: "0", num: "9", den: "10" }, type: "fraction" },
-            { q: "4又1/8 ÷ 6 = ?", a: { whole: "0", num: "11", den: "16" }, type: "fraction" },
-            { q: "20 ÷ 2又1/2 = ?", a: { whole: "8", num: "0", den: "1" }, type: "fraction" },
-            { q: "19/6 × 1又2/4 = ?", a: { whole: "4", num: "3", den: "4" }, type: "fraction" },
-            { q: "5/16 × 1/6 = ?", a: { whole: "0", num: "5", den: "96" }, type: "fraction" },
-            { q: "11/12 × 6/7 = ?", a: { whole: "0", num: "11", den: "14" }, type: "fraction" },
-            { q: "13/25 × 5/26 = ?", a: { whole: "0", num: "1", den: "10" }, type: "fraction" },
-            { q: "6又2/9 × 1又5/7 = ?", a: { whole: "10", num: "2", den: "3" }, type: "fraction" },
-            { q: "2又1/2 × 1又1/2 = ?", a: { whole: "3", num: "3", den: "4" }, type: "fraction" },
-            { q: "3又1/3 × 3又9/10 = ?", a: { whole: "13", num: "0", den: "1" }, type: "fraction" },
-            { q: "10又3/4 × 5又7/8 = ?", a: { whole: "63", num: "5", den: "32" }, type: "fraction" },
-            { q: "1/5 × 2又3/8 = ?", a: { whole: "0", num: "19", den: "40" }, type: "fraction" },
-            { q: "6/7 × 14/15 = ?", a: { whole: "0", num: "4", den: "5" }, type: "fraction" },
-            { q: "5.72 ÷ 0.88 = ?", a: "6.5", type: "normal" },
-            { q: "83.2 ÷ 1.6 = ?", a: "52", type: "normal" },
-            { q: "6.72 ÷ 0.4 = ?", a: "16.8", type: "normal" },
-            { q: "58.82 ÷ 1.73 = ?", a: "34", type: "normal" },
-            { q: "2.4 ÷ 0.75 = ?", a: "3.2", type: "normal" },
-            { q: "94.5 ÷ 7.5 = ?", a: "12.6", type: "normal" },
-            { q: "8.4 ÷ 3.5 = ?", a: "2.4", type: "normal" },
-            { q: "25.2 ÷ 0.9 = ?", a: "28", type: "normal" },
-            { q: "69.08 ÷ 3.14 = ?", a: "22", type: "normal" },
-            { q: "32.5 ÷ 0.26 = ?", a: "125", type: "normal" },
-            { q: "370.4 ÷ 18.52 = ?", a: "20", type: "normal" },
-            { q: "15.35 × 0.9 = ?", a: "13.815", type: "normal" },
-            { q: "11.7 × 0.53 = ?", a: "6.201", type: "normal" },
-            { q: "0.63 × 4.4 = ?", a: "2.772", type: "normal" },
-            { q: "75.2 × 6.06 = ?", a: "455.712", type: "normal" },
-            { q: "64.8 × 6.54 = ?", a: "423.792", type: "normal" },
-            { q: "23.12 × 1.36 = ?", a: "31.4432", type: "normal" },
-            { q: "23.11 × 2.41 = ?", a: "55.6951", type: "normal" },
-            { q: "1.03 × 4.8 = ?", a: "4.944", type: "normal" },
-            { q: "3.06 × 4.35 = ?", a: "13.311", type: "normal" },
-            { q: "0.8 × 8.26 = ?", a: "6.608", type: "normal" }
-
-];
-        let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
+ // 追加的 50 題圖表題庫 (已完整包含 img 圖片標記與精確答案)
+   const masterQuestionBank = [
+// 50 題線對稱圖形單元題庫
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-01.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "3", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-02.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-03.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-04.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-05.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-06.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-07.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-08.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "8", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-09.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-10.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "5", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-11.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "4", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-12.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-13.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "0", type: "normal" },
+  { q: "下面圖形有幾條對稱軸？<br><img src='z515-14.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1", type: "normal" },
+  { q: "下面的圖形有幾條對稱軸？<br><img src='z515-15.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "以虛線為對稱軸，哪張圖是線對稱圖？<br><img src='z515-16.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "甲", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼字？<br><img src='z515-17.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "土", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼英文字母？<br><img src='z515-18.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "X", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼英文字母？<br><img src='z515-19.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "Y", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼英文字母？<br><img src='z515-20.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "M", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼英文字母？<br><img src='z515-21.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "A", type: "normal" },
+  { q: "把下面對摺的紙，沿著虛線剪下後，會剪出什麼英文字母？<br><img src='z515-22.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "T", type: "normal" },
+  { q: "下面是線對稱圖形，請問對稱軸是邊（  ）。(請依字母順序寫出)<br><img src='z515-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "CF", type: "normal" },
+  { q: "下面是線對稱圖形，請問邊AB是（  ）公分，邊FE是（  ）公分，邊AE是（  ）公分。(答案中間用/隔開)<br><img src='z515-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "21/14/28", type: "normal" },
+  { q: "下面是線對稱圖形，請問角1是（  ）度；角2是（  ）度。(答案中間用/隔開)<br><img src='z515-23.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "75/45", type: "normal" },
+  { q: "下面是一個線對稱圖形，邊DJ、邊AG是對稱軸。請問若以邊DJ為對稱軸，邊BC的對稱邊是邊(  )。<br><img src='z515-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "FE", type: "normal" },
+  { q: "下面是一個線對稱圖形，邊DJ、邊AG是對稱軸。請問若以邊AG為對稱軸，點L的對稱點是點(  )。<br><img src='z515-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "B", type: "normal" },
+  { q: "下面是一個線對稱圖形，邊DJ、邊AG是對稱軸。請問若邊AB是3公分，邊BC是1公分，邊CD是3公分，這個圖形的周長是(  )公分。<br><img src='z515-26.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "28", type: "normal" },
+  { q: "下面是線對稱圖形，請問對稱軸是邊（  ）。(請依字母順序寫出)<br><img src='z515-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "CH", type: "normal" },
+  { q: "下面是線對稱圖形，請問邊CD的長是（  ）公分。<br><img src='z515-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "8", type: "normal" },
+  { q: "下面是線對稱圖形，請問邊AJ長（  ）公分，邊HG長（  ）公分。(答案中間用/隔開)<br><img src='z515-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "6/12", type: "normal" },
+  { q: "下面是線對稱圖形，請問角1是（  ）度，角2是（  ）度，角3是（  ）度。(答案中間用/隔開)<br><img src='z515-29.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "130/150/115", type: "normal" },
+  { q: "下面是線對稱圖形，請問點B的對稱點是點（  ）。<br><img src='z515-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "D", type: "normal" },
+  { q: "下面是線對稱圖形，請問角D的對稱角是角（  ）。<br><img src='z515-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "B", type: "normal" },
+  { q: "下面是線對稱圖形，請問邊AB的對稱邊是邊（  ）。<br><img src='z515-33.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "AD", type: "normal" },
+  { q: "下面是一個線對稱圖形，虛線是對稱軸。請問沿著對稱軸對摺，點A和點（  ）疊合，點G和點（  ）疊合。(答案中間用/隔開)<br><img src='z515-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "D/F", type: "normal" },
+  { q: "下面是一個線對稱圖形，虛線是對稱軸。請問角1＝（  ）度，角2＝（  ）度。(答案中間用/隔開)<br><img src='z515-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "165/145", type: "normal" },
+  { q: "下面是一個線對稱圖形，虛線是對稱軸。請問邊CD＝（  ）公分，邊DE＝（  ）公分。(答案中間用/隔開)<br><img src='z515-36.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "1.5/2", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問以為對稱軸時：點B的對稱點是點（  ），點D的對稱點是點（  ），點K的對稱點是點（  ）。(答案中間用/隔開)<br><img src='z515-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "P/N/G", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問以邊EM為對稱軸時：點B的對稱點是點（  ）。邊BC的對稱邊是(  ）。(答案中間用/隔開)<br><img src='z515-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "H/HG", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問如果角C＝60度，那麼角O＝(  ）度，角G＝(  ）度，角K＝(  ）度。(答案中間用/隔開)<br><img src='z515-39.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "60/60/60", type: "normal" },
+  { q: "下面是一個線對稱的圖形，以邊CG為對稱軸。請問點A的對稱點是點（  ）。<br><img src='z515-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "E", type: "normal" },
+  { q: "下面是一個線對稱的圖形，以邊CG為對稱軸。請問角B的對稱角是角（  ）。<br><img src='z515-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "D", type: "normal" },
+  { q: "下面是一個線對稱的圖形，以邊CG為對稱軸。請問邊AB的對稱邊是邊（  ）。<br><img src='z515-42.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "ED", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問點B的對稱點是點（  ）。<br><img src='z515-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "F", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問角1的對稱角是角（  ）。<br><img src='z515-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2", type: "normal" },
+  { q: "下面是一個線對稱圖形，請問邊AD是對稱軸，會垂直平分點C和點E的連線，所以邊CG和邊（  ）一樣長。<br><img src='z515-45.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "EG", type: "normal" },
+  { q: "下面是線對稱圖形，請問對稱軸是邊（  ）。<br><img src='z515-48.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "EF", type: "normal" },
+  { q: "下面是線對稱圖形，請問邊EB長（  ）公分；邊DF長（  ）公分。(答案中間用/隔開)<br><img src='z515-48.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "2/5", type: "normal" },
+  { q: "下面是線對稱圖形，請問四邊形的周長是（  ）公分。<br><img src='z515-48.jpg' style='max-width:250px; width:100%; margin-top:10px;'>", a: "30", type: "normal" }    
+];   
+ let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
         const today = new Date().toDateString();
 //修改啟動邏輯 (window.onload)
@@ -389,13 +388,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-6-2-0-1.gif";
+                fImg.src = "b-5-1-5-1.gif";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-6-2-0-0.gif";
+                fImg.src = "b-5-1-5-0.gif";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
@@ -416,8 +415,7 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
                 renderQuestion();
             }
         }
-
-  function endGame(status) {
+function endGame(status) {
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             
@@ -458,7 +456,6 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             // 4. 顯示結算畫面
             document.getElementById('final-screen').classList.remove('hidden');
         }
-
     </script>
 </body>
 </html>
