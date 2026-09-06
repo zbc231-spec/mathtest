@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>閱讀理解 - 勇者同步版</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-pane::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-pane::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目區 / 結算圖片區 */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 30px 50px;          
+            overflow-y: auto;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 */
+        .btn-box { text-align: center; padding: 20px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; max-height: 95%; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：平時放題目，結算時放 b-finish.jpg -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <div id="quiz-list"></div>
+                    <div class="btn-box">
+                        <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                        <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                    </div>
+                </div>
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+        {
+    t: "西遊記-第三章-流沙河收沙悟淨",
+    c: "請在親師生平台中，進入Hami書城，搜尋「名著好好讀-西遊記」，閱讀第三章-流沙河收沙悟淨後，回答問題。",
+    q: [
+        { 
+            txt: "根據文章內容，當惠岸行者叫沙悟淨出來拜見唐三藏時，沙悟淨一開始為什麼會「連連搖頭」？", 
+            opts: ["他不甘心向凡人唐三藏下跪認錯", "他以為肥頭大耳的八戒與拿金箍棒的悟空才是唐三藏", "他害怕觀音菩薩給的紅葫蘆會將他收服", "他不想剃髮出家，拒絕成為和尚"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章中寫到沙悟淨抬頭看到肥頭大耳的豬八戒和手持金箍棒的孫悟空連連搖頭，隨後惠岸行者向他解釋「那都是唐三藏的徒弟，不用擔心」，說明他是把兩位師兄誤認成了唐三藏。" 
+        },
+        { 
+            txt: "根據文章記載，師徒一行人最後是如何順利渡過寬八百里且無船隻的流沙河？", 
+            opts: ["由孫悟空與豬八戒運用法術背著唐三藏騰雲駕霧飛過去", "觀音菩薩親自降臨，運用神通法力將河水分開出一條道路", "沙悟淨將脖子上的骷髏鏈子結合惠岸行者的紅葫蘆化成一艘船", "白龍化身為巨大的船隻，載著師徒四人渡過波濤洶湧的河水"], 
+            a: 2, 
+            s: 1, 
+            fb: "文中倒數第二段明確指出，沙和尚取下脖子上的骷髏鏈子，連同惠岸行者帶來的葫蘆變成一艘船，帶領大家渡過流沙河。" 
+        },
+        { 
+            txt: "在豬八戒下水引誘妖精的過程中，孫悟空兩次急著出手幫忙，結果卻適得其反。這反映出孫悟空當時具有怎樣的性格特質？", 
+            opts: ["膽小怯懦，害怕豬八戒獨自佔據所有的功勞", "沉著冷靜，能夠精準分析敵我雙方水戰能力的優劣", "急性子且好勝心強，難以忍住不出手卻缺乏細心考量", "城府極深，故意藉由打草驚蛇來捉弄豬八戒"], 
+            a: 2, 
+            s: 1, 
+            fb: "孫悟空看兩人打得激烈就「手癢」、明知自己水性不好且答應不插手，卻依然「按耐不住」一棍打下去致使妖精縮回水裡，這展現出他急躁、好勝、沉不住氣的性格缺點。" 
+        },
+        { 
+            txt: "綜合全文，關於沙悟淨與白龍加入取經隊伍的過程，下列哪一項敘述最符合文章的主旨與背景設定？", 
+            opts: ["他們都是被孫悟空強大的武功所威脅，不得不屈服加入", "他們原本都是作惡多端的妖怪，最後被唐三藏的佛法感動而洗心革面", "他們受觀音菩薩指點與安排，早已在特定地點等待唐三藏並加入取經團隊", "他們是受天庭玉皇大帝直接差遣，前來監視唐三藏取經進度的神仙"], 
+            a: 2, 
+            s: 2, 
+            fb: "觀音菩薩對悟空說沙悟淨是「聽了我的話，在那裡等待唐三藏」，文中最後也提及白龍「也是在等著唐三藏」，說明他們都是受觀音菩薩安排、專程等候並輔佐唐三藏西行取經的夥伴。" 
+        }
+    ]
+},
+       {
+    t: "西遊記-第四章-偷吃人參果惹禍",
+    c: "請在親師生平台中，進入Hami書城，搜尋「名著好好讀-西遊記」，閱讀第四章-偷吃人參果惹禍後，回答問題。",
+    q: [
+        { 
+            txt: "根據文章內容，當小道童清點果子時發現「少了四顆」，但孫悟空卻坦白「只吃了三顆」，造成這中間一顆果子數量差異的原因是什麼？", 
+            opts: ["土地公偷偷採摘了一顆自己享用", "豬八戒趁孫悟空不注意時偷吃了第二顆", "第一顆採摘的人參果一掉到地上就縮進土裡不見了", "小道童自己偷偷吃掉一顆卻誣賴給孫悟空"], 
+            a: 2, 
+            s: 1, 
+            fb: "文章中土地公向孫悟空解釋人參果「一落地，就會進到土裡」，後來孫悟空也在文末向道童說明自己與師兄弟吃了三顆，但有一顆是打落入土，說明第一顆果子因掉落地上而消失。" 
+        },
+        { 
+            txt: "關於人參果的神奇功效與特性，下列哪一項敘述完全符合文章的說法？", 
+            opts: ["凡人只要聞到味道就能活上四萬七千年", "果樹一萬年才結果一次，一次只會結出三十顆果子", "只要拿金箍棒輕敲，果子就會自動飄落到手上", "唐三藏一看到人參果就認出這是延年益壽的仙果"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章第五段小道童的話明確提到，人參果樹一萬年才能結果，一次只有三十顆果子。文中也提到聞到味道能活三百六十歲，吃一顆才能活四萬七千年。" 
+        },
+        { 
+            txt: "當鎮元子準備用油鍋油炸師徒等人時，孫悟空大喊：「徒弟做的事跟師父無關，你不要想傷我師父！」這段文字展現了孫悟空怎樣的心態與特質？", 
+            opts: ["極力推卸責任，想把罪過全部推給豬八戒", "雖然調皮闖禍，但深具擔當且極力維護師父", "心虛膽怯，試圖用花言巧語騙取鎮元子的同情", "對自己的法力過度自負，完全不把鎮元子放在眼裡"], 
+            a: 1, 
+            s: 1, 
+            fb: "孫悟空雖然闖下推倒果樹的大禍，但在面對油鍋酷刑時，主動站出來承擔責任，強調禍是徒弟闖的、不願連累師父，這體現了他勇於擔當與護師心切的特質。" 
+        },
+        { 
+            txt: "綜合全文，這場偷吃人參果並推倒果樹的危機，最終能夠「大事化小、小事化無」的核心關鍵是什麼？", 
+            opts: ["孫悟空展現高超武藝，打敗了鎮元子與小道童", "唐三藏親自向鎮元子誦經道歉並賠償金銀財寶", "孫悟空請來觀音菩薩用甘露救活人參果樹", "豬八戒吐出了吃掉的人參果並還給五莊觀"], 
+            a: 2, 
+            s: 2, 
+            fb: "全文事件轉折點在於鎮元子要求賠償一棵活的人參果樹，孫悟空隨即請來觀音菩薩用甘露救活寶樹，才讓鎮元子轉怒為喜，化解了師徒四人的危機。" 
+        }
+    ]
+},
+  {
+    t: "無人機禁飛區擴大惹議",
+    c: "近年無人機盛行，帶動空拍玩家人數攀升，不過有無人機玩家發現，原本就限制重重的無人機地圖，近期禁飛、限飛範圍竟又再擴大，過去可合法練飛的新北河堤、陽明山如今都成了禁區，稍一不慎，就可能吃上罰單。為了討回「空拍權」，由無人機玩家組成的三一三反不平等空域聯盟今下午將赴交通部抗議。\n\n過去各縣市空拍機禁飛、限飛範圍無統一規範，其中交通部民航局轄管的禁飛範圍，是針對機場跑道兩端中心點半徑五公里，以及跑道中心線左右兩側二點六公里範圍內嚴格禁飛或限高，若違規使用無人機闖入將開罰卅萬至一五○萬元，其餘範圍如河邊、山區、市中心等均由各地方政府或其他事業主管機關規範，罰鍰金額也由地方政府訂定。\n\n不過由於地方政府長期不重視玩家權益，加上疑似不了解無人機發展狀況，導致只要有一點疑慮，就乾脆直接畫設為禁飛、限制區，壓縮無人機玩家合法空域。\n\n三一三反不平等空域聯盟表示，過去很多玩家會在華中橋、新北河堤、三重飛場練習，如今全變成紅區，禁止玩家練飛；嘉義民航局無人機考場附近直徑十公里，也被自來水公司申請為禁區，嚴重影響練飛、考試的考生。\n\n聯盟發起人吳明陽表示，這次新增的禁飛範圍都沒公告，除非自行上網查詢，否則恐被罰卅萬元以上罰鍰，很多玩家在公告前早就申請場地，如今也只能停擺。呼籲地方政府放寬禁航範圍外，也希望民航局規畫相關指引，讓地方政府在畫設飛航區、禁限區時能有參考。\n\n<div style='text-align:center; margin: 15px 0;'><img src='x51-02.jpg' alt='無人機禁飛區擴大惹議圖表' style='max-width:100%; height:auto; border-radius:8px;'><p style='font-size:0.9rem; color:#666; margin-top:5px;'>▲ 圖一：無人機禁飛區圖表與管理罰則統計</p></div>\n\n考量民眾確實有使用需求，交通部民航局表示，六月公告新增的廿三處圓形禁限航區，是因涉及重要政府機關、電力設施、水利設施，但經考量後，平時玩家只要在不違反民航法等相關規定前提下，即可從事無人機活動，不過在主管機關公告演習期間或發生重大事件時，如防災演練、軍事演習等，禁止從事遙控無人機活動。\n\n至於何謂「重大事件」？民航局表示，由政府機關及其他主管機關來訂定，但過去有類似案例，如電廠或水利設施發生問題、花蓮地震期間只有救災飛機可進。\n\n至於去年十一月已畫設的禁限航區，民航局說，將從被擴大的五公里，回到原本的三公里範圍，民眾若要從事無人機活動，需事先提出申請，各部會也會重新檢視其原提報範圍，盡速調整。\n\n--------------------\n【資料來源】：https://udn.com/news/story/7266/9635239",
+    q: [
+        { 
+            txt: "根據文章內容與圖一資訊，下列哪一個地點是玩家過去常用來練習，但近期因禁限航區擴大而變成「紅區禁飛」的地方？", 
+            opts: ["桃園國際機場跑道兩端", "新北河堤與華中橋", "嘉義水庫內部核心管制區", "花蓮震災救災專用空域"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章第四段與圖一「引發爭議的禁飛區」列表中明確提及，華中橋、新北河堤、三重飛場等地過去常有玩家練習，如今全變成紅區禁止練飛。" 
+        },
+        { 
+            txt: "結合文章與圖一的「無人機罰則」，若玩家在地方政府公告的禁限區違規飛行，最高會被處以多少罰鍰？", 
+            opts: ["15萬元", "30萬元", "120萬元", "150萬元"], 
+            a: 0, 
+            s: 1, 
+            fb: "圖一「無人機罰則」明確標示，在「地方公告禁限區飛行」罰則為 3萬～15萬元；若是在機場四周、商港、水庫等重要禁限區或超高飛行，罰款才是 30萬～150萬元。因此地方禁限區最高罰鍰為 15 萬元。" 
+        },
+        { 
+            txt: "根據民航局對於六月新增的 23 處圓形禁限航區之回應，下列關於玩家使用該空域的規定，何者說明完全正確？", 
+            opts: ["平時完全禁止任何無人機進入，違者一律開罰 150 萬元", "平時不違規前提下可從事無人機活動，但在公告演習或發生重大事件時禁止飛行", "玩家只要有考取專業證照，即可在防災演練期間自由進行空拍", "不論是否發生重大事件，只要事先提出申請就一律可以飛行"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章第六段指出，平時玩家只要在不違反民航法相關規定前提下即可活動；但在主管機關公告演習期間或發生重大事件（如防災演練、軍事演習）時，則禁止從事無人機活動。" 
+        },
+        { 
+            txt: "三一三反不平等空域聯盟發起抗議，以及民航局後續決定調整禁限航區範圍（如從擴大的五公里縮回三公里），這反映了當前無人機管理上的什麼核心矛盾？", 
+            opts: ["玩家全面拒絕接受考照制度與無人機實名註冊規範", "政府機關為了推廣觀光，無限制開放所有國家公園空域", "公共安全/設施防護與民間合法休閒/產業發展權益之間的平衡與溝通困境", "民航局與地方政府搶奪無人機罰鍰收入的行政權力鬥爭"], 
+            a: 2, 
+            s: 2, 
+            fb: "全文敘述地方政府與相關單位因疑慮或重要設施防護而大幅劃設禁飛區，導致玩家練飛與考照空間被嚴重壓縮（發起抗議）；而民航局隨後協調鬆綁與調整範圍，反映出「公共安全防護」與「保障民間合法使用權益」之間需要持續溝通與取得平衡。" 
+        }
+    ]
+},
+    {
+    t: "惡作劇的代價",
+    c: "校園裡的上課鐘響才剛結束，某個班級裡卻突然傳出孩子大哭的聲音，老師趕緊跑去查看才發現，班上有位女學生向後跌坐在地上痛哭，原來是另一位男同學和她開玩笑，在她要坐下時瞬間拿開椅子，使她大力的跌坐在地上，讓她痛得站不起來，老師連忙撥打119叫救護車將受傷的孩子送醫。惹禍的男同學收斂起了笑容，在一旁不知所措，他這樣惡作劇的行為會有事嗎？\n\n同學之間互開玩笑，好像無傷大雅，但是如果玩笑不小心開得太大、造成別人受傷，不但不好玩，而且還會有法律問題。像剛剛那位惡作劇的同學，在女同學要坐下來的時候卻把椅子抽走，讓她跌坐在地上因而受傷，沒想到這個舉動讓女同學站不起來，這時候可不是惡作劇的同學說一句「開開玩笑」、或「不是故意的」就可以沒事。\n\n因為有人受傷，就可能會有法律的問題，如果今天惡作劇的同學是懷有報復的心態去拉椅子，拉椅子的動作在法律上就會被認定為是故意傷害人的行為，惡作劇的同學就會被認定要負傷害罪的刑責；就算是剛剛惡作劇的同學不是故意的，但還是可能有過失傷害責任的產生，因為惡作劇的人應該可以預見到自己動手把別人的椅子拉開，會造成別人摔倒在地而受傷的情形，如果女同學也真的因為坐空而跌倒受傷，那惡作劇的人就會被認定有過失傷害罪的責任，這可是有6個月以下的有期徒刑的，而且可能還要賠償她醫療等相關費用；如果不幸造成女同學半身不遂或是一輩子癱瘓等其他嚴重的傷害，刑責還會增加為一年以下有期徒刑。至於導致女同學未來可能無法工作的損失，還有需要請看護照顧等的費用，也可能都要賠償給她，這些費用可是相當巨大且驚人的。大家可能比較不知道的是，如果像剛剛惡作劇的男同學還是未成年人，也就是未滿二十歲的人，他的父母親對於受傷害的人也是要負連帶賠償責任的。\n\n除了像上述惡作劇的例子之外，有時候也會看到同學們在馬路邊互相推擠、追逐、打鬧….等等，也都是很危險的行為，有可能因為不小心就造成朋友被車撞到、跌倒，甚至發生更嚴重傷害的結果，自己也會因此需要承擔相關的法律責任。所以要提醒大家：時時尊重別人，好同學之間，反而應該要互相保護，有人要惡作劇也要阻止，千萬不能以惡作劇來做為開玩笑的方式，因為惡作劇有可能會付出超乎你想像的代價！\n\n--------------------\n【資料來源】：https://cdn-news.org/News.aspx?EntityID=News&PK=0000000000652e59d138dac623c18f4ea73c5dc868f50ce1",
+    q: [
+        { 
+            txt: "根據文章第二段與第三段說明，如果學生開玩笑抽走別人的椅子導致對方跌倒受傷，但自己「完全沒有報復或故意害人的心態」，在法律上最可能會面臨什麼責任？", 
+            opts: ["因為只是無心的開玩笑，所以完全不需要負任何法律責任", "雖然不是故意，但因為能預估行為會造成危險，仍可能構成「過失傷害罪」", "只要當場向對方道歉並取得原諒，警方就無法立案處理", "直接判定為「故意傷害罪」，並判處三年以上有期徒刑"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章提及即便行為人主張不是故意的，但因為應該可以預見拉開椅子會導致別人跌倒受傷，因此仍會有「過失傷害罪」的法律責任產生。" 
+        },
+        { 
+            txt: "根據文章內容，當未成年學生因惡作劇造成同學嚴重受傷，需要支付龐大的醫療與看護費用時，法律對於家長（父母親）有何相關規定？", 
+            opts: ["家長完全不需要承擔責任，所有賠償金額由政府全部買單", "未成年學生必須自己打工賺錢賠償，家長僅需負擔精神上的監督義務", "未成年學生的父母親對於受害者同樣要負擔「連帶賠償責任」", "只要學校幫忙出面協調，家長就可以免除一切經濟賠償責任"], 
+            a: 2, 
+            s: 1, 
+            fb: "文章第三段明確指出，未成年人如果因惡作劇造成他人傷害，其父母親對於受傷害的人也是要負連帶賠償責任的。" 
+        },
+        { 
+            txt: "文章除了舉出「抽椅子」的校園惡作劇之外，還舉了下列哪一種生活情境作為例子，警示大家「危險打鬧」同樣會產生嚴重的法律責任？", 
+            opts: ["在圖書館裡大聲說笑影響其他同學讀書", "在馬路邊互相推擠、追逐打鬧導致可能被車撞", "在考試時互相傳抄答案或代寫作業", "未經同學同意擅自拿走對方的文具用品"], 
+            a: 1, 
+            s: 1, 
+            fb: "文章最後一段明確提到，在馬路邊互相推擠、追逐、打鬧等行為非常危險，有可能導致朋友跌倒或被車撞，自己也會因此承擔相關法律責任。" 
+        },
+        { 
+            txt: "綜合全文內容，作者撰寫這篇文章的最主要目的與核心呼籲是什麼？", 
+            opts: ["鼓勵學生多參加法律講座，以便未來能順利考上法官或律師", "說明校園霸凌的定義，要求學校嚴格處罰所有犯錯的同學", "呼籲同學之間應時時互相尊重與保護，切勿以惡作劇當作玩笑而付出巨大代價", "倡導學校應將所有課桌椅固定在地上，以徹底避免抽椅子的行為發生"], 
+            a: 2, 
+            s: 2, 
+            fb: "文章首尾呼應，從同學間看似無傷大雅的惡作劇出發，詳細分析可能產生的刑責與巨大經濟賠償代價，最後總結呼籲大家要尊重與保護彼此、阻止惡作劇，切勿付出超乎想像的代價。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 1 * 60 * 1000;
+        let cooldownInterval = null;
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            // 在載入題目前檢查冷卻狀態
+            if (checkCooldown()) return;
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            document.querySelector('.quiz-pane').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 【關鍵】完成了全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
