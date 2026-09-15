@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>智識之域 · 四門</title>
+  <style>
+    :root {
+      --green: 90, 255, 150;
+      --gold: 255, 210, 70;
+      --blue: 80, 170, 255;
+      --red: 255, 80, 60;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #07060a;
+      color: #f3e6c4;
+      font-family: "Palatino Linotype", "Book Antiqua", "Noto Serif TC", serif;
+    }
+
+    body { overflow: hidden; }
+
+    .stage {
+      position: relative;
+      width: 100vw;
+      height: 100dvh;
+    }
+
+    .stage img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .door {
+      position: absolute;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border-radius: 50% 50% 42% 42%;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .door .glow {
+      position: absolute;
+      inset: 8% 12% 6% 12%;
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0.82);
+      filter: blur(10px);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      transition: opacity .35s ease, transform .35s ease;
+    }
+
+    .door:hover .glow,
+    .door:focus-visible .glow {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+
+    .door-green .glow {
+      background: radial-gradient(circle, rgba(var(--green), .95) 0%, rgba(var(--green), .45) 38%, rgba(var(--green), 0) 70%);
+      box-shadow: 0 0 40px rgba(var(--green), .35);
+    }
+    .door-gold .glow {
+      background: radial-gradient(circle, rgba(var(--gold), .95) 0%, rgba(var(--gold), .45) 38%, rgba(var(--gold), 0) 70%);
+      box-shadow: 0 0 40px rgba(var(--gold), .35);
+    }
+    .door-blue .glow {
+      background: radial-gradient(circle, rgba(var(--blue), .95) 0%, rgba(var(--blue), .45) 38%, rgba(var(--blue), 0) 70%);
+      box-shadow: 0 0 40px rgba(var(--blue), .35);
+    }
+    .door-red .glow {
+      background: radial-gradient(circle, rgba(var(--red), .95) 0%, rgba(var(--red), .45) 38%, rgba(var(--red), 0) 70%);
+      box-shadow: 0 0 40px rgba(var(--red), .35);
+    }
+
+    .label {
+   position: absolute;
+  left: 50%;
+  bottom: 80%;
+  transform: translateX(-50%);
+  font-size: clamp(16px, 2.1vw, 28px);
+  font-weight: 700;
+  letter-spacing: .18em;
+  white-space: nowrap;
+  color: #fff8dc;
+  text-shadow:
+    0 0 6px #000,
+    0 2px 10px #000,
+    0 0 18px rgba(0, 0, 0, .9);
+
+  padding: .25em .7em;
+  border-radius: 6px;
+  opacity: 1;
+  pointer-events: none;
+    }
+
+   </style>
+</head>
+<body>
+  <div class="stage">
+    <img src="b-library.jpg" alt="智識之域 · 四門" />
+
+    <a class="door door-green" href="a-book-51.html" title="五年級上學期" data-box="3.6,36.5,13.4,46">
+      <span class="glow"></span>
+<span class="label">五上</span>
+    </a>
+    <a class="door door-gold" href="a-book-52.html" title="五年級下學期" data-box="23.2,44.5,12.6,33.5">
+      <span class="glow"></span>
+<span class="label">五下</span>
+    </a>
+    <a class="door door-blue" href="a-book-61.html" title="六年級上學期" data-box="63.6,44.5,12.6,33.5">
+      <span class="glow"></span>
+<span class="label">六上</span>
+    </a>
+    <a class="door door-red" href="a-book-62.html" title="六年級下學期" data-box="82.8,36.5,13.6,46">
+      <span class="glow"></span>
+<span class="label">六下</span>
+    </a>
+  </div>
+
+  <script>
+    const IMG_W = 1712;
+    const IMG_H = 1152;
+
+    function placeDoors() {
+      const stage = document.querySelector(".stage");
+      const vw = stage.clientWidth;
+      const vh = stage.clientHeight;
+      const scale = Math.max(vw / IMG_W, vh / IMG_H);
+      const dw = IMG_W * scale;
+      const dh = IMG_H * scale;
+      const ox = (vw - dw) / 2;
+      const oy = (vh - dh) / 2;
+
+      document.querySelectorAll(".door").forEach((el) => {
+        const [l, t, w, h] = el.dataset.box.split(",").map(Number);
+        el.style.left = ox + (l / 100) * dw + "px";
+        el.style.top = oy + (t / 100) * dh + "px";
+        el.style.width = (w / 100) * dw + "px";
+        el.style.height = (h / 100) * dh + "px";
+      });
+    }
+
+    window.addEventListener("load", placeDoors);
+    window.addEventListener("resize", placeDoors);
+  </script>
+</body>
+</html>
