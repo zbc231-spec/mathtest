@@ -229,7 +229,7 @@
   { q: "將下面分數用約分的方法通分。 1/4,18/24(請照題目順序回答）", a: "1/4, 3/4", type: "normal" },
   { q: "將下面分數用約分的方法通分。 3/8,30/48(請照題目順序回答）", a: "3/8, 5/8", type: "normal" },
   { q: "將下面分數用約分的方法通分。 12/42,6/7(請照題目順序回答）", a: "2/7, 6/7", type: "normal" },
-  { q: "將下面分數用約分的方法通分。 36/78,8/1(請照題目順序回答）3", a: "6/13, 8/13", type: "normal" },
+  { q: "將下面分數用約分的方法通分。 36/78,8/13(請照題目順序回答）", a: "6/13, 8/13", type: "normal" },
   { q: "3/6 ＜ 3/0，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5", type: "normal" },
   { q: "5/7 ＞ 0/14，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7/8/9", type: "normal" },
   { q: "4/5 ＞ 0/10，0中可能是1、2、3……9的哪些數字？(請由小至大寫出，答案中間用/隔開）", a: "1/2/3/4/5/6/7", type: "normal" },
@@ -455,13 +455,13 @@
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-5-1-4-1.gif";
+                fImg.src = "b-5-1-4-1.jpg";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-5-1-4-0.gif";
+                fImg.src = "b-5-1-4-0.jpg";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;

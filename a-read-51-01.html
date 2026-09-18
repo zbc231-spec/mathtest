@@ -150,6 +150,7 @@
             border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
         .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
         .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
         .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
@@ -216,6 +217,7 @@
         <!-- 1小時冷卻畫面 (預設隱藏) -->
         <div id="cooldown-screen" class="hidden">
             <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
             <div class="cd-title">冷卻時間中，暫無法做題！</div>
             <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
             <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
@@ -315,7 +317,7 @@
       ];
 
         // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
-        const COOLDOWN_TIME = 1 * 60 * 1000;
+        const COOLDOWN_TIME = 20 * 60 * 1000;
         let cooldownInterval = null;
         let liveTimerInterval = null; // 即時計時器變數
 

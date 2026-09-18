@@ -387,13 +387,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-5-1-3-1.gif";
+                fImg.src = "b-5-1-3-1.jpg";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-5-1-3-0.gif";
+                fImg.src = "b-5-1-3-0.jpg";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;

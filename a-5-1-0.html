@@ -205,7 +205,7 @@
     { q: "27×324＝（   ）", a: "8748", type: "normal" },
     { q: "10800÷900＝（   ）", a: "12", type: "normal" },
     { q: "25000×160＝（   ）", a: "4000000", type: "normal" },
-    { q: "7982÷307＝（ {）", a: "26", type: "normal" },
+    { q: "7982÷307＝（   ）", a: "26", type: "normal" },
     { q: "3.02×9＝（   ）", a: "27.18", type: "normal" },
     { q: "5400÷300＝（   ）", a: "18", type: "normal" },
     { q: "0.17×8＝（   ）", a: "1.36", type: "normal" },
@@ -387,13 +387,13 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             const bText = document.getElementById('battle-text');
 
             if (isCorrect) {
-                fImg.src = "b-5-1-0-1.gif";
+                fImg.src = "b-5-1-0-1.jpg";
                 bText.innerText = "答對了，怪物遭到致命一擊！金幣+1！";
                 bText.style.color = "#27ae60";
                 coins++;
                 document.getElementById('coin-val').innerText = coins;
             } else {
-                fImg.src = "b-5-1-0-0.gif";
+                fImg.src = "b-5-1-0-0.jpg";
                 bText.innerText = "答錯了，你遭受怪物猛烈攻擊！HP-1！";
                 bText.style.color = "#e74c3c";
                 hp--;
