@@ -129,13 +129,13 @@
 
 <script>
     // --- 老師設定區 ---
-    const startDate = new Date("2026-09-09"); // 設定開學第一週的週一
+    const startDate = new Date("2026-09-09T00:00:00"); // 設定開學第一週的週一
     const totalWeeks = 20;
 
     function initBooks() {
         const grid = document.getElementById('bookGrid');
         const now = new Date();
-        
+        now.setHours(0, 0, 0, 0);
         // 計算目前是開學後第幾週 (0 代表第一週)
         const diffTime = now - startDate;
         const currentWeek = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
