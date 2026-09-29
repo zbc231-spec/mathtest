@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第六冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+  {
+    t: "西遊記第十一章-車遲國三妖比試",
+   c: "        唐三藏師徒四人渡過通天河之後，一路向西行，來到了車遲國。\n        當天晚上，孫悟空在借宿的寺院看到三清觀好熱鬧，便叫醒了兩個師弟。\n        孫悟空說：「八戒、悟淨，你們看那邊在做什麼法事？不如我們也去湊個熱鬧。」\n        但當他們來到三清觀，道士們已經離開了。孫悟空、豬八戒和沙悟淨趁機溜進大殿，把裡面的供果一掃而光，等到道士回來，看到觀內一片狼藉，三人趕緊跑走。\n        第二天一早，唐三藏帶著孫悟空他們進宮要換通行的度牒。三位國師認出他們正是昨晚搗亂的和尚，氣得要命，要國王砍他們的腦袋。\n        國王說：「不如讓東土來的和尚們與國師比試求雨，如果獲勝，我就不追究。」\n        「這好辦！」其中一個國師乃是虎力大仙，他擺好了架勢，拿出幾張符咒，準備開始求雨。\n        孫悟空變了個假身留在地上，真身卻跑去找雷公電母，讓他們只聽自己的命令。\n        虎力大仙連扔三張符咒，天空仍舊萬里無雲。再看孫悟空，只見他拿出金箍棒，雷公電母一見到金箍棒出現，立刻下起狂風暴雨。\n        國王忙大喊：「停雨！東土的和尚贏了！」\n        虎力大仙不服說：「陛下，我來和他比坐禪的時間。」便叫人抬來桌子，由虎力大仙和唐三藏各坐一個。\n        另外一個國師叫鹿力大仙，見唐三藏不動如山，怕虎力大仙無法贏他，就變出一隻臭蟲，飛到唐三藏脖子上，讓唐三藏坐立難安。\n        孫悟空發現了鹿力大仙的詭計，立刻變成蜜蜂弄死臭蟲，又變成一條蜈蚣，爬到虎力大仙鼻子裡咬一口，虎力大仙頓時從檯子上摔了下來。\n        「陛下，剛才我哥才求過了雨，體力不濟，這局不算，讓我來和他比『隔板猜物』。」鹿力大仙要求。\n        國王說：「就照國師的意思。」\n        說完，他命王后在櫃子裡放一套衣物。孫悟空變成小蟲，飛進去咬爛了衣服。\n        鹿力大仙說：「是一套衣裙。」\n        孫悟空變成的小蟲，跑到唐三藏耳邊說：「是一堆破爛的衣服。」\n        唐三藏照著說：「是一堆破爛的衣服。」眾人打開櫃子看，果真是一堆破破爛爛的衣服。\n        國王又親自從御花園摘了一個大仙桃放進去，鹿力大仙猜是個仙桃。\n        唐三藏說：「是個桃核。」\n        國王打開一看，仙桃早就被悟空啃得只剩下桃核。\n        鹿力大仙不服：「陛下，我們來比試砍頭挖心下油鍋！」\n        孫悟空答應：「沒問題！」\n        馬上就有虎力大仙派的人將孫悟空的頭砍掉，而孫悟空被砍後，又長出一個新的頭。虎力大仙也去砍頭，但孫悟空吹了根毫毛，變成黃狗，把他的頭扔進河裡。\n        虎力大仙死掉現出原形，原來是頭黃毛老虎。\n        鹿力大仙見了，要比試剖腹挖心。孫悟空笑嘻嘻地讓劊子手剖開肚皮，然後吹了一口仙氣，肚子又合攏了。鹿力大仙也被剖開，孫悟空變出一隻餓鷹，叼走了鹿力的五臟六腑。鹿力大仙倒在地上，也現出原形，竟然是一隻白毛鹿！\n        羊力大仙架起油鍋，孫悟空跳進油鍋，愉快的在鍋裡游泳。輪到羊力大仙時，他跳進油鍋，一副沒事樣，孫悟空的火眼金睛一瞧，原來有條冷龍躲在那裡！油鍋看起來很燙，但事實上一點也不熱。\n        孫悟空於是偷偷找來東海龍王，讓他收了冷龍，羊力大仙立刻被燙熟，只見鍋裡躺著一頭煮熟的羊，原來他是白羊精。\n        國王見了大吃一驚，這才醒悟過來，原來他被妖精騙了那麼久！他大擺宴席，感謝唐三藏師徒四人，並將他們送出了車遲國。\n\n--------------------\n【資料來源】：Hami書城-名著好好讀-西遊記",
+    q: [
+        { 
+            txt: "根據文章「隔板猜物」比試的記載，當國王將御花園摘的大仙桃放入櫃中後，唐三藏為何能準確回答是「桃核」？", 
+            opts: [
+                "因為孫悟空變小蟲飛入櫃中把仙桃啃得只剩下桃核並告訴唐三藏", 
+                "因為唐三藏施展佛門神通直接透視櫃子內部並發現了裡面的桃核", 
+                "因為鹿力大仙暗中偷吃仙桃後心虛，故意將錯的答案告訴唐三藏", 
+                "因為豬八戒趁大家不注意時溜進櫃中將仙桃吃光並剩下一個桃核"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「孫悟空變成小蟲……仙桃早就被悟空啃得只剩下桃核」，並跑去告訴唐三藏。" 
+        },
+        { 
+            txt: "根據文章對「下油鍋」比試的說明，羊力大仙跳進滾燙的油鍋中卻能展現出「一副沒事樣」的主要原因為何？", 
+            opts: [
+                "因為羊力大仙本身擁有刀槍不入的神體，對高溫油鍋完全免疫", 
+                "因為羊力大仙暗中請冷龍保護，使得油鍋表面看起來燙卻並不熱", 
+                "因為孫悟空暗中幫羊力大仙降溫，希望能藉此拖延比試的時間", 
+                "因為車遲國國王事先在油鍋中加入大量冰塊，讓油溫無法升溫"
+            ], 
+            a: 1, 
+            s: 1, 
+            fb: "文中明確提到「孫悟空的火眼金睛一瞧，原來有條冷龍躲在那裡！油鍋看起來很燙，但事實上一點也不熱」。" 
+        },
+        { 
+            txt: "綜合文章對各項比試過程的描繪，孫悟空在面對三位國師的挑戰時，主要採取了什麼樣的應對策略？", 
+            opts: [
+                "完全依賴唐三藏念咒施展佛法，自己則在旁冷眼旁觀不插手比試", 
+                "運用靈活變化與識破對方詭計的能力，化解危機並徹底擊敗妖精", 
+                "主動向國王承認昨晚搗亂的錯誤，試圖透過誠意感化三位道士國師", 
+                "聯合東海龍王與雷公電母直接動用武力，一舉攻破車遲國的大殿"
+            ], 
+            a: 1, 
+            s: 1, 
+            fb: "孫悟空在比試過程中變身干擾、找神仙幫忙收走冷龍、化解臭蟲與變動物破壞對方招式，展現出靈活變化與破除詭計的策略。" 
+        },
+        { 
+            txt: "綜合全文內容，關於車遲國比試的結果與國王態度前後轉變的原因，下列哪一項分析最為準確？", 
+            opts: [
+                "三妖現出原形揭露騙局，國王醒悟並大擺宴席感謝唐三藏師徒", 
+                "國王因害怕孫悟空的神通而被迫妥協，極不情願地給予通行度牒", 
+                "唐三藏靠著高深的坐禪功力感化國王，讓國王決定廢除道教國師", 
+                "鹿力大仙與羊力大仙主動認錯求饒，國王因而決定赦免妖精的罪行"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章結尾指出三妖死後分別現出黃毛老虎、白毛鹿與白羊精原形，國王大吃一驚並醒悟被騙，因而大擺宴席感謝並送走師徒四人。" 
+        }
+    ]
+},
+ {
+    t: "西遊記第十二章-女兒國唐僧招親",
+    c: "        唐三藏師徒從車遲國出來，路過西梁的女兒國，接待他們的女官問明來意，要他們先休息一下，便回宮通報女王。\n        女王一一聽了，滿心歡喜：「看來我昨晚的夢要成真了！」原來女王前一天才夢到成親，而且對方還是個和尚呢！說完，便派太師去請唐三藏師徒。\n        唐三藏正與三個徒弟在驛站用齋飯，聽說太師來了，有些意外。豬八戒嘻嘻一笑：「難道女王要請我們一起吃飯？」\n        孫悟空卻說：「不只是吃飯，怕是要說親呢！」\n        唐三藏大驚：「這該如何是好？」\n        「師父只管答應，一切有我老孫呢！」\n        果然，太師一進門便道賀：「恭喜聖僧，你是來我女兒國的第一個男子，女王特地派我來求親，一同治理女兒國。」\n        唐三藏擔心的說：「取經之事怎麼辦？」\n        太師說：「聖僧不用擔心，等與女王成親之後，自然會讓你的三位徒弟繼續西行。」\n        這就回宮稟告女王陛下，設宴款待大家。\n        太師一走，唐三藏立刻拉著徒弟叫道：「悟空，我是一個出家人，怎麼能跟人成親呢？」\n        孫悟空安慰說：「師父你莫急，這女兒國國王不是妖精，不能一棒子打死。不如將計就計，先換了度牒再說。」\n        不久，太師便回宮稟報。女王得知唐三藏有意，滿心歡喜，立刻前來迎接。她一見唐三藏溫文儒雅、氣質非凡，立刻開心的帶他回到王宮。\n        宮中，宴席已經擺好，豬八戒見了，哪裡管得了什麼禮數，坐下便開始大吃大喝。\n        「快點把師父留下吧！吃飽喝足，大家好各奔前程。」豬八戒喊著，被孫悟空瞪了一眼。\n        吃了一會兒，唐三藏雙手合掌，對著女王說道：「承蒙陛下厚待，我們師徒四人已經酒足飯飽。希望快些換度牒，我這幾個徒兒也好啟程。」\n        女王同意了，隨即又拉著唐三藏要讓他即位。唐三藏慌忙拒絕說：「陛下，明日才是黃道吉日，今日先送徒兒們離開吧！」\n        女王想了想，早已些送走那幾個模樣稀奇古怪的和尚也好。她接過沙悟淨遞過來的度牒，蓋上女兒國的大印，交還給他。\n        見度牒到手，唐三藏說：「陛下，可否讓貧僧送徒兒們離開城門，順道囑咐他們幾句，讓他們安心西去。」\n        女王同意了：「聖僧果然是個好師父。」\n        唐三藏師徒四人走出城門，回頭一看，女王帶著女官們也出來送行。\n        唐三藏轉過身，對女王說：「陛下，請回吧，貧僧要去西方取經。」\n        女王聽了，大吃一驚：「我們不是說好了嗎？你做國王，我為王后，這宴席也已經吃過了，怎麼現在才反悔了？」\n        眾人正在糾纏不清，突然，從一旁竄出一個女子，捲起一陣風把唐三藏給帶走了。那女子正是蠍子精，孫悟空、豬八戒和沙悟淨撤下女兒國國王，要去救唐三藏。\n        蠍子精法力高強，孫悟空和豬八戒都打不過她。還好這時多虧觀音菩薩指點，孫悟空去東天門裡的光明八宮請來昴日星官，化為公雞，降伏蠍子精，師徒一行人才繼續上路。\n\n--------------------\n【資料來源】：Hami書城-名著好好讀-西遊記",
+    q: [
+        { 
+            txt: "根據文章最後一段的說明，當孫悟空與豬八戒都打不過法力高強的蠍子精時，最後是請來哪位神仙降伏對手的？", 
+            opts: [
+                "昴日星官化為公雞將其降伏", 
+                "觀音菩薩親自下凡施展法寶", 
+                "東海龍王召喚神水壓制妖精", 
+                "雷公電母降下天雷擊退敵手"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「孫悟空去東天門裡的光明八宮請來昴日星官，化為公雞，降伏蠍子精」。" 
+        },
+        { 
+            txt: "根據文章第十二段的說明，孫悟空建議唐三藏面對女兒國太師的求親時採取「將計就計」的態度，其主要用意為何？", 
+            opts: [
+                "順利取得女兒國大印並換取通行的度牒，好讓團隊能繼續西行", 
+                "藉由留在女兒國擔任國王，累積治理國家的經驗以宣揚佛法智慧", 
+                "試探女兒國國王的真實身份，確認對方是否為危害人間的妖精所變", 
+                "爭取在宮中享用豐盛宴席的時間，好讓豬八戒與沙悟淨恢復戰鬥體力"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中孫悟空說明「這女兒國國王不是妖精，不能一棒子打死。不如將計就計，先換了度牒再說」，可知重點在於安全取得度牒。" 
+        },
+        { 
+            txt: "在城門口送行時，唐三藏突然轉身對女王說「貧僧要去西方取經」，導致女王大吃一驚。造成女王產生誤會的核心原因為何？", 
+            opts: [
+                "唐三藏假意答應親事並吃下婚宴，使女王以為他已真心決定留在宮中", 
+                "豬八戒暗中與女王達成私下協議，承諾會說服唐三藏放棄西天取經", 
+                "觀音菩薩曾給女王托夢，預言唐三藏必定會留在女兒國並與其成親", 
+                "孫悟空在度牒上暗中施展法術，改變了度牒內容使女王產生嚴重誤解"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中女王驚訝表示「我們不是說好了嗎？你做國王，我為王后，這宴席也已經吃過了」，可知是因為唐三藏配合「將計就計」的假意應允讓女王信以為真。" 
+        },
+        { 
+            txt: "綜合全文內容，關於唐三藏師徒在女兒國過境並順利化解危機的過程，下列哪一項分析最為準確？", 
+            opts: [
+                "展現孫悟空應變的智慧與神佛協助，成功克服情關誘惑與妖精襲擊", 
+                "說明女兒國國王與蠍子精暗中勾結，目的是為了奪取唐三藏的度牒", 
+                "強調豬八戒在宮中顧全大局的表現，是師徒得以順利離開女兒國的關鍵", 
+                "批判唐三藏缺乏取經的堅定決心，險些因為女兒國的繁華而放棄初衷"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章前半段展現孫悟空以智取（將計就計換度牒）應對非妖精的國王，後半段展現求助菩薩與昴日星官降伏蠍子精，完整體現智謀與神佛相助的主旨。" 
+        }
+    ]
+},
+  {
+    t: "哆啦A夢教我的事",
+    c: "        哆啦A夢故事裡，大雄是個家境不好、腦袋不好、體育不好，世俗的標準找不到一絲長處的人。成天被媽媽罵、被胖虎揍、被老師唸，就連走在路上不是被狗追，就是掉進水溝。每次當大雄哭著回家求援，心軟的哆啦A夢總會摸摸光溜溜的腦袋想辦法。\n        即便辦法不見得靠譜，但透過法寶，他總是在試著告訴缺乏自信的大雄：不要覺得自己不如人，遇到困難不要灰心，就算外面有再多的挑戰和困難，都要試著挖掘自己優點。哭永遠沒辦法解決問題，唯有保持一顆自信、樂觀的心，學會勇敢，學會承擔，才能改造自己，獲得認同。\n        再細想，哆啦A夢本身也不是先天比人強。他製造時少了顆螺絲，個性總是冒冒失失，被歸類為次級品。出廠沒多久，耳朵就被老鼠咬壞，迷迷糊糊的醫生誤將耳朵切除後，又不小心喝下悲傷之源，連串止不住的淚水將原本黃色的身體染成藍色。\n        誰也沒想到，當「次級品」遇到了「倒楣鬼」後，其中產生的化學變化，竟感動了現實生活中大大小小的每個人。\n        有人指出，個性霸道的胖虎欲予欲求，習慣用拳頭解決一切問題；再輔以欺善怕惡，靠玩具收買朋友的小夫，不適合孩童長期觀賞，但那些人如果只看到鼓勵或煽動暴力，也未免太斷章取義。\n        就我看來，哆啦A夢和大雄的世界裡，暴力、小聰明最終都會以失敗劃下句點。\n        君不見哆啦A夢的劇情自有一套邏輯，從胖虎、小夫欺負大雄開始，到哆啦A夢拿出法寶支援，再到大雄借住哆啦A夢的道具惡整胖虎、小夫，但一旦惡作劇過頭，總會有更悲慘的結局。\n        這是一部有夢想、有溫情、有友情的動畫。它傳遞的理念，從來都是善惡到頭終有報，心存善念才是正道。就算胖虎歌唱得難聽了一點，脾氣暴躁了一點，但絕對是個重友情，有義氣的大男孩；就算小夫懦弱不堪，關鍵時刻總是鼓起勇氣和夥伴們並肩作戰；就算孩子看不到那一面，身為大人，難道不可以透過哆啦A夢的故事，機會教育以正視聽嗎？\n        如果這樣的卡通真被禁播，錯得到底是卡通，還是只看到醜惡與瑕疵的人？\n        心中有佛還是糞，我想，佛印和蘇東坡的故事，早告訴你了。\n        這部卡通教會了我，遇到困難仍要靠自己，即便朋友再有能力，即便道具再神奇，耍小聰明最終只會徒勞無功；它也教會了我，就算天生不如人，只要認同自己，愛自己，找到自己，「次級品」和「倒楣鬼」都有存在的價值，也都能找到專屬的春天。\n\n--------------------\n【資料來源】：https://www.businesstoday.com.tw/article/category/183030/post/201407220016/",
+    q: [
+        { 
+            txt: "根據文章第三段的內容，哆啦A夢的外觀之所以會從原本的黃色變成藍色，主要原因為何？", 
+            opts: [
+                "因為製造時少了一顆螺絲，導致身體金屬材質逐漸變質退色", 
+                "因為被老鼠咬壞耳朵後又喝下悲傷之源，止不住的淚水將身體染色", 
+                "因為迷糊的醫生在切除耳朵時，使用了錯誤的藥劑導致皮膚變色", 
+                "因為被歸類為次級品丟棄後，在雨水中長時間浸泡而改變了顏色"
+            ], 
+            a: 1, 
+            s: 1, 
+            fb: "第三段明確記載「迷糊的醫生誤將耳朵切除後，又不小心喝下悲傷之源，連串止不住的淚水將原本黃色的身體染成藍色」。" 
+        },
+        { 
+            txt: "根據文章第六、七段對劇情邏輯的說明，為什麼作者認為主張「哆啦A夢煽動暴力而應禁播」的說法是斷章取義？", 
+            opts: [
+                "因為胖虎和小夫在劇中其實從未真正欺負過大雄，只是開玩笑", 
+                "因為大雄每次使用法寶惡作劇過頭時，最終都會得到更悲慘的結局", 
+                "因為哆啦A夢每次都會拿出最具攻擊力的法寶來打敗胖虎和小夫", 
+                "因為卡通製作團隊在每集結尾都會安排專家向觀眾解釋暴力後果"
+            ], 
+            a: 1, 
+            s: 1, 
+            fb: "第七段指出劇情邏輯為「大雄借住哆啦A夢的道具惡整胖虎、小夫，但一旦惡作劇過頭，總會有更悲慘的結局」，說明作品傳遞善惡到頭終有報，而非鼓勵暴力。" 
+        },
+        { 
+            txt: "作者在文中提及「心中有佛還是糞，我想，佛印和蘇東坡的故事，早告訴你了」，這句話主要想表達什麼觀點？", 
+            opts: [
+                "暗示卡通劇情的品質良莠不齊，觀眾應具備挑選好節目的能力", 
+                "批判那些主張禁播的人，其實是因為自己內心充滿偏見才只看到醜惡", 
+                "說明蘇東坡的文學作品與哆啦A夢一樣，都蘊含著深奧的佛學哲理", 
+                "主張大人應該禁止兒童觀看含有宗教典故或傳統歷史故事的動畫"
+            ], 
+            a: 1, 
+            s: 1, 
+            fb: "接續前文「錯得到底是卡通，還是只看到醜惡與瑕疵的人？」，引用該典故旨在指責批評者用什麼眼光看世界，呈現的就是自己的內心。" 
+        },
+        { 
+            txt: "綜合全文內容，下列哪一項分析最能完整歸納作者從《哆啦A夢》這部卡通中所領悟的核心價值？", 
+            opts: [
+                "人應接納自我並靠自己面對困難，且能以善意看待世界與他人的價值", 
+                "只要擁有強大的神奇法寶與朋友協助，世上所有難關都能迎刃而解", 
+                "動畫作品應去除所有暴力與霸凌情節，才能對兒童產生正面的教育效果", 
+                "強調家庭背景與個人天賦決定了一生的成就，必須坦然接受世俗標準"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章結尾總結「遇到困難仍要靠自己……只要認同自己，愛自己，找到自己，『次級品』和『倒楣鬼』都有存在的價值」，並貫穿全篇對正向心態與善念的強調。" 
+        }
+    ]
+},
+ {
+    t: "玉米罐頭開封這樣保存才正確！",
+    c: "<img src='x516-1.jpg' alt='x516-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n--------------------\n【資料來源】：https://tw.news.yahoo.com/玉米罐頭吃不完怎麼辦-直接冰竟錯了-行家曝-正確保存法-111100022.html",
+q: [
+{
+txt: "根據圖文資料的說明，若玉米罐頭開封後 2~3 天內吃不完，採用冷凍保存時最長約可保存多久？",
+opts: [
+"約 1 個月",
+"約 2 個月",
+"約 3 個星期",
+"約 2~3 天"
+],
+a: 0,
+s: 1,
+fb: "圖文第 4 點明確指出「放進冷凍庫，約可保存 1 個月」。"
+},
+{
+txt: "根據「為什麼不能留在原罐？」的說明，常見馬口鐵罐頭一旦開封後，為什麼即使立刻放進冰箱冷藏也不能長時間存放？",
+opts: [
+"因為馬口鐵罐無法承受冰箱的低溫，會產生有毒物質混入食材中",
+"因為原有的加熱殺菌與保存條件已破壞，且鍍錫接觸空氣會影響風味",
+"因為冰箱內部的濕氣會導致馬口鐵罐外部迅速生鏽並滲透進罐頭內部",
+"因為玉米粒在低溫下會自動釋放大量水分，加速容器本身的發酵反應"
+],
+a: 1,
+s: 1,
+fb: "圖文明確解釋，馬口鐵罐開封後內層鍍錫接觸空氣會影響風味，且原本仰賴的殺菌與密封環境已被破壞，故無法長時間存放。"
+},
+{
+txt: "根據圖文中的冷凍技巧，為什麼建議將玉米粒放入夾鏈袋平鋪冷凍 30 分鐘後要取出「輕輕搖散」？",
+opts: [
+"為了將玉米粒表面殘留的水分徹底甩乾，避免玉米粒在低溫下發黴變質",
+"為了避免玉米粒因結凍而黏成一大塊，方便日後依需求份量取用料理",
+"為了讓玉米粒能均勻吸收空氣，以保持原本飽滿彈牙的口感與風味",
+"為了加速玉米粒的冷凍過程，確保能在最短時間內達到攝氏零下的溫度"
+],
+a: 1,
+s: 1,
+fb: "圖文小提醒明確提到「冷凍 30 分鐘後取出，將玉米粒輕輕搖散，可避免結塊」，配合作者提及分裝便利性，可知是為了避免黏成一團以利取用。"
+},
+{
+txt: "綜合圖文整體傳達的保存資訊與操作步驟，下列哪一個選項最適合歸納這張圖表的主旨？",
+opts: [
+"說明開封後玉米罐頭的危害，並強調馬口鐵罐頭對健康的負面影響",
+"指導玉米罐頭開封後的正確保存步驟，以延長保存期限並維護食安",
+"比較冷藏與冷凍兩種設備的運作原理，並分析食材發黴的真正原因",
+"推廣食品級保鮮盒的優點，並示範各種罐頭食品的加熱與烹調技巧"
+],
+a: 1,
+s: 2,
+fb: "圖文整體從警告不可直接冰原罐切入，依序說明倒湯汁、換容器、冷藏/冷凍步驟及原理，旨在教導大眾正確保存開封後的玉米罐頭。"
+}
+]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
