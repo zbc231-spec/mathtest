@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第八冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "西遊記第十五回-盤絲洞遇蜘蛛精",
+    c: "        離開火焰山後，唐僧師徒四人一路西行，來到了一處幽靜的山谷。只見前方有一座莊園，茅屋數間，環境清幽。唐僧見天色漸晚，又念及悟空平日辛苦，便主動提出由自己親自前去化齋。\n        唐僧獨自走進莊園，只見屋內有七位年輕貌美的女子正圍坐在一起縫補衣裳。唐僧躬身施禮說明來意，七位女子熱情地將唐僧請進屋內，端出一盤盤「美味佳餚」。唐僧定睛一看，盤子裡裝的竟全是人肉與毒蟲所做的食物，嚇得他臉色蒼白，起身便要離開。\n        原來，這七位女子乃是山中修煉成精的蜘蛛精，住處名為「盤絲洞」。七個蛛精見唐僧要走，當場露出猙獰面目，從肚臍眼噴出鋪天蓋地的銀白色蛛絲，將唐僧結結實實地纏繞成一個大繭，吊掛在了梁柱之上，準備蒸熟食用。\n        孫悟空見師父久去不歸，心知不妙，連忙帶領八戒與沙僧前來尋找。悟空變作一隻蜜蜂飛入莊園打探，發現了被綁的師父。他又追蹤到山谷間的一處溫泉「濯垢泉」，見那七個蜘蛛精正在泉水中嬉戲洗澡。\n        豬八戒一聽說有妖怪洗澡，搶著要去降妖。八戒跑到泉水邊，搖身一變化作一隻大鮎魚，在水中橫衝直撞，攪得七個蛛精狼狽不堪。七個蛛精大怒，跳上岸來再次噴出萬道蛛絲，將豬八戒也纏了個結實。\n        孫悟空見狀趕來支援，揮動金箍棒打斷蛛絲，救出了八戒。七個蜘蛛精敵不過悟空，敗退逃往黃花觀，尋求她們的師兄——多目怪（百眼魔君）幫忙。\n        多目怪設下毒茶宴請唐僧師徒，八戒與沙僧不疑有他，喝下毒茶後當場口吐白沫倒地。悟空識破毒計，與多目怪在大殿前展開大戰。多目怪見打不過悟空，猛地脫下衣服，兩脅之下赫然睜開了一千隻金光四射的眼睛！那一千隻魔眼放出萬道金光，形成一座刺眼的金光陣，將悟空死死困在其中，刺得悟空雙眼劇痛，無法近身。\n        悟空化作穿山甲穿地逃出金光陣，正自焦急時，紫雲山千花洞的毗藍婆菩薩駕雲趕來。菩薩拿出從昂日星官眼睛裡煉製出的一根繡花針，拋向半空。那繡花針化作一道金芒，瞬間破開了金光陣，刺中了多目怪的大穴，使其現出原形——一隻丈餘長的蜈蚣精！\n        毗藍婆菩薩收服了蜈蚣精，並用解藥救醒了唐僧、八戒與沙僧，七個蜘蛛精也在混戰中被悟空徹底消滅。師徒四人掃除妖魔，重整行囊，歡歡喜喜地繼續向西天踏上取經之路。\n\n--------------------\n【資料來源】：改編自《西遊記》經典故事／內容由 Gemini AI 整理撰寫",
+    q: [
+        { 
+            txt: "根據文章內容，毗藍婆菩薩用來破開多目怪金光陣並使其現出原形的法寶「繡花針」，是用哪一位神仙眼睛裡的精華所煉製的？", 
+            opts: [
+                "昂日星官", 
+                "葵木狼", 
+                "太上老君", 
+                "靈吉菩薩"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第八段明確記載「菩薩拿出從昂日星官眼睛裡煉製出的一根繡花針，拋向半空」。" 
+        },
+        { 
+            txt: "多目怪（百眼魔君）在與孫悟空交手時，為何要猛地脫下衣服並睜開兩脅之下的千隻眼睛？", 
+            opts: [
+                "因為他在正面武打中敵不過孫悟空，需要施展千眼金光陣將悟空死死困住", 
+                "為了向蜘蛛精師妹們展現自己修煉千年的威嚴，震懾前往黃花觀的唐僧", 
+                "為了用金光照亮地底通路，防止孫悟空化作穿山甲從地底逃跑", 
+                "因為毒茶的毒性發作反噬到自己身上，迫使他必須睜開魔眼解毒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第七段指出多目怪「見打不過悟空」，因而脫衣展露千眼釋放萬道金光形成金光陣，以困住並傷害悟空雙眼。" 
+        },
+        { 
+            txt: "故事開頭唐僧一改往常讓悟空採果的習慣，主動提出要親自前去莊園化齋，其主要原因是什麼？", 
+            opts: [
+                "體恤孫悟空平日西行降妖與尋找食物相當辛苦，心生念及而主動分擔", 
+                "因為唐僧懷疑莊園內藏有落胎泉水，想親自去為師徒購買解藥", 
+                "為了向三個徒弟證明自己具備獨立化齋的能力，不需要事事依賴悟空", 
+                "因為唐僧在莊園外聽到了七位女子的求救聲，決定前去查看救援"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第一段指出唐僧「念及悟空平日辛苦，便主動提出由自己親自前去化齋」，體現師父體貼徒弟的心態。" 
+        },
+        { 
+            txt: "從毗藍婆菩薩使用「昂日星官眼睛煉製的繡花針」輕易破除「蜈蚣精（多目怪）金光陣」的情節中，主要傳達了什麼樣的寓意？", 
+            opts: [
+                "即便妖法再強大刺眼，世間萬物仍遵循物種相克與邪不勝正的自然法則", 
+                "孫悟空的火眼金睛完全無法抵禦金光陣，證明其法力不如多目怪", 
+                "強調多目怪是因為缺乏防備心才被偷襲，若正面交鋒菩薩未必能勝", 
+                "說明取經團隊只要遇到眼部受傷的妖怪，就必須飛往天庭尋求星官協助"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文中第七與第八段敘述多目怪千眼金光陣強大至極，但毗藍婆菩薩拿出源自金雞（昂日星官）精華的繡花針一舉破陣降伏蜈蚣精，深刻點出了萬物相克與正必勝邪的道理。" 
+        }
+    ]
+},
+{
+    t: "西遊記第十六回-比丘國唐僧救童",
+    c: "        離開盤絲洞後，唐僧師徒四人一路披星戴月，來到了一座名為「比丘國」的繁華城邦。剛進城門，眾人便被眼前的景象震撼了：只見街頭巷尾、每家每戶的門口，都懸掛著一隻隻沉重的鵝籠，籠子裡竟關著一個個面黃肌瘦、啼哭不止的幼小童男！\n        唐僧心中大悲，連忙來到驛館向館丞打聽緣由。館丞嘆息著吐露真相：三年前，國王得了一場重病，久治不愈。一位自稱「國丈」的道士帶著一位傾國傾城的美貌女子進獻給國王，國王封那女子為「美后」。國丈隨後開出一道偏方，聲稱需要用一千一百一十一個小童的心肝作為藥引，才能煉製出長生不老的仙丹。如今鵝籠裡裝的，正是全城搜刮來準備明日開膛取心的無辜孩子。\n        唐僧聽完大驚失色，流淚懇求孫悟空拯救這些無辜的小生命。當晚，孫悟空召集各路風神與城隍神，施展神仙法術，掀起一陣陣狂風，將全城鵝籠連同裡面的童男一併刮到了安全隱蔽的山谷中藏匿起來。\n        次日清晨，朝堂之上發現童男全部失蹤，國丈大怒，指著前來倒換通關文牒的唐僧對國王說：「陛下，童男失蹤乃是天意，如今這東土大唐的高僧乃是十世修行的好人，他的心肝比千名童男更具功效！」國王信以為真，當場下令要剖開唐僧的胸膛取出心肝。\n        孫悟空早已料到妖怪有此一著，便搖身一變化作唐僧的模樣代替師父入宮。朝堂上，假唐僧冷笑一聲，接過匕首往自己肚子上一劃，登時流出一堆紅心、白心、黃心與貪心、嫉妒心，唯獨沒有妖怪想要的「黑心」！假唐僧當場變回齊天大聖本相，舉棒便向國丈打去。\n        那國丈與美后見事情敗露，化作兩道妖風逃出皇宮。悟空與八戒緊追不捨，將美后一棒打死，現出原形——一隻玉面狐狸精。而國丈則逃入山林，正當悟空要痛下殺手時，南極壽星（南極仙翁）駕著祥雲趕到，制止了悟空。壽星將拐杖一點，國丈頓時現出了原形——一隻壽星座下的白鹿精！原來這白鹿精趁壽星不備，私自偷了壽星的蟠桃拐杖逃下凡間作亂。\n        壽星收服了白鹿精返回天庭，悟空也引導官兵從山谷中接回了所有丟失的童男，讓全城百姓家庭團聚。比丘國國王悔恨不已，下令改國名為「欽安國」，擺下盛大的國宴感激師徒四人。唐僧師徒化解了大難，在全城百姓的歡呼與祝福聲中，歡歡喜喜地繼續向西天踏上取經之路。\n\n--------------------\n【資料來源】：改編自《西遊記》經典故事／內容由 Gemini AI 整理撰寫",
+    q: [
+        { 
+            txt: "根據文章內容，自稱「國丈」的妖怪逃入山林後，南極壽星將拐杖一點，使其現出了何種原形？", 
+            opts: [
+                "白鹿精", 
+                "玉面狐狸精", 
+                "青毛獅子怪", 
+                "黃羊精"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第六段明確記載「壽星將拐杖一點，國丈頓時現出了原形——一隻壽星座下的白鹿精」。" 
+        },
+        { 
+            txt: "孫悟空在全城童男失蹤的次日清晨，為何要特地變身成唐僧的模樣代替師父入宮朝見？", 
+            opts: [
+                "預料到國丈會在童男失蹤後轉而打唐僧心肝的主意，藉由親自代入以護師並當場拆穿妖怪", 
+                "因為唐僧害怕見到國王，便要求孫悟空代替自己前去辦理通關文牒的蓋印手續", 
+                "為了向比丘國國王展示七十二變的神通，說服國王放棄使用小童心肝作為藥引", 
+                "希望引誘美后主動出手襲擊，藉此測試自己的金剛不壞之身能否抵禦剖胸匕首"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段指出「孫悟空早已料到妖怪有此一著，便搖身一變化作唐僧的模樣代替師父入宮」，預先防範國丈因童男失蹤而轉向唐僧索心的陷阱。" 
+        },
+        { 
+            txt: "孫悟空在剖開自己肚子時展現了紅心、白心、貪心與嫉妒心，並強調唯獨沒有「黑心」，這話的主要意圖是什麼？", 
+            opts: [
+                "藉由諷刺與對比，揭露並譴責國丈與國王為了私利殘害千名童男才是真正的「黑心」", 
+                "為了向朝堂上的官兵證明自己是真心實意想留下來擔任比丘國的新國丈", 
+                "說明十世修行的好人因為沒有黑心，所以其心肝根本無法拿來煉製長生不老丹", 
+                "因為孫悟空在變幻唐僧時發生失誤，無法完美變出妖怪所需的黑色心髒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段敘述假唐僧剖肚展示各種心唯獨無黑心，是以隱喻手法暗諷國丈與昏庸國王動念害死千名幼童才是真正心術不正的黑心之人。" 
+        },
+        { 
+            txt: "故事結尾，比丘國國王在明白真相後悔恨不已，並下令將國名改為「欽安國」，這一舉動主要呈現了什麼樣的意涵？", 
+            opts: [
+                "象徵國王從迷信殘暴的昏庸中覺醒，決心摒棄邪念並改過自新，祈求國家欽服平安", 
+                "證明比丘國的官兵具備極高的效率，可以在一天之內將千名童男全數接回家庭", 
+                "說明南極仙翁在收服白鹿精後，要求國王必須更換國名才能化解天庭的怒氣", 
+                "強調唐僧師徒在取經路上每到一個國家，都會強制要求當地國王更改城邦名稱"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文中第七段敘述國王悔恨昔日聽信偏方殘害童男，下令改國名為「欽安國」並宴請感謝師徒，展現了領導者知錯能改、回歸正道與祈求治安國泰的心理轉折。" 
+        }
+    ]
+},
+  {
+    t: "熬夜、臨時抱佛腳 反影響成績表現",
+    c: "        很多學生喜歡考前一個月、考前幾天才開始熬夜念書、臨時抱佛腳。美國睡眠醫學專家認為，這種做法不只沒效，睡眠剝奪、睡眠不足，還會傷害大腦功能、影響成績表現，反而得不償失，建議還是及早準備，學習效果會比較好。\n        睡眠不足 學習表現衰退\n        美國德州農工大學醫學院教授大衛‧厄爾尼斯特專研生理節奏，他表示，睡眠剝奪對工作記憶的影響很驚人。每少睡1小時，大腦工作效率就會遞減。多數人的睡眠時間至少需要7到8小時，大腦才能正常運作。如果整晚沒睡、熬夜，睡眠時間不夠，大腦就會感覺很疲憊，此時有些學習、記憶表現就會衰退。\n        少量累積學習 效果較佳\n        當熬夜、臨時抱佛腳時，為了快速記憶，大腦只使用短期記憶功能，但如果需要回想、保存這些記憶，就需要用到長期記憶功能。當一個人想快速記住一些訊息，只用到短期記憶功能。但如果沒有「重新運用」這些資訊，這些資訊就會在幾分鐘、幾小時內消失。\n        因此若想提升成績表現，就要讓訊息從短期記憶轉變成長期記憶，但臨時抱佛腳這種學習形式卻無法達到這樣的效果。厄爾尼特建議，想提升成績，以少量累積法學習，最有成效，當然事先準備也是很重要。如果不重複使用這些資訊，這些資訊就會流失。\n        多次學習 反覆記憶\n        厄爾尼特指出，考試之前，連續花好幾小時讀書、學習，效果並不好。建議先努力學習，在考試前三、四天開始做準備，將學習時間切成20-30分鐘小區塊，每天多次學習。一天分好幾次反覆記憶這些資訊，就能讓大腦將這些訊息化為長期記憶，考試時，回想這些資訊就會比較順利。\n        熬夜苦讀 效果不彰\n        事實上，大腦認知表現好壞受生理時鐘控制，當一天過去，大腦也會變得疲累不堪，因此早上、白天的學習、記憶表現，會比晚上來得好，到了深夜，學習、記憶能力就會變差。因此在晚上讀書、學習，大腦表現便明顯衰退，深夜熬夜苦讀，等於是在對抗自然生理節奏，而認知、學習效率最好時段多在白天。建議晚上不要熬夜苦讀，考試那天，早一點起床做準備，效果較好。\n\n--------------------\n【資料來源】：https://www.healthnews.com.tw/article/29167",
+    q: [
+        { 
+            txt: "根據美國德州農工大學醫學院教授大衛‧厄爾尼斯特的說法，多數人每日至少需要多少小時的睡眠時間，大腦才能維持正常運作？", 
+            opts: [
+                "7 到 8 小時", 
+                "5 到 6 小時", 
+                "9 到 10 小時", 
+                "3 到 4 小時"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確提及「多數人的睡眠時間至少需要7到8小時，大腦才能正常運作」。" 
+        },
+        { 
+            txt: "根據文章分析，學生若採用「臨陣磨槍、熬夜苦讀」的方式備考，為什麼無法順利將學習內容轉化成長期記憶？", 
+            opts: [
+                "因為短時間快速記憶僅使用短期記憶功能，若未重複使用資訊便會在短時間內消失", 
+                "因為深夜的大腦會自動啟動排毒機制，強制刪除當天所儲存的所有文字訊息", 
+                "因為臨考前的大腦運作速度過快，導致長期記憶區域因過熱而無法運作", 
+                "因為熬夜會使大腦完全失去工作記憶功能，無法再接收任何新的學科知識"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三、四段指出，臨時抱佛腳只用到短期記憶，若沒有重新運用、重複使用資訊，資訊就會在幾分鐘或幾小時內流失，無法轉變成長期記憶。" 
+        },
+        { 
+            txt: "厄爾尼特教授建議學生在考前三、四天準備時，應採用何種學習策略來達到最佳的記憶效果？", 
+            opts: [
+                "將學習時間切成 20-30 分鐘小區塊，每天分好幾次反覆記憶資訊", 
+                "在考前最後一晚連續苦讀 8 小時以上，一次性記下所有考試重點", 
+                "完全放棄白天讀書，改在深夜生理時鐘最安靜時進行長時間複習", 
+                "每次讀書至少持續 4 小時不休息，直到大腦感到完全疲累為止"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段指出，建議在考前三、四天開始準備，「將學習時間切成20-30分鐘小區塊，每天多次學習。一天分好幾次反覆記憶這些資訊」。" 
+        },
+        { 
+            txt: "綜合全文關於「生理時鐘」與「記憶轉化」的說明，下列對於提升考試成績最佳策略的歸納，何者最為準確？", 
+            opts: [
+                "順應生理時鐘於白天少量累積反覆學習，保證充足睡眠以維持大腦最佳運作", 
+                "利用深夜安靜時段集中大腦注意力，並在考前通宵不睡以避免忘記短期記憶", 
+                "考前一天不需做任何複習，只需在考試當天提早 3 小時起床一次讀完所有範圍", 
+                "縮短每日睡眠至 5 小時以增加讀書時間，只要分區塊學習就不會影響大腦效率"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章指出大腦認知表現受生理時鐘控制（白天優於晚上）、睡眠不足傷害大腦，且記憶需透過少量累積與重複運用轉化成長期記憶，故順應生理時鐘、規律睡眠並多次累積複習為最佳策略。" 
+        }
+    ]
+},
+{
+    t: "香腸、火腿致癌？罪魁禍首不是亞硝酸鹽，而是「它」",
+    c: "        普遍民眾存在這項認知──「吃香腸、加工肉品或吃太多烤肉，因含有大量硝酸鹽、亞硝酸鹽，將大幅提高罹癌風險。」這個說法不盡然正確，近期國立陽明交通大學研究團隊調查發現，國人攝取最大量的硝酸鹽、亞硝酸鹽來源，其實是「蔬菜」、「米飯」，事實上，亞硝酸鹽還具有保護心血管的作用，顛覆眾人觀點！林口長庚醫院腎臟科系教授級主治醫師顏宗海指出，真正導致罹癌的罪魁禍首，其實是「亞硝胺」，尤其在烤肉時，當含有硝酸鹽、亞硝酸鹽的食物遇上高溫，就會導致亞硝胺的產生。\n        亞硝酸鹽遇高溫 產生「亞硝胺」才是罪魁禍首\n        顏宗海醫師說明，許多流行病學研究、醫學理論都指出，含有亞硝胺的食物要少吃，否則會增加心血管疾病與癌症風險。根據國際癌症研究中心（IARC）研究統計，每人每日攝取超過50克（約1.33兩）的加工肉品，或100克（約2.66兩）的紅肉（豬、羊、牛），將增加17％罹患大腸癌的風險。亞硝酸鹽其實是合法的食品添加物，根據食藥署規範，凡加工肉品類，包括香腸、火腿、培根、臘肉，可適量添加硝酸鹽、亞硝酸鹽，以預防微生物汙染（例：肉毒桿菌）、腐敗，及食物中毒；硝酸鹽、亞硝酸鹽會使肉品的顏色更鮮豔，因此又稱之為保色劑。\n        加工肉品先水煮再烤 降低亞硝胺產生\n        不過，目前亞硝酸鹽類不宜添加過量，食藥署規定，每１公斤不能添加超過0.07公克的亞硝酸鹽類，乃因當含有亞硝酸鹽的加工肉品經過高溫烹煮，如：燒烤，就會產生大量的亞硝胺，顏宗海醫師表示，「有的人形容，硝酸鹽、亞硝酸鹽是必要之『惡』。」必須添加於食物中，以避免食物中毒的風險，但添加過量，會造成癌症風險，必須有所限制，此乃權宜之計。\n        因此建議民眾，想品嚐美味燒烤，同時避免亞硝胺危害，建議先將加工肉品水煮至七、八分熟，再放上烤盤，「因為水的沸點只有攝氏100度，而燒烤可能高達攝氏200度，此舉能減少高溫烹調產生的亞硝胺。」食用時也可以搭配新鮮蔬果，因其具有抗氧化的作用，也可降低亞硝胺的危害。\n        蔬果所含硝酸鹽水煮後被破壞 不需擔心產生亞硝胺\n        不過，蔬菜中若含有硝酸鹽，經過高溫烹調是否亦會產生亞硝胺，提高罹癌風險呢？顏宗海醫師解釋，農民種菜時，會施加肥料（氮肥），使得蔬菜裡會含有硝酸鹽，不過，由於硝酸鹽屬於水溶性物質，通常烹煮過程中，成分就會被破壞，因此不用擔心。而蔬菜所含的其他成分，包括：膳食纖維、多酚、維生素等，對於身體有龐大的助益，已大幅超過硝酸鹽帶來的風險。不過，千萬不要食用不新鮮的蔬菜，因為當進入腸胃道和胺類結合，就會形成亞硝胺。\n\n--------------------\n【資料來源】：https://www.healthnews.com.tw/article/55114",
+    q: [
+        { 
+            txt: "根據陽明交通大學研究團隊的調查，國人每日攝取最大量的硝酸鹽與亞硝酸鹽主要來源其實是下列何者？", 
+            opts: [
+                "蔬菜與米飯", 
+                "香腸與培根", 
+                "火腿與臘肉", 
+                "燒烤紅肉與啤酒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文章第一段明確指出「國人攝取最大量的硝酸鹽、亞硝酸鹽來源，其實是『蔬菜』、『米飯』」。" 
+        },
+        { 
+            txt: "顏宗海醫師建議在燒烤加工肉品前先將其「水煮至七、八分熟」，其最主要科學原理為何？", 
+            opts: [
+                "利用水沸點僅攝氏 100 度的特性先行加熱，以縮短後續高達 200 度的燒烤時間並減少亞硝胺產生", 
+                "利用水洗徹底將肉品表面所有的防腐劑與色素清除，使其不再含有任何硝酸鹽類化合物", 
+                "藉由水分破壞加工肉品中的胺類結構，使其即使在高溫下也不會發生任何化學轉化反應", 
+                "透過水煮將香腸火腿中的脂肪完全溶解，藉此避免高溫油脂接觸火源產生戴奧辛毒素"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段說明「先將加工肉品水煮至七、八分熟，再放上烤盤，『因為水的沸點只有攝氏100度，而燒烤可能高達攝氏200度，此舉能減少高溫烹調產生的亞硝胺』」。" 
+        },
+        { 
+            txt: "關於食用蔬菜是否需要擔心高溫烹調產生致癌物質，下列說明何者符合顏宗海醫師的分析？", 
+            opts: [
+                "硝酸鹽屬水溶性物質易在烹煮中被破壞，加上蔬果抗氧化養分利益遠高於風險，唯獨應避免食用不新鮮蔬菜", 
+                "蔬菜施用氮肥含有大量亞硝胺，故無論如何烹煮都會大幅提升罹患大腸癌與心血管疾病的風險", 
+                "蔬菜經過高溫水煮後會大量釋放肉毒桿菌毒素，因此建議儘量生食以保留維生素與膳食纖維", 
+                "只要蔬菜經過滾水川燙，其進入腸胃道後就絕對不會再與胺類物質結合形成致癌化合物"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "最後一段說明硝酸鹽為水溶性易被破壞，且蔬果養分助益遠超過風險；但也提醒千萬不要食用不新鮮蔬菜，避免進入腸胃道與胺類結合形成亞硝胺。" 
+        },
+        { 
+            txt: "綜合全文說明，關於「亞硝酸鹽」與「罹癌風險」兩者之間的真實關係，下列歸納何者最為準確？", 
+            opts: [
+                "亞硝酸鹽本身具有保護心血管作用，真正致癌物是其在高溫或不當條件下轉化產生的亞硝胺", 
+                "亞硝酸鹽是劇毒化學添加物，只要攝取微量就會立刻在大腸內轉化為致癌的亞硝胺", 
+                "只要將加工肉品的亞硝酸鹽添加量控制在每公斤 0.07 公克以下，高溫燒烤時就完全不會產生亞硝胺", 
+                "每日攝取超過 50 克的蔬菜米飯會因含有亞硝酸鹽，而增加 17% 罹患大腸癌的風險"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章澄清亞硝酸鹽本身顛覆傳統觀念具有保護心血管作用，且為合法保色防腐劑；真正的罪魁禍首是加工肉品經高溫（如燒烤）後產生的「亞硝胺」。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
