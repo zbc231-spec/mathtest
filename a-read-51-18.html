@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十八冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-黃帝大戰蚩尤",
+    c: "        大約在四千多年以前，我國黃河、長江流域一帶住著許多氏族和部落。黃帝是傳說中最有名的一個部落首領。以黃帝為首領的部落，最早住在我國西北方的姬水附近，後來搬到涿鹿（今河北省涿鹿、懷來一帶），開始發展畜牧業和農業，定居下來。\n        跟黃帝同時的另一個部落首領叫做炎帝，最早住在我國西北方姜水附近。據說跟黃帝族是近親。炎帝族漸漸衰落，而黃帝族正在興盛起來。\n        這時候，有一個九黎族的首領名叫蚩尤，十分強悍。傳說蚩尤有八十一個兄弟，他們全是猛獸的身體，銅頭鐵額，吃的是沙石，凶猛無比。他們還製造刀戟弓弩各種各樣的兵器，常常帶領他的部落，侵掠別的部落。\n        有一次，蚩尤侵佔了炎帝的地方，炎帝起兵抵抗，但他不是蚩尤的對手，被蚩尤殺得一敗塗地。炎帝沒法子，逃到涿鹿請求黃帝幫助。黃帝早就想除去這個各部落的禍害，就聯合各部落，準備人馬，在涿鹿的田野上和蚩尤展開一場大決戰。\n        關於這次大戰，有許多神話式的傳說。據說黃帝平時馴養了熊、羆、貔、貅、貙、虎六種野獸，在打仗的時候，就把這些猛獸放出來助戰。蚩尤的兵士雖然凶猛，但是遇到黃帝的軍隊，加上這一群猛虎凶獸，也抵擋不住，紛紛敗逃。\n        黃帝帶領兵士乘勝追殺，忽然天昏地黑，濃霧迷漫，狂風大作，雷電交加，使黃帝的兵士無法追趕。原來蚩尤請來了「風伯雨師」助戰。黃帝也不甘示弱，請天女幫助，驅散了風雨。一剎那之間，風止雨停，晴空萬里，終於把蚩尤打敗了。也有一種傳說，說是蚩尤用妖術製造了一場大霧，使黃帝的兵士迷失了方向。黃帝用「指南車」來指引，帶領兵士，依著蚩尤逃跑的方向追擊，結果把蚩尤捉住殺了。\n        各部落看到黃帝打敗了蚩尤，都挺高興。黃帝受到了許多部落的擁護。但是，炎帝族和黃帝族也發生了衝突，雙方在阪泉（今河北涿鹿縣東南）地方打了一仗，炎帝失敗。從此，黃帝成了中原地區的部落聯盟首領。\n\n--------------------\n【資料來源】：https://www.epochtimes.com/b5/1/7/6/n226791.htm",
+    q: [
+        { 
+            txt: "根據文章內容，當蚩尤用妖術製造了大霧使黃帝的士兵迷失方向時，黃帝是依靠什麼工具來指引方向並順利追擊蚩尤的？", 
+            opts: [
+                "指南車", 
+                "風火輪", 
+                "追風舟", 
+                "天女鏡"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「蚩尤用妖術製造了一場大霧，使黃帝的兵士迷失了方向。黃帝用『指南車』來指引，帶領兵士，依著蚩尤逃跑的方向追擊」。" 
+        },
+        { 
+            txt: "炎帝在遭到蚩尤侵佔土地並打得一敗塗地後，為何會選擇前往涿鹿請求黃帝幫助？", 
+            opts: [
+                "因為黃帝部落正在興盛且兩族為近親，黃帝具備對抗蚩尤的實力與共同立場", 
+                "因為天帝命令炎帝必須與黃帝聯合，才能向王母娘娘借取天女與神兵", 
+                "因為蚩尤的八十一個兄弟將炎帝逼至絕境，只有涿鹿設有防禦狂風大雨的結界", 
+                "為了將阪泉的部落聯盟首領位置讓給黃帝，以換取黃帝軍隊的支援"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中提到炎帝與黃帝兩族據說「是近親」，且「炎帝族漸漸衰落，而黃帝族正在興盛起來」，加上黃帝早就想除掉蚩尤這個禍害，因此尋求黃帝協助是合理選擇。" 
+        },
+        { 
+            txt: "在涿鹿大戰中，蚩尤軍隊擁有銅頭鐵額與精良兵器，黃帝軍隊最初能打破僵局並使蚩尤士兵敗逃的關鍵戰術是什麼？", 
+            opts: [
+                "將平時馴養的熊、羆、貔、貅、貙、虎等六種猛獸投入戰場協助作戰", 
+                "請天女降下暴風雪將蚩尤的八十一個兄弟凍結在涿鹿田野", 
+                "利用指南車發射密集的羽箭與石塊，一舉破壞蚩尤的兵器庫", 
+                "聯合九黎族內部反對蚩尤的長老，從後方發動突襲包抄"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述黃帝「平時馴養了熊、羆、貔、貅、貙、虎六種野獸，在打仗的時候，就把這些猛獸放出來助戰……蚩尤的兵士遇到這一群猛虎凶獸抵擋不住，紛紛敗逃」。" 
+        },
+        { 
+            txt: "綜合全文關於「涿鹿之戰打敗蚩尤」以及「阪泉之戰打敗炎帝」的情節，下列對於黃帝最終成為中原部落聯盟首領的過程歸納，何者最為準確？", 
+            opts: [
+                "透過平定侵略各部落的蚩尤贏得廣泛擁護，並在隨後與炎帝的衝突中獲勝，奠定了中原領導地位", 
+                "完全依賴天女與神仙魔法的相助才得以消滅強敵，展現了神權高於凡間部落的階級秩序", 
+                "說明古人如何利用指南車與冶煉兵器技術帶動產業發展，並靠著農業豐收統一各族", 
+                "強調蚩尤與炎帝因為缺乏馴養猛獸的能力，最終不得不將中原土地全部讓給黃帝"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章先描寫黃帝聯合各部落除掉禍害蚩尤，獲得許多部落擁護；最後描寫黃帝在阪泉之戰打敗炎帝，「從此，黃帝成了中原地區的部落聯盟首領」，完整交代了領導地位的確立過程。" 
+        }
+    ]
+},
+{
+    t: "星座故事-射手座的傳說",
+    c: "        射手座又叫人馬座，夏夜的時候，抬頭看南方的天空，人馬座就在天蠍座的東邊。\n        希臘神話故事中的射手座，是一個上半身為人形、下半身是馬的怪物，名叫奇龍。這種半人半馬的怪獸被稱為山杜爾族，居住在派利翁山上。他們以狩獵維生，性情非常兇猛。奇龍卻與其他的山杜爾族不一樣，他以善良和智慧聞名，是族中受人尊敬的賢者。他是族中唯一能長生不老的人，但是最後還是逃不過死神的召喚。\n        希臘最偉大的英雄赫丘力是奇龍的好朋友，曾向奇龍學習過天文學。有一次，他到艾拉曼特山圍獵大野豬時，途中拜訪了另一個山杜爾人波洛士。見到赫丘力，波洛士非常高興，準備了許多山珍美味招待他。赫丘力吃著肉，突然大叫沒有甘醇的美酒太可惜。波洛士一臉為難，表示地窖裡的酒是山杜爾族共有的財產，私自飲用會受到處罰，且酒香會引來族人。赫丘力拍胸脯保證會保護他，強行要波洛士拿酒出來享用。\n        陣陣酒香瀰漫四周，其他的山杜爾族聞到香味，紛紛跑進山洞憤怒質問。山杜爾人舉起長槍拉好弓，準備攻擊赫丘力。赫丘力手一揮打落許多槍劍，一連摔倒了好幾個山杜爾人。山杜爾人見無法打敗赫丘力，便一溜煙逃跑。赫丘力一路追擊到奇龍居住的馬雷里。\n        喊叫聲將奇龍引了出來。此時赫丘力拉好弓，大叫「你們休想逃走！」並放出了塗有劇毒的箭。這枝毒箭穿過亂成一團的人群，不幸射中了奇龍。赫丘力愧疚萬分，連忙拔出箭並敷抹奇龍特製的藥，但已無濟於事，奇龍隨即奄奄一息並嚥下了最後一口氣。\n        山杜爾人哀痛大哭，波洛士憤恨地拿起那枝毒箭將其折成兩半，卻一不小心手腕碰到了箭梢，毒素迅速蔓延，波洛士也跟著魂歸西天。宙斯因為惋惜奇龍的死，就讓他升天成為射手座；而倒楣的波洛士則成為奇龍南方的半人馬座，兩顆星相互輝映，成為夏天中最明亮的星座。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章所述，賢者奇龍雖然屬於性情兇猛的山杜爾族，但他與其他族人相比，最顯著的特徵是什麼？", 
+            opts: [
+                "以善良與智慧聞名，且是族中唯一擁有長生不老之身的人", 
+                "擅長使用塗有劇毒的弓箭狩獵，並擁有駕馭太陽車的能力", 
+                "掌管山杜爾族共同地窖的所有美酒，擔任族中的審判官", 
+                "上半身是巨龍、下半身是駿馬，體型比一般山杜爾人巨大"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確指出「奇龍卻與其他的山杜爾族不一樣，他以善良和智慧聞名……他是族中唯一能長生不老的人」。" 
+        },
+        { 
+            txt: "波洛士最初對於拿地窖的美酒招待赫丘力感到非常猶豫，其最主要的擔憂是什麼？", 
+            opts: [
+                "美酒屬於山杜爾族共有財產，私開會引來族人憤怒並引發衝突", 
+                "地窖的美酒帶有劇毒，只有懂得調配解藥的奇龍才能飲用", 
+                "擔心赫丘力喝醉後會發瘋，進而毀壞派利翁山上的房屋與森林", 
+                "害怕天后赫拉發現他們私自飲酒後，會降下雷霆懲罰山杜爾族"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述波洛士解釋「那是山杜爾族共有的財產，如果私自飲用，會受到處罰的……酒香會引他們過來，他們一生氣，就很難應付的」，顯示其擔憂族人憤怒與衝突。" 
+        },
+        { 
+            txt: "英雄赫丘力原本只是前往圍獵野豬並拜訪朋友，最終卻導致好友奇龍與波洛士雙雙喪命，這場悲劇的根本原因是什麼？", 
+            opts: [
+                "赫丘力自負魯莽強行開酒引發衝突，且在追擊時盲目射出劇毒之箭", 
+                "山杜爾族人貪婪無度，為了搶奪赫丘力的武器而主動圍攻奇龍的山洞", 
+                "波洛士故意在美酒中摻入奇龍特製的劇毒，企圖陷害赫丘力與山杜爾族", 
+                "宙斯為了讓奇龍升天成為星座，暗中操控赫丘力的弓箭射向奇龍"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "赫丘力不聽勸告強行要酒（引發衝突動因），隨後一路盲目追擊並朝亂成一團的人群射出「塗有劇毒的箭」，直接導致射殺奇龍，並間接引發波洛士碰毒折箭身亡的連鎖悲劇。" 
+        },
+        { 
+            txt: "綜合全文關於「奇龍被誤傷」與「波洛士折箭」的情節，下列對於射手座與半人馬座神話所呈現的意涵歸納，何者最為準確？", 
+            opts: [
+                "警惕世人衝動與莽撞可能釀成無法挽回的悲劇，並讚頌智慧賢者的精神永存星空", 
+                "說明希臘神話中英雄赫丘力如何靠著強大武力消滅山杜爾族並獲得封神的過程", 
+                "強調長生不老的神力才是戰勝死神的唯一途徑，而劇毒則是邪惡勢力的象徵", 
+                "展現山杜爾族人為了維護共有財產而不惜犧牲生命的團結與忠誠精神"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事因赫丘力的強橫衝動（強行要酒、盲目射毒箭）導致賢友奇龍慘死與波洛士意外喪命（悲劇警示）；宙斯因惋惜奇龍的智慧與善良而將其昇華為射手座（讚頌賢者精神永存）。" 
+        }
+    ]
+},
+{
+    t: "連假睡到中午才吃？跳過早餐不會瘦！研究曝「晚吃」瘦素降16％、飢餓訊號增3成",
+    c: "         ●研究發現：晚4小時吃同樣熱量，瘦素降16％\n        2022年發表於國際期刊《Cell Metabolism》的一項隨機交叉試驗，找來16名過重或肥胖成人，讓每個人分別經歷「較早進食」與「較晚進食」兩種情境。兩種情境的起床與睡覺時間相同，主要差別在用餐時段。\n        較早進食時，三餐分別安排在起床後約1小時、5小時與9小時；較晚進食時則不吃早餐，三餐整體延後250分鐘（約4小時10分鐘），最後一餐距離睡覺只剩約2.5小時。\n        為了確認差異來自進食時間，研究團隊嚴格控制食物內容、總熱量、活動量、睡眠時間與光照環境。結果發現，晚吃時感到飢餓的機率約是早吃時的2倍。\n        此外，晚吃時清醒期間的平均瘦素濃度下降約16％，也就是幫助身體感受到「吃飽了」的訊號變弱；代表飢餓訊號相對於飽足訊號的指標則增加約34％。\n        能量消耗方面，晚吃時受試者清醒期間少消耗約5％的熱量，約等於一天少消耗60大卡。\n        ●晚吃真的會胖嗎？研究揭「延後進食」對脂肪產生影響\n        研究團隊另外在其中7名受試者的脂肪組織中發現，晚吃改變了與脂肪儲存及分解相關的基因表現，傾向讓脂肪分解減少、脂肪合成增加，但這部分仍需進一步研究證實。\n        不過，這項研究受試者人數不多、研究對象為過重或肥胖成人，觀察時間也只有數天，並未直接測量體重變化，因此還不能斷定長期晚吃一定會變胖。\n        但就這次觀察，在熱量相同的情況下，單純延後進食時間，可能讓身體的飽足訊號變弱、飢餓訊號相對增強。\n        ●連假想睡飽又不想變胖？營養師整理3大原則\n        1.避免三餐跟著作息一路往後拖\n        晚起沒關係，重要的是起床後不要拖太久才吃第一餐，也別讓晚餐、宵夜跟著大幅往後移，盡量讓最後一餐與睡覺時間保持至少3小時。\n        2.第一餐先顧蛋白質與纖維，保持正常份量\n        早午餐優先選雞蛋、無糖豆漿、雞肉、魚肉等優質蛋白質，搭配蔬菜與適量全穀雜糧類，有助增加飽足感，也較符合均衡飲食原則。\n        另外，更要避免因為太餓就一次吃得特別多，以正常份量為原則。\n        3.連假最後一天調整飲食時間，恢復正常作息\n        連假最後一天可將起床、吃飯與睡覺時間稍微往平日靠近，避免進食時間拖得太晚，減少隔天恢復上班作息時的落差。\n        羅瑋如營養師提醒，連假偶爾晚起、吃頓早午餐不必太緊張，重點是別讓整體進食節奏長期往後移。\n        若本身有糖尿病、胃食道逆流、進行減重療程或有其他疾病者，調整用餐時間前，建議先諮詢醫師或營養師，找出適合自己的飲食節奏。\n\n--------------------\n【資料來源】：https://www.commonhealth.com.tw/article/94730",
+    q: [
+        { 
+            txt: "根據 2022 年發表於《Cell Metabolism》的研究，受試者在「較晚進食」的情境下，其清醒期間的能量消耗產生了什麼樣的變化？", 
+            opts: [
+                "少消耗約 5％ 的熱量，約等於一天少消耗 60 大卡", 
+                "多消耗約 16％ 的熱量，約等於一天多消耗 100 大卡", 
+                "少消耗約 34％ 的熱量，約等於一天少消耗 250 大卡", 
+                "能量消耗完全不受進食時間延後影響，與早吃完全相同"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段明確記載「能量消耗方面，晚吃時受試者清醒期間少消耗約5％的熱量，約等於一天少消耗60大卡」。" 
+        },
+        { 
+            txt: "研究指出在吃進相同食物總熱量的前提下，將三餐進食時間整體延後 4 小時以上，為何容易讓人覺得更想吃東西且不容易飽？", 
+            opts: [
+                "因為晚吃會使體內平均瘦素濃度下降約 16％，導致飽足訊號變弱且飢餓訊號相對增強", 
+                "因為延後進食會導致胃食道逆流，促使胃酸大量分泌而誘發飢餓感受", 
+                "因為睡眠時間被強制縮短了 250 分鐘，引發大腦產生強烈的補償性飲食需求", 
+                "因為蛋白質與膳食纖維在夜間無法被腸道正常吸收，無法提供身體所需的飽足感"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段與第八段說明晚吃時「瘦素濃度下降約16％……幫助身體感受到『吃飽了』的訊號變弱；代表飢餓訊號相對於飽足訊號的指標則增加約34％」，故飽足感減弱且飢餓感增強。" 
+        },
+        { 
+            txt: "羅瑋如營養師建議連假晚起時，第一餐應優先挑選雞蛋、無糖豆漿、雞肉等優質蛋白質搭配蔬菜，這樣做的主要考量是什麼？", 
+            opts: [
+                "有助於增加飽足感並符合均衡飲食原則，避免因過度飢餓而暴飲暴食", 
+                "能夠直接在短時間內補足受試者夜間少消耗的 60 大卡能量", 
+                "可以替代睡眠的作用，幫助身體在連假最後一天快速恢復工作作息", 
+                "能防止脂肪組織產生基因突變，完全消除單一市場與折價溢價的風險"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第十段說明「早午餐優先選……優質蛋白質，搭配蔬菜與適量全穀雜糧類，有助增加飽足感，也較符合均衡飲食原則。另外，更要避免因為太餓就一次吃得特別多」。" 
+        },
+        { 
+            txt: "這篇文章主要透過科學研究結果與營養師的建議，傳達了何種關於「進食時間與生活作息」的核心觀念？", 
+            opts: [
+                "進食時間的節奏會影響體內激素與代謝，連假期間應維持合理的用餐間隔與飲食內容，而非長期將餐次延後", 
+                "只要控制總熱量不變，無論何時用餐或宵夜距離睡覺多久，都不會對身體的生理機制產生任何影響", 
+                "晚吃會直接導致長期肥胖，因此連假期間絕對不可睡過頭，必須於早晨 6 點前完成第一餐", 
+                "減重療程與糖尿病患者只需透過「延後進食 250 分鐘」即可輕鬆達到控制體重的效果"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文透過實驗說明單純延後進食時間會降低瘦素、增加飢餓感與減少熱量消耗，並結合營養師建議說明連假時應控制第一餐時間、質與量，提醒大家注意進食節奏對身體代謝的影響。" 
+        }
+    ]
+},
+{
+    t: "PGC 規則小學堂｜新手必看！4 大重點讓你一秒看懂匹克球基本規則",
+    c: "        剛接觸匹克球的你，是不是常被場上一些獨特的規則搞得暈頭轉向？「什麼時候可以截擊？」、「分數那三個數字到底怎麼喊？」\n        別擔心！今天 PGC 團隊為大家準備了一張「匹克球基本規則大補帖」，只要掌握這 4 個核心觀念，包你立刻搞懂規則，打球更順、更上手！\n <img src='x5118-1.jpg' alt='x5118-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n        【01 發球規則：溫柔的開局】\n        •動作限制：必須採「低手發球」，擊球點必須低於腰部，且拍頭不能高於手腕。\n        •落點規定：發球必須斜線發到對角的發球區內。\n        •PGC小撇步：如果覺得拋球不好抓節奏，也可以合法使用「落地發球」，讓球自然落下彈起後再擊球喔！\n        【02 雙彈規則：匹克球的靈魂】\n        這是匹克球最特別的規定！\n        •第一彈 frist bom!：發球過去後，接發球方必須讓球「落地彈起一次」才能回擊。\n        •第二彈 second bom!：球回到發球方時，發球方也必須讓球「落地彈起一次」才能擊打。\n        •完成這「兩次彈跳」後，雙方就可以自由選擇要空中截擊，還是等球彈起再打了！\n        【03 非截擊區 / 廚房 (NVZ)：網前的楚河漢界】\n        •球網兩側延伸 7 呎的綠色區域就是俗稱的「廚房」。\n        •絕對不可在廚房內或踩著廚房線進行「截擊（不落地直接擊球）」。\n        •特別注意：就算是合法截擊完，若因為身體「慣性」不小心踩進廚房或踩線，一樣算犯規失分！\n        •記住口訣：球沒落地，腳不進廚房！但如果球已經在廚房內落地彈起，你絕對可以大方走進去處理！\n        【04 計分方式：神秘的三個數字】\n        •得分條件：只有「發球方」才能得分。接發球方贏下該回合時，只能取得「發球權」，不會得分。\n        •報分順序：每次發球前都要喊出三個數字【我方分數 - 對方分數 - 第幾發球員】。例如「7 - 4 - 1」。\n        •賽制：一般比賽採 11 分制，且必須連贏 2 分才算獲勝。\n\n--------------------\n【資料來源】：https://www.facebook.com/photo/?fbid=122170306646933018&set=a.122158623038933018",
+    q: [
+        { 
+            txt: "根據文章與圖示內容，在匹克球的「非截擊區（廚房）」規則中，球網兩側延伸的廚房區域寬度是多少呎？", 
+            opts: [
+                "7 呎", 
+                "5 呎", 
+                "10 呎", 
+                "11 呎"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段與圖示【03 非截擊區（廚房）】明確標示「廚房區寬 7 呎 / 球網兩側向內延伸 7 呎的區域」。" 
+        },
+        { 
+            txt: "在匹克球比賽中，選手發球後若接發球方沒有讓球先落地彈起，而是直接在空中進行「截擊」回擊，依據規則將產生何種後果？", 
+            opts: [
+                "違反「雙彈規則（Two-Bounce Rule）」，屬於犯規行為", 
+                "屬於極為優秀的攻擊技巧，可以額外獲得 2 分", 
+                "只要球員沒有踩進廚房區，該回擊完全符合規則", 
+                "發球方必須立即更換為「落地發球」重新開始比賽"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段說明「雙彈規則」規定發球過去後，接發球方必須讓球落地彈起一次才能回擊，若直接截擊則未完成第一彈，屬於違反規則。" 
+        },
+        { 
+            txt: "若選手站在廚房區外成功完成合法的空中截擊，但隨後因衝刺的「身體慣性」不小心踩到廚房線，依據規則應如何判決？", 
+            opts: [
+                "仍算犯規失分，因為即使截擊動作合法，因慣性踩線或進入廚房一樣算犯規", 
+                "算合法擊球得分，因為擊球瞬間雙腳確實位於廚房區外", 
+                "該回合不算重打，並由對方取得一次免費發球的機會", 
+                "只要球在離開拍面時已經過網，慣性踩線就不受限制"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確指出「特別注意：就算是合法截擊完，若因為身體『慣性』不小心踩進廚房或踩線，一樣算犯規失分！」。" 
+        },
+        { 
+            txt: "比賽中發球前裁判或球員喊出報分口號「7 - 4 - 1」，根據文章與圖示中的計分規則，這三個數字分別代表什麼意義？", 
+            opts: [
+                "我方得7分、對方得4分、由第1發球員發球", 
+                "發球方得7分、總共打了4局、代表第1次犯規", 
+                "比賽剩下7分鐘、對方得4分、目前進行第1回合", 
+                "我方得7分、對方得4分、代表已經連贏2分獲勝"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文中第四段與圖示【04 計分方式】明確說明報分順序為「我方分數 - 對方分數 - 第幾發球員」，故「7 - 4 - 1」即代表我方7分、對方4分、第1發球員。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

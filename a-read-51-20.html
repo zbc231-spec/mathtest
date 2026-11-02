@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第二十冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "星座故事-水瓶座的傳說",
+    c: "        水瓶座位於摩羯座的東方，是個不太明顯的星座。它又叫做寶瓶座。在星座圖上，水瓶座是一個少年把水瓶扛在肩上。這個少年就是特洛伊王子卡尼米迪斯。\n        天神宙斯所領導的奧林帕斯山，經常舉行盛大的宴會，在宴會中負責為眾神斟酒的，向來是青春女神希碧。有一次，眾神依舊在奧林帕斯宮殿舉行酒宴，等了許久，還不見希碧來倒酒。宙斯詢問之下，希碧家的僕人前來回報希碧昨天不小心摔斷了腿。宙斯愁眉苦臉的思考該由誰來負責倒酒，一個神回答：「據我所知，特洛伊王子卡尼米迪斯是個優秀的美少年，聽說他讓不少少女神魂顛倒呢！」\n        宙斯立刻趕到特洛伊，在國王的牧場上看到了這位英俊的少年。宙斯一看到他就被他的風采迷住了，心想特洛伊王恐怕不會答應讓他離開，於是宙斯變成了一隻大鷹，迅速從天空飛下，抓起了卡尼米迪斯。卡尼米迪斯揮動雙手掙扎，但老鷹越飛越高，很快便飛到了奧林帕斯宮殿。\n        宙斯恢復原樣後，和藹地對卡尼米迪斯說明原委。卡尼米迪斯雖然不十分情願離開家鄉，可是神的命令是無法抗拒的，便接下了為眾神斟酒的工作。由於卡尼米迪斯的加入，使宴會的氣氛更加熱鬧，宙斯相當喜歡他，也很滿意他的表現。\n        可是，卡尼米迪斯神秘失蹤使特洛伊王非常著急，王妃更是連續幾天不吃不喝對天發呆。宙斯聽著人民的談論，覺得自己太過分了。於是他在特洛伊王的夢中顯靈說：「我是天神宙斯。你的兒子卡尼米迪斯是我帶走的，他現在快快樂樂的生活在神界中。為了安慰你們失去兒子的悲痛，我要送一匹駿馬給你作為補償。」特洛伊王驚醒後，外面果然站著一匹駿馬。\n        後來，宙斯把卡尼米迪斯變成水瓶座，以紀念他努力伺候眾神，並且給眾神帶來了歡樂。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章內容，天神宙斯當初為何需要親自前往特洛伊找尋新的倒酒人選？", 
+            opts: [
+                "因為原先負責倒酒的青春女神希碧不小心摔斷了腿無法出席", 
+                "因為青春女神希碧隨同父親希烏斯前往凡間遊歷而離開天庭", 
+                "因為天神宙斯為了舉辦慶功宴，命令希碧召集凡間最美麗的少女", 
+                "因為特洛伊國王主動向宙斯推薦自己的兒子卡尼米迪斯前往神界"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出僕人向宙斯回報「主人的女兒希碧，昨天晚上不小心摔斷了腿」，導致酒宴無人倒酒。" 
+        },
+        { 
+            txt: "宙斯在牧場看到卡尼米迪斯後，為何不直接向特洛伊國王請求，而是選擇化身為老鷹強行將他帶走？", 
+            opts: [
+                "擔心特洛伊國王心疼愛子而不願答應，因而選擇悄悄強行帶走", 
+                "為了向奧林帕斯眾神展示自己化身巨鷹的高超變身魔法能力", 
+                "因為天庭宴會時間極為緊迫，使用巨鷹飛翔才能最快趕回宮殿", 
+                "以為卡尼米迪斯只是普通的牧羊少年，不知道他是特洛伊的王子"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述宙斯的心裡想法「若去求特洛伊王，他恐怕不會答應。看樣子，我只好悄悄帶他走了」，顯示其選擇強行帶走的考量。" 
+        },
+        { 
+            txt: "宙斯事後為何會主動托夢給特洛伊國王並贈送一匹駿馬？", 
+            opts: [
+                "聽到特洛伊人民與王室因王子失蹤而深感悲痛，內心感到自責過分而給予補償", 
+                "因為特洛伊國王準備率領大軍攻打奧林帕斯山，宙斯為了平息戰爭而妥協", 
+                "為了履行與卡尼米迪斯的交換條件，以駿馬換取王子永生留在天庭服務", 
+                "因為駿馬帶有神聖法力，能替特洛伊國王尋找失蹤王子的下落"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中提到特洛伊國王與王妃極度悲痛，「宙斯聽著這些談話，也覺得自己太過分了」，因而托夢告知真相並贈送駿馬以表達歉意與補償。" 
+        },
+        { 
+            txt: "綜合全文關於「宙斯強帶王子斟酒」與「水瓶座升天」的情節，下列對於水瓶座神話所呈現的象徵意涵，何者歸納最為準確？", 
+            opts: [
+                "象徵為眾神帶來歡樂與勤勞服務的精神，以及神明權力強干預凡間命運後所留下的永恆紀念", 
+                "警惕世人切莫因追求外表美麗而招致災禍，並展現特洛伊王室對神明的無畏抗爭", 
+                "說明希臘神話中萬物皆可化為駿馬的魔法法則，以及天庭宴會禮儀的演變過程", 
+                "強調青春女神希碧為了維護天庭秩序而不惜犧牲腿部的至高奉獻精神"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事描寫宙斯強行將卡尼米迪斯帶回天庭（神明干預凡人命運），王子盡責倒酒帶給眾神歡樂，宙斯最終將其化為水瓶座「以紀念他努力伺候眾神，並且給眾神帶來了歡樂」。" 
+        }
+    ]
+},
+{
+    t: "星座故事-雙魚座的傳說",
+    c: "        宙斯率領神族在長達十年的泰坦之戰中擊敗了克洛諾斯，並將戰敗的泰坦諸神打入深不見底的塔爾塔羅斯深淵後，大地之母蓋亞對宙斯殘酷處置自己親生骨肉的行為感到無比憤怒。\n        為了徹底顛覆宙斯的新政權，蓋亞與塔爾塔羅斯結合，孕育出了古希臘神話史上體型最龐大、力量最恐怖的終極魔獸——提豐。\n        提豐的身軀巨大到足以摘下天上的星辰，他的頭部能觸及天穹頂端，雙臂張開可覆蓋東方至西方的地平線；他的下半身是由無數條扭曲狂暴的劇毒巨蟒所構成，爬行時伴隨著刺耳的嘶鳴與毒液的噴灑；他生有一百個燃燒著烈焰的龍頭，眼中射出毀滅一切的赤紅火光，口中能同時發出諸神的咆哮、公牛的怒吼、雄獅的狂吠與巨獸的悲鳴。\n        當提豐從大地深處破土而出，並向奧林匹斯山發動毀滅性的突襲時，整座神山劇烈震顫，天穹為之燃燒。面對這股超越常理的原始毀滅力量，諸神陷入了前所未有的巨大恐慌。\n        諸神深知無法正面抵擋提豐的初次衝擊，紛紛化作各類動物，沿著地中海向南逃往古老的埃及與近東平原，試圖隱匿神性以躲避魔獸的追殺。\n        當時，掌管世間愛、美麗與生育的女神阿芙羅黛蒂，正帶著她年幼的兒子——司掌愛慾與吸引力的小愛神艾若斯，漫步在河岸邊的蘆葦叢與柳林之中。\n        突然間，天空被濃厚的黑煙與毒霧遮蔽，大地傳來如雷鳴般的劇烈震動。伴隨著百頭巨龍的嘶吼與腥臭的硫磺氣味，提豐巨大的陰影從地平線盡頭狂暴襲來。樹木被連根拔起，河水因巨獸的熱力而沸騰蒸發。\n        阿芙羅黛蒂雖然是擁有強大神力的奧林匹斯神，但在突如其來的原始凶獸面前，她首先展現出的不是對戰，而是對懷中幼子的本能保護。看著幼小的艾若斯因恐懼而顫抖，阿芙羅黛蒂環顧四周，陸地上的退路已被提豐噴射的烈焰徹底切斷，唯一的生路就是眼前奔騰湧動的幼發拉底河。阿芙羅黛蒂緊緊抱起兒子，縱身躍入了滾滾波濤之中。\n        在觸及水面的剎那，原誕生於海的泡沫中的阿芙羅黛蒂運用自身的本能，施展了變形術：她將自己與兒子艾若斯同時化身成了兩條優雅而敏捷的魚，潛入冰冷的水流深處以掩蓋神聖的氣息。\n        變形為魚類的阿芙羅黛蒂立刻意識到一個巨大的危險：幼小的兒子在洶湧的河水衝擊下，母子兩人極有可能被漩渦沖散。一旦在混亂的水底失去彼此的蹤跡，兒子如果落單，非常有可能再度淪為提豐或水下怪獸的獵物。\n        在千鈞一髮之際，阿芙羅黛蒂展現出極致的智慧與深情。她從身上褪下了一條閃耀著金色微光、永不斷裂的神聖絲帶。\n        阿芙羅黛蒂將這條絲帶的一端，牢牢繫在自己化身的大魚尾部；隨後，她將絲帶的另一端，緊緊打結在兒子所化身的小魚尾部。\n        這條絲帶將兩條魚的生命與命運徹底相連。一條魚游向北方探索安全的水域，另一條魚游向西方引導方向，但無論暗流多麼湍急、波濤多麼洶湧，透過這條緊繃的牽絆，母子兩人始終能感受到對方的存在與力量。\n        阿芙羅黛蒂與艾若斯在水底同心協力、並肩游動，成功穿越了最危險的洪流峽谷，徹底擺脫了提豐的視線與追擊，安然抵達了平靜的大海深處。\n        關於變成魚，還有另一個說法：\n        阿芙羅黛蒂與兒子逃至幼發拉底河畔時並未立刻變形，而是兩條游經此地的神聖大魚主動游上前來。這對雙魚將女神與孩童穩穩馱在寬闊的魚背上，奮力游過險灘，將他們護送至安全彼岸。因為這項救神之功，當地的敘利亞人將魚類視為神聖的圖騰，終生嚴禁捕食與傷害魚類。\n        無論是母子親身化魚相依為命，或是神聖雙魚前來救駕，這段在絕境中閃耀的守護故事深深打動了天界。\n        宙斯最終在埃特納火山下徹底鎮壓了提豐、恢復了奧林匹斯秩序之後，為了表彰阿芙羅黛蒂在危難中展現的母性光輝，並將「愛是超越恐懼與分離的永恆牽絆」這一宇宙真理化作永久的警示，宙斯將這對以絲帶相繫的雙魚形象升入了天際，安置在黃道帶的最後一個區塊，化為了雙魚座。\n\n--------------------\n【資料來源】：https://gemini.google.com/app/79a1b5f9c58f7e29?hl=zh-TW",
+    q: [
+        { 
+            txt: "根據文章第一個版本的記載，阿芙羅黛蒂與兒子艾若斯在躍入幼發拉底河化身為魚之後，她是用什麼物品將兩人的尾部緊緊繫在一起？", 
+            opts: [
+                "一條閃耀著金色微光且永不斷裂的神聖絲帶", 
+                "一根由奧林匹斯山橄欖樹枝所編織而成的藤蔓", 
+                "一條從幼發拉底河岸邊採摘的水仙花與玫瑰花冠", 
+                "一條由金剛石與白銀打造而成的永恆鎖鍊"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「她從身上褪下了一條閃耀著金色微光、永不斷裂的神聖絲帶……將這條絲帶的一端，牢牢繫在自己化身的大魚尾部；隨後，她將絲帶的另一端，緊緊打結在兒子所化身的小魚尾部」。" 
+        },
+        { 
+            txt: "在第一個版本中，阿芙羅黛蒂之所以要在湍急的水底用絲帶將自己與兒子的尾巴繫在一起，其最主要的隱憂是什麼？", 
+            opts: [
+                "擔心幼小的兒子被洶湧漩渦沖散落單，進而再度淪為提豐或水下怪獸的獵物", 
+                "為了限制艾若斯的游動速度，防止他擅自游回岸上向魔獸提豐發動攻擊", 
+                "因為變身魔法需要兩人肢體緊密連結，否則會在短時間內變回凡人形態", 
+                "為了向天空中的宙斯傳達求救訊號，利用閃耀的絲帶吸引天庭神明的注意"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中說明母子倆「極有可能被漩渦沖散。一旦在混亂的水底失去彼此的蹤跡，兒子如果落單，非常有可能再度淪為提豐或水下怪獸的獵物」，顯示繫上絲帶是為了防止分離與危險。" 
+        },
+        { 
+            txt: "大地之母蓋亞當初之所以與塔爾塔羅斯結合並孕育出魔獸提豐，其最根本的動機為何？", 
+            opts: [
+                "對宙斯將她親生骨肉泰坦諸神打入深淵的殘酷行為感到憤怒，意圖顛覆宙斯新政權", 
+                "為了考驗阿芙羅黛蒂與艾若斯的母子情誼，並測試奧林匹斯諸神的應變能力", 
+                "因為奧林匹斯諸神在尼羅河畔舉辦宴會破壞了自然的平穩，蓋亞降下懲罰", 
+                "受到冥王黑帝斯的煽動，企圖利用提豐將人間與天庭一併吞併入冥界"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文章第一段明確記載「蓋亞對宙斯殘酷處置自己親生骨肉的行為感到無比憤怒……為了徹底顛覆宙斯的新政權，蓋亞與塔爾塔羅斯結合，孕育出了古希臘神話史上體型最龐大、力量最恐怖的終極魔獸——提豐」。" 
+        },
+        { 
+            txt: "綜合全文關於阿芙羅黛蒂母子化魚相繫以及敘利亞雙魚救駕的情節，下列對於雙魚座神話所傳達的核心精神歸納，何者最為準確？", 
+            opts: [
+                "頌揚在絕境危難中無私展現的母愛光輝，以及「愛是超越恐懼與分離的永恆牽絆」", 
+                "警惕世人在強敵面前不應倉皇逃跑，並強調唯有靠武力正面對抗才能獲得尊嚴", 
+                "說明希臘神話中埃及與敘利亞圖騰信仰的由來，以及萬物變身法則的最高階限制", 
+                "展現魔獸提豐無可匹敵的毀滅力量，並強調神明權力鬥爭對自然萬物造成的破壞"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事描寫阿芙羅黛蒂在面對生死浩劫時本能保護幼子，並用絲帶緊緊相繫（母愛與牽絆），宙斯將雙魚升入夜空「為了表彰阿芙羅黛蒂在危難中展現的母性光輝，並將『愛是超越恐懼與分離的永恆牽絆』這一宇宙真理化作永久的警示」。" 
+        }
+    ]
+},
+{
+    t: "放假，反而是訓練自律的大好時機-劉軒",
+    c: "        面對即將來臨的連假，很多人可能有了許多自由支配的時間，會認為：「太棒了，終於可以好好放鬆了！我什麼事都不要做，每天要睡到自然醒！」但根據我個人經驗和團隊夥伴的反饋，基本上人在假期前兩、三天幸福感很高。但到假期到中間，如果沒有特別安排事情，就會開始感到無聊。甚至有些人每天會抱著電腦、滑手機，打發時間度日，最後在收假前感受到很深的空虛感。\n        休假就該好好放鬆、甚至盡情放空自己啊！為什麼明明沒特別安排什麼事，還是沒有獲得想像中那種「假期感」？這很可能正因為你的「沒規劃」，當我們沒有主動做好假期規劃，就會只是讓假期被動地「過去」了。無論工作或生活，其實都需要規劃和安排，才能讓人有掌控感。這並不是要你變成計畫狂或控制狂，規劃是為了盡可能讓你想要的事情發生。所以，從另一個角度來說，一個美好的假期不一定是自然而然地發生，有時，是需要我們「刻意」安排好的。\n        首先，假期最重要的目的當然是「休息」，但這並不代表我們需要一路睡到中午。在我眼中，一段假期正好適合拿來調整自己的作息。假如你想改變自己熬夜、晚起的習慣，那在這段時間就可以跟自己約定，每天晚上幾點鐘一定洗漱睡覺，隔天定好鬧鐘就一定不賴床。在假期放鬆狀態下規律作息，一定會讓你明顯感受到精力恢復。以我自己為例，休假期間我每天都會特別早起，去河堤邊跑步、邊聽podcast學習。這段完全屬於自己的時間，真的能讓我感到身心的愉悅。尤其，在一天的在開始，就已經做了有益身心的事情，這種感覺會讓一整天都更有能量！\n        另一個讓你過上美好假期的建議是：「提前安排好隔天事項」。這並不是要你列出任務清單，而是要你概括地想想第二天會有哪些事要做？比如：早上有親戚拜訪、同學聚會、或者有場球賽要看？下午要幫父母準備晚餐？幾點要追劇？提前在腦內跑過一遍這些事項，隔天你對時間的掌控感會提高許多。甚至，你會有點概念知道自己沒安排事情時可以看哪部電影，或者有意識地留一段時間給自己放空。有人說：「快樂的時光總是過得特別快」，我覺得其實是「無意識地過日子才會過得特別快」。當我們閒在家裡，時常會發現光是在沙發上看劇、看電影，一天很快就過了，是吧？我自己就挺不喜歡因為無意識虛度，而讓假期晃過去，尤其當我發現自己原本想做的事，其實才做了一半。\n        另外，假如你時常在渡假前雄心壯志地設下許多學習充電的目標，那我會建議只帶一本書、或設定一個小的學習目標即可。不要要求太多，讓自己依然以享受假期為主，休息之餘再補充知識能量，如此一來，才能避免自己因為沒達成目標而感到有些懊惱，這樣反而就失去休假的真諦了！別忘了：「你的休息和努力，同樣重要」！\n        最後，假期也是我們最可能需要面對到美食誘惑的時候，但記得別太過頭，反而造成身體太多的負荷。這裡提供一個飲食小原則，讓我們能在假期結束不會因為飲食而覺得身體沈甸甸的：「盡可能避免攝取過多精緻澱粉、肉類、重鹹、加工食品⋯⋯等」，如此一來不只身體輕鬆，還不會影響睡眠品質和假期的整體幸福感。\n        以上給大家的幾點連假建議，也是我不時提醒自己的，期待自己：「放假雖然放鬆，但不要放縱」。畢竟，放假休息之餘，也是一個很棒的機會，讓我們重新調整自己的生活步調、訓練自己更自律的好時機。記得，人越自律，就越自由！\n\n--------------------\n【資料來源】：https://soundshine.com.tw/article2020048/",
+    q: [
+        { 
+            txt: "根據文章內容，作者在休假期間每天早起去河堤邊跑步時，會邊跑步邊收聽什麼來進行學習？", 
+            opts: [
+                "Podcast", 
+                "新聞廣播", 
+                "英語有聲書", 
+                "流行音樂"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確記載「以我自己為例，休假期間我每天都會特別早起，去河堤邊跑步、邊聽podcast學習」。" 
+        },
+        { 
+            txt: "作者建議在假期設定學習目標時只需「帶一本書或設定小目標」，其主要原因是什麼？", 
+            opts: [
+                "避免因目標過高未達成而產生懊惱感，確保能兼顧休息與享受假期的真諦", 
+                "因為假期的時間過於短暫，根本無法閱讀完全部買來的書籍", 
+                "為了留出更多時間進行重鹹與精緻澱粉等美食的享用", 
+                "因為作者認為學習與努力的價值遠遠高於放鬆休息"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段指出「不要要求太多，讓自己依然以享受假期為主……才能避免自己因為沒達成目標而感到有些懊惱，這樣反而就失去休假的真諦了」。" 
+        },
+        { 
+            txt: "作者提到「提前安排好隔天事項」時強調不需要列出詳細任務清單，只需在腦內概括跑過一遍，這樣做的主要好處是什麼？", 
+            opts: [
+                "提高個人對時間的掌控感，避免無意識地虛度光陰", 
+                "能夠強迫自己像計畫狂一樣精準執行每一分鐘的行動", 
+                "可以完全免去親戚拜訪或同學聚會等不必要的社交行程", 
+                "保證隔天不需要定鬧鐘就能自然醒並進行規律作息"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段說明提前在腦內跑過事項，「隔天你對時間的掌控感會提高許多」，並指出「無意識地過日子才會過得特別快」，因此概括安排能提升時間掌控感以防虛度。" 
+        },
+        { 
+            txt: "作者在文章最後總結「放假雖然放鬆，但不要放縱」，這句話主要傳達了什麼樣的心態或觀點？", 
+            opts: [
+                "休息的本質在於透過刻意與適度的自律規劃生活，從而獲得身心的掌控感與真正的自由", 
+                "休假時應嚴格禁止任何娛樂與追劇活動，將全部時間投入於調整作息與高強度學習", 
+                "完全不作規劃、盡情睡到中午才是化解收假前空虛感的最有效方式", 
+                "只要在假期中嚴格控制飲食不吃肉類，就能達到超越常人的自律境界"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文強調假期若完全無規劃被動度過反而容易感到空虛，唯有透過「刻意安排」、規律作息與飲食節制等自律行為，才能重新掌控生活步調，呼應「人越自律，就越自由」的主旨。" 
+        }
+    ]
+},
+{
+    t: "新北市農曆春節爆竹煙火施放規定與安全宣導",
+    c: "        農曆春節假期，許多民眾習慣施放爆竹煙火增添年節氣氛。新北市政府消防局第一救災救護大隊特別提醒，施放爆竹煙火務必遵守法規，不僅要認明合格標示，更要注意「施放時間」與「合法區域」。若違規施放爆竹煙火，可依規定處新臺幣3萬元以上15萬元以下罰鍰。\n        根據《新北市爆竹煙火施放管制辦法》，每日22時至次日06時，禁止施放升空類、飛行類（如沖天炮、小高空）之一般爆竹煙火，以維護社區安寧及夜間公共安全。此外，新北市也明確公告禁止施放地區，包含學校、圖書館、醫院、養護中心、漁港、碼頭、捷運與高（臺）鐵車站及其路權範圍，以及其他經公告者（如非開放之河濱公園等）。\n        為了讓民眾有合法的慶祝空間，消防局於春節期間特別規劃8處特定河濱區域供民眾施放：一、二重疏洪道（出口堰堤頂步道區域）；二、新店溪（秀朗橋上下游側各50公尺範圍）；三、新店溪（華中橋下游側至光復抽水站一帶）；四、淡水河畔（重陽橋下游側至蘆洲垃圾轉運站）；五、大漢溪右岸（鐵路橋下游側至四汴頭抽水站）；六、大漢溪左岸（西盛環保公園範圍）；七、大漢溪左岸（柑園河濱公園）；八、大漢溪左岸（鶯歌河濱公園）。特別注意，於這些河濱專區施放，時間同樣受每日22時至次日06時禁止施放升空類及飛行類煙火之規定限制。\n        在保護兒童安全方面，消防局強調，依據《爆竹煙火管理條例》，未滿12歲之兒童施放爆竹煙火時，必須有父母或監護人陪同。此外，更嚴格禁止兒童施放「升空類」、「飛行類」及「甩炮類」等較具危險性的產品。若違反相關規定，家長將面臨新臺幣3,000元至1萬5,000元的罰鍰。\n        選購與施放煙火時應遵守安全守則：認標示，產品必須貼有內政部委託機構認證之合格「認可標示」；看說明，詳閱包裝上的使用方法與安全距離；禁改裝，嚴禁將多種煙火串接或改裝，以免發生爆炸意外。第一救災救護大隊呼籲，過年期間施放安全第一，若發現違規製造、儲存或非法施放情事，請撥打119檢舉，共同守護平安年。\n<img src='x5120-1.jpg' alt='x5120-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n--------------------\n【資料來源】：https://www.facebook.com/FDNT1Battalion/posts/明天開始就是農曆春節假期許多民眾習慣施放爆竹煙火增添年節氣氛新北市政府消防局第一救災救護大隊特別提醒施放爆竹煙火務必遵守法規不僅要認明合格標示更要注意施放時間與/1407977014462840/",
+    q: [
+        { 
+            txt: "根據文章與宣導宣導圖內容，未滿12歲之兒童施放爆竹煙火時，除了必須有父母或監護人陪同外，還被嚴格禁止施放下列哪一種爆竹煙火產品？", 
+            opts: [
+                "甩炮類", 
+                "仙女棒類", 
+                "旋轉類", 
+                "火花類"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段明確指出「禁止兒童施放『升空類』、『飛行類』及『甩炮類』等較具危險性的產品」。" 
+        },
+        { 
+            txt: "新北市政府消防局規定每日晚上22時至次日清晨06時禁止施放升空類及飛行類一般爆竹煙火，其主要考量是什麼？", 
+            opts: [
+                "避免夜間施放發出巨大聲響與光影影響社區安寧，並降低夜間視線不佳引發火災的風險", 
+                "因為該時段全新北市的所有河濱公園都會關閉，禁止任何民眾進入", 
+                "為了強制民眾在晚上10點前將所有購買的煙火施放完畢，以免過期失效", 
+                "因為夜間施放升空類煙火會干擾天庭神仙的休息，違反傳統農曆習俗"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確說明該項限時規定是「以維護社區安寧及夜間公共安全」，且夜間安寧與消防安全為公共管制的主要宗旨。" 
+        },
+        { 
+            txt: "民眾若計畫在農曆春節期間前往新北市大漢溪左岸的柑園河濱公園專區施放沖天炮（升空類煙火），下列哪一種規劃方式才是符合法規且安全的？", 
+            opts: [
+                "在白天或晚上10點前前往，並確認購買的產品貼有合格認可標示後依說明施放", 
+                "選在半夜11點前往，因為夜間河濱公園人煙稀少，施放升空類煙火最不會干擾他人", 
+                "將數支沖天炮用膠帶串聯改裝在一起，以增加連發施放的熱鬧氣氛與效果", 
+                "讓家中10歲的小朋友獨自帶著沖天炮前往施放，訓練其獨立自主的能力"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "河濱專區仍受「22時至06時禁放升空類」、「認明合格認可標示」、「嚴禁改裝串接」及「未滿12歲需家長陪同且禁放升空類」等法規約束，故僅有A選項完全合規。" 
+        },
+        { 
+            txt: "新北市政府消防局制定爆竹煙火施放管制辦法並規劃特定河濱開放專區，這項政策主要展現了何種治理思維？", 
+            opts: [
+                "在兼顧民眾過年慶祝節慶民俗需求之餘，透過明確的時間與空間管制保障公共安全與環境安寧", 
+                "為了增加政府的罰鍰收入，故意設立繁複的規定以吸引民眾違規觸法", 
+                "全面禁止民眾施放任何形式的爆竹煙火，藉此達到節能減碳與環境保護的目的", 
+                "強調市府缺乏對爆竹煙火製造商的管轄權，只能將管理責任完全轉嫁給一般購買民眾"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文與圖片顯示市府並未全面禁止煙火，而是透過認可標示、劃設8大河濱專區、限定夜間時間與保護兒童等規範，達成「安全歡慶節日」與「維護公共安全」雙贏的治理目標。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

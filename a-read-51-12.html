@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十二冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-三皇時代的文明起源",
+    c: "        中國古代文明的開端，被稱為「三皇五帝」時期。三皇部分，由於古代典籍眾多且說法不一，但主要的代表人物為有巢氏、燧人氏、伏羲氏、神農氏，被後世尊為開天闢地後人類文明的奠基者。其中，有巢氏創屋居、燧人氏取火、伏羲氏教漁牧、神農氏教農醫，這條從野居到農耕的發展脈絡，幾乎象徵著人類從蠻荒走向文明的全部進程。\n        一、有巢氏：人類建屋而居的始祖。在遠古時代，人類穴居山洞，飽受野獸侵襲與風雨威脅。根據《太平御覽》記載：「上古穴居而野處，後聖人有巢氏教民構木為巢，以避群害。」有巢氏（又稱大巢氏）便因此被視為最早教導人類建造房屋的聖人。他所教的「構木為巢」，是早期樹屋的原型，人們將木枝交錯構築於高處，避免猛獸侵襲，並以葉為衣、以果為食，逐步形成了安居的概念。這不僅是建築的開端，也是「家」的起源。\n        二、燧人氏：火之祖與文明的覺醒。在有巢氏之後，燧人氏出現於史前的荒野中。他是「三皇」之一，象徵人類從自然束縛中覺醒的智慧。傳說他在狩獵時發現摩擦木枝能生火，因此發明了「鑽木取火」之法，使人類結束了茹毛飲血的原始生活。燧人氏的火不只是物理的熱，更是精神文明之火。火的發現讓烹飪、冶金、祭祀等文化得以誕生，標誌著「文化的起點」。今日河南商丘仍有「燧皇陵」，紀念他為華夏文明所燃起的第一團火焰。\n        三、伏羲氏：創世智者與八卦之父。伏羲氏（又作宓羲、庖犧）被尊為「三皇之首，百王之先」。他與女媧氏的兄妹結合，象徵人類的繁衍起源。傳說中，他觀察天地萬物變化，「仰觀天象、俯察地理」，由此推演出八卦與陰陽之理，開啟了中華宇宙觀的基礎。除了八卦，伏羲氏還發明文字、結繩記事、漁網捕魚、馴養家畜、制定婚姻制度。他使人類社會從遊獵走向定居，從無序走向秩序。可見伏羲氏不僅是技術革新的引領者，更是社會制度與哲學思想的開創者。\n        伏羲女媧關係：天地陰陽的象徵。伏羲與女媧常被描繪為蛇身人首，交纏而立，象徵陰陽交合、生生不息。女媧造人補天，伏羲制定禮法治世，兩者構成了天地平衡的雙面象徵，也反映了中國文化中「天人合一」的核心哲學。\n        四、神農氏：農業與醫藥文明的創建者。伏羲氏之後，出現了另一位偉大的聖人——神農氏（炎帝）。他被尊為「華夏始祖」之一，是農業、醫學、草藥之神。神農氏「嘗百草」的故事家喻戶曉，象徵他為了尋找治病的草藥而冒險試毒，最終奠定中醫藥的基礎。他還發明耒耜（農具），教導人們種植五穀、建立市場交易制度，使人類從漁獵社會邁向農耕文明。這是「以地為生」的開端，也為後來的黃帝文明打下堅實根基。\n        資料來源：https://www.inzense.com.tw/shennong-fuxi-and-youchao-three-sovereigns-era-complete-guide-origins-of-civilization-and-chinese-wisdom-heritage/",
+    q: [
+        { 
+            txt: "根據文章內容，哪一位聖人發明了「鑽木取火」之法，使人類結束了茹毛飲血的原始生活，並標誌著華夏「文化的起點」？", 
+            opts: [
+                "燧人氏", 
+                "有巢氏", 
+                "伏羲氏", 
+                "神農氏"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確指出「燧人氏……發明了『鑽木取火』之法，使人類結束了茹毛飲血的原始生活……標誌著『文化的起點』」。" 
+        },
+        { 
+            txt: "有巢氏教導人類「構木為巢」，將木枝交錯構築於高處，這在當時最主要的現實作用與重大意義是什麼？", 
+            opts: [
+                "避免猛獸侵襲與風雨威脅，形成安居概念並開創了「家」的起源", 
+                "利用樹屋的高處地形觀察天象，進而推算出陰陽八卦的演變規律", 
+                "方便在樹梢採集果實與葉片，作為祭祀神仙與製作遮蔽衣物之用", 
+                "儲存高溫烘烤過的食物與穀物，以防範穴居山洞時遭洪水淹沒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第一段說明上古人類穴居飽受野獸與風雨威脅，有巢氏教導構木為巢「避免猛獸侵襲，並以葉為衣、以果為食，逐步形成了安居的概念。這不僅是建築的開端，也是『家』的起源」。" 
+        },
+        { 
+            txt: "文章提到伏羲氏「推演八卦、發明漁網、馴養家畜、制定婚姻制度」，這些創舉對當時的人類社會帶來了何種根本性的改變？", 
+            opts: [
+                "推動人類社會從遊獵走向定居，並建立起社會秩序與哲學思想基礎", 
+                "徹底取消了神農氏嘗百草的風險，使社會邁入完全無疾病的黃金時代", 
+                "促使天帝賜予紅色神弓與白羽箭，協助人類打敗蚩尤等強悍部落", 
+                "取代了燧人氏的火種文化，使人類社會直接轉變為現代商業市場"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段指出伏羲氏的種種創舉「使人類社會從遊獵走向定居，從無序走向秩序。可見伏羲氏不僅是技術革新的引領者，更是社會制度與哲學思想的開創者」。" 
+        },
+        { 
+            txt: "綜合全文關於有巢氏、燧人氏、伏羲氏與神農氏事蹟的介紹，下列對於「三皇時代」在華夏文明演進歷程中的總結，何者歸納最為準確？", 
+            opts: [
+                "象徵人類從野居居住、用火、漁牧到農耕醫藥，由蠻荒一步步邁向文明秩序與哲學的總體進程", 
+                "說明希臘與華夏神話中天神如何掌控自然萬物，並透過魔法變身來干預凡人命運的過程", 
+                "證明華夏古代建築與中醫技術早在開天闢地前就已達到完備成熟的全盛巔峰", 
+                "強調四位聖人皆靠著武力征服強大部落，進而建立了以黃帝為首的中原部落聯盟"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章前言即說明三皇「創屋居、取火、教漁牧、教農醫，這條從野居到農耕的發展脈絡，幾乎象徵著人類從蠻荒走向文明的全部進程」，選項A完整歸納了這條文明發展軸線。" 
+        }
+    ]
+},
+{
+    t: "星座故事-雙子座的傳說",
+    c: "        雙子座是冬天星空中最明亮的星座，位於獵戶座東邊的上方。它由兩顆排在一起閃爍的星星組成，其來源是波樂克斯和卡斯特兄弟。\n        據說他們倆是同父異母的兄弟。卡斯特是斯巴達國王和他美麗的妻子麗達王妃所生的，而波樂克斯則是天神宙斯和麗達王妃所生的兒子。\n        他們倆人感情非常融洽，雖然長得一模一樣，但是他們最大的不同就是，卡斯特的身分是「人」，而波樂克斯卻是天神宙斯的兒子，具有永恆不死之身。\n        兩人長大之後都成為優秀的青年，也合作過不少英勇的事蹟。有一次，希臘中部一個國王叫卡留頓，由於沒有對月亮和狩獵女神獻上祭品，因此月亮女神阿蒂蜜絲故意命令一隻巨大的野豬去擾亂卡留頓的領土。\n        王子米雷阿克爾決心要殺死這隻野豬，便召集了天下所有的勇士參加狩獵。\n        波樂克斯和卡斯特也參加了，還有他們的堂兄弟林克烏斯和伊達斯。一開始，他們互相合作，勇敢的追殺野豬，可是等到野豬被殺後，糾紛卻開始了。\n        「現在，這隻豬該如何處置呢？」卡斯特說。\n        「豬是我殺死的，由我來決定！」驕傲的林克烏斯說。\n        「什麼？！野豬明明是我們一起殺死的，怎麼能說是你呢？」\n        「就是我！不服氣嗎？」林克烏斯拔出了劍，這時，王子米雷阿克爾趕緊出來協調，雙方才沒動手打起來，不過都彼此怨恨著對方。\n        因此，有一天，波樂克斯和卡斯特再度和林克烏斯兄弟碰面時，立刻就起了爭執，雙方陷入了一場混戰。卡斯特不幸被害，波樂克斯眼見兄弟死亡，既悲傷又憤怒，力戰之下，用長槍刺死了林克烏斯。此時，天神宙斯也幫助兒子波樂克斯，用雷霆將伊達斯擊斃。\n        波樂克斯報仇之後，對著卡斯特的屍體痛哭失聲。\n        他淚流滿面的呼喚著宙斯：「父神啊！請您救救卡斯特吧！否則就讓我一起死去。卡斯特死了，我活著又有什麼意義呢！」\n        宙斯感動的說：「兒子啊！卡斯特只是個凡人，人總是要死去的，如果你想救活卡斯特，你就必須分出一半的生命給他。」\n        波樂克斯答應了，從此，他們半生的時間在地上，另半生則在奧林帕斯仙境，永遠在一起。\n        後來，天神宙斯把這對相親相愛的兄弟移置到天上，變成了雙子座，在冬天的晚上閃爍著明亮的光輝。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章第二段與第三段的介紹，波樂克斯與卡斯特雖然長得一模一樣，但兩人身分上最關鍵的不同是什麼？", 
+            opts: [
+                "卡斯特是凡人，而波樂克斯是宙斯之子並擁有永恆不死之身", 
+                "卡斯特是宙斯的神仙之子，而波樂克斯是斯巴達國王的凡人兒子", 
+                "卡斯特擅長使用長槍作戰，而波樂克斯則擁有操控雷霆的法力", 
+                "卡斯特出生於奧林帕斯仙境，而波樂克斯則從小生長在希臘民間"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「卡斯特的身分是『人』，而波樂克斯卻是天神宙斯的兒子，具有永恆不死之身」。" 
+        },
+        { 
+            txt: "林克烏斯兄弟與波樂克斯、卡斯特兄弟之間結下深仇大恨，最根本的導火線是什麼？", 
+            opts: [
+                "野豬被殺後，林克烏斯驕傲地獨攬功勞並拔劍爭執，導致雙方心生怨恨", 
+                "林克烏斯在狩獵野豬前偷偷向月亮女神獻祭，搶走了卡斯特的功勞", 
+                "國王卡留頓將野豬的處置權全數交給卡斯特，引發林克烏斯極度不滿", 
+                "宙斯偏心降下雷霆擊斃伊達斯，導致林克烏斯憤而拔劍刺殺卡斯特"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述野豬被殺後，林克烏斯獨攬功勞稱「豬是我殺死的」，並拔劍威脅，雖然經王子協調未當場動手，但「彼此怨恨著對方」，成為後續混戰的導火線。" 
+        },
+        { 
+            txt: "波樂克斯在卡斯特遇害後向宙斯痛哭求救，宙斯提出什麼條件來實現拯救卡斯特的願望？", 
+            opts: [
+                "波樂克斯必須分享自己一半的生命給卡斯特，兩人共同分擔凡間與仙境的時間", 
+                "波樂克斯必須放棄神仙身分，永遠留在地上陪伴卡斯特過著凡人的生活", 
+                "波樂克斯必須再次用長槍擊敗月亮女神野豬，以向宙斯證明兄弟情深", 
+                "波樂克斯必須將獵戶座附近的星空讓給卡斯特，使其獨自升天成為星座"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "宙斯告訴波樂克斯「如果你想救活卡斯特，你就必須分出一半的生命給他」，從此兩人半生在地上、半生在仙境。" 
+        },
+        { 
+            txt: "綜合全文關於波樂克斯「願同生共死」與「分享一半生命」的情節，下列對於雙子座神話所傳達的核心精神歸納，何者最為準確？", 
+            opts: [
+                "展現超越生死、甘願犧牲個人永生權利以換取手足相聚的至高兄弟情誼", 
+                "強調人神殊途的命運不可逆轉，凡人終究無法透過神明的力量獲得重生", 
+                "警惕世人在面對榮譽與利益時應保持謙虛，避免因爭功而招致滅門之禍", 
+                "說明希臘神話中英雄透過弒殺怪獸與報仇雪恨，最終獲得封神升天的過程"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "波樂克斯擁有不死之身，但在卡斯特死後寧願放棄獨活，甚至答應分出一半壽命給凡人兄弟，宙斯感動將其化為雙子座，核心象徵著超越生死、無私奉獻的兄弟至情。" 
+        }
+    ]
+},
+{
+    t: "撿走別人掉的錢包，犯了什麼罪？",
+    c: "        阿賢的父母家境不差，在台北沒有房貸也沒有車貸，每個月都還能存一些錢。大致上阿賢想要的東西父母親都會買給他，唯一的要求是專心把書唸好，也不用去打工浪費唸書時間。\n        最近阿賢身邊的朋友都拿了新手機，跟父母親多次商量的結果都是上大學後再說。某日，阿賢與父母親回南部探親，眼尖的他在高鐵站內的座椅看見一個錢包，心想如果取走錢包的錢，那麼就可以買自己喜愛的東西了吧！然而令阿賢訝異的是，在列車抵達高雄要出站時，已經有警察在閘門口等著他。原來阿賢父親使用企業會員購票，每組票上都留有序號，而透過監視器畫面的交叉比對，馬上就可以輕易地知道阿賢目的地。一旁的父母親則是傷心難過不已。\n        從教育的立場來看，給小孩一點零用錢應該是好的吧。\n        有些父母認為小孩會亂花錢，形成無謂的浪費，即使有給零用錢也是嚴格限制使用；但這種情況在我看來跟沒給差不了多少。至於害怕「浪費」的問題，其實以「定額定期」的給法就好了，畢竟孩子透過零用錢的使用，在某程度上可以脫離父母親的價值觀，同時有限度地開展自己的意志，並且認知到自我負責的概念，而這一切，也是學習成長的一環。\n        如從法律的觀點來說，撿起他人掉落在公眾場所的行為觸犯何罪，是竊盜還是侵佔呢？答案其實都不是。\n        原則上，這只會成立《刑法》第337條的侵占遺失物罪，處罰也非常輕，最多罰你500元。所以我常開玩笑的跟上課同學說，在「法網恢恢」的前提下，當你們看到錢包遺失時，請先確認有無超過500元，不然最後你真的會是做功德的人。\n        當然，你把遺失物拿去警察局的話，可以驗證好心有好報這句話，因為《民法》第805條的規定，你可以要錢包裡面的十分之一。至於有些人疑惑為何這條的刑罰怎麼這麼輕，其實這是人性（法律術語：期待可能性）的考量，基本上可以考慮除罪化，不然有些喜歡在球場撿保特瓶去賣的人，某種程度上都會有成罪的危險。\n        最後一個有趣的問題是，撿起錢包拿走裡面的錢，然後把錢包丟掉。請問有毀損錢包的問題嗎？\n        理論上，這當然可以另外成立毀損罪，不過這會很弔詭，因為撿錢包只有罰500元，但如果警察伯伯問你錢包去向時，你瀟灑的回答「我丟了」，刑度瞬間提升為兩年（《刑法》第354條），比六福村的大怒神還高還快。所以，為了避免變相懲罰那些誠實的犯罪人，基本上還是以不成立毀損罪較為合理（法律術語：不罰的後行為）。\n        回到一開始的故事，教育上給小孩一點（定期定額）零用錢，即使可能會浪費，但那也是他們成長的必經路程，父母親也該學會適時的放手，至於侵占遺失物在法律上的處罰雖然很輕，但想想掉錢包的人重辦身分證很麻煩，所以還回去還是比較好，甚至可以從十分之一的報酬中「看到幸福」，法律並沒有虧待你們。\n\n--------------------\n【資料來源】：https://www.thenewslens.com/article/94338",
+    q: [
+        { 
+            txt: "根據文章所述，撿起他人掉落在公眾場所的錢包並據為己有，在法律上主要會觸犯下列哪一項罪名？", 
+            opts: [
+                "《刑法》第 337 條的侵占遺失物罪", 
+                "《刑法》第 320 條的普通竊盜罪", 
+                "《刑法》第 354 條的毀損罪", 
+                "《刑法》第 339 條的普通詐欺罪"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「原則上，這只會成立《刑法》第337條的侵占遺失物罪，處罰也非常輕」。" 
+        },
+        { 
+            txt: "關於撿走錢包里的錢並將錢包丟棄的行為，文章認為法理上不應另外成立「毀損罪」的最主要原因為何？", 
+            opts: [
+                "避免因為行為人誠實說明丟棄行為，而導致刑度從輕罰 500 元驟升至最高兩年的變相懲罰", 
+                "因為錢包本來就是遺失物，丟棄遺失物在民法上屬於合法處分他人財產的權利", 
+                "因為警察無法透過高鐵車票序號與監視器畫面證實行為人是否有丟棄錢包的動作", 
+                "因為只要行為人主動至警察局領取十分之一的報酬，法律便會自動免除其所有刑責"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中提到若承認毀損罪，誠實回答丟棄會使刑度瞬間提升為兩年，故「為了避免變相懲罰那些誠實的犯罪人，基本上還是以不成立毀損罪較為合理（不罰的後行為）」。" 
+        },
+        { 
+            txt: "從家庭教育的角度來看，作者建議父母親採用「定期定額」的方式給孩子零用錢，最主要的教育效益是什麼？", 
+            opts: [
+                "幫助孩子學習開展個人意志，並在有限額度內建立自我負責與脫離父母價值的成長概念", 
+                "完全杜絕孩子在買新手機或昂貴物品時產生任何無謂的浪費行為", 
+                "讓孩子知道打工是浪費唸書時間，從而將所有精力專注於提升學業成績上", 
+                "訓練孩子在公共場所發現他人遺失物時，能主動撿拾並依法索取十分之一報酬"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段說明「孩子透過零用錢的使用，在某程度上可以脫離父母親的價值觀，同時有限度地開展自己的意志，並且認知到自我負責的概念，而這一切，也是學習成長的一環」。" 
+        },
+        { 
+            txt: "綜合文中對於「侵占遺失物刑罰極輕」以及「丟棄錢包不另論毀損罪」的法律邏輯分析，下列何者最符合作者所欲傳達的法律設計思維？", 
+            opts: [
+                "法律制定時會衡量人性（期待可能性）並避免變相懲罰誠實，展現兼具理性與常理的設計思維", 
+                "法律設計的核心是為了鼓勵民眾將所有遺失物據為己有，因此將刑罰降至最低以減輕法院負擔", 
+                "法律規範過於寬鬆且存在嚴重漏洞，導致誠實回答犯罪過程的人往往會遭受最嚴厲的法律制裁", 
+                "法律的主要目的是為了保護警察執法方便，因此將所有遺失物相關的處罰統一設定為罰款 500 元"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "作者透過說明刑罰輕是考量「人性（期待可能性）」避免動輒得咎，以及不另論毀損罪是為了避免「變相懲罰誠實的人（不罰的後行為）」，表達法律設計背後貼近人性與理性邏輯的思維。" 
+        }
+    ]
+},
+{
+    t: "JK羅琳：真正的勇敢，是從創傷中重生",
+    c: "        二零零七年底，英國獨立電視台拍攝的紀錄片「J. K. 羅琳：輝煌的一年」中，當今世上身價第一的暢銷女作家羅琳表示，自己此生最欣賞的美德是「勇氣」。面對人生創傷與磨難，她認為真正的勇敢是從創傷中重生。\n        一九九四年聖誕節，不到三十歲的羅琳剛結束一段混亂的異國婚姻，窩居在愛丁堡沒有暖氣的公寓裡。她身無分文，獨自撫養幼小的女兒，加上母親早逝與父親疏離，重重打擊讓她患上了嚴重的憂鬱症。那段萬念俱灰的日子裡，她甚至對事物失去感覺，懷疑快樂就此遠去。《哈利波特》中全身罩著斗篷、會吸走人們希望與幸福的「催狂魔」，正是她當時低潮心境的寫照。\n        在萬念俱灰、一度想尋短之際，摯愛的女兒救了她一命。為了給女兒依靠，羅琳決定勇敢面對，接受了九個月的心理諮詢治療。她鼓起勇氣重新出發，全心投入寫作。她心想最糟不過是被退稿，於是放膽揮灑想像力，耗時十七年完成了《哈利波特》系列作品。這套小說後來被翻譯成六十五國語言，在全球熱銷數億冊，讓她從身無分文的單親媽媽翻身成為全球知名的風雲人物。\n        羅琳對於自己曾面臨的失敗與困境從不遮掩，反而為自己能夠克服磨難感到無比驕傲。她始終堅守初衷，按原計畫寫完七集便為故事畫下句點。面對世人的掌聲與財富，她依然保持幽默與真誠，並期許自己能成為「一個把才華發揮得淋漓盡致的人」。\n\n--------------------\n【資料來源】：改寫https://flipedu.parenting.com.tw/article/003571",
+    q: [
+        { 
+            txt: "【提取訊息】根據文章內容，著名小說《哈利波特》中會吸走人們希望、幸福與生存渴望的怪物「催狂魔」，是 J. K. 羅琳在何種人生境遇下創作出來的？", 
+            opts: [
+                "經歷失婚、身無分文且獨自撫養幼女，罹患嚴重憂鬱症的低潮時期", 
+                "在愛丁堡大學攻讀文學學位，深入研究歐洲中世紀黑魔法神話期間", 
+                "《哈利波特》全球大賣並獲得《時代雜誌》選為年度風雲人物之後", 
+                "接受英國獨立電視台紀錄片專訪，重回舊公寓與製作人交談之際"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "直接擷取：文中第二段明確說明羅琳在失婚、身無分文且患有憂鬱症時，「《哈利波特》裡，全身罩著斗篷，會吸走人們希望、幸福與生存渴望的『催狂魔』，就是在那段低潮時創作出來的」。" 
+        },
+        { 
+            txt: "【推論訊息】羅琳在經歷嚴重的憂鬱症與萬念俱灰的絕境時，是什麼關鍵因素讓她決定尋求心理諮詢並重新振作？", 
+            opts: [
+                "看見身旁安詳無憂的小女兒，驚覺自己必須為了所愛的人勇敢活下去", 
+                "出版社看中了她的小說初稿，並提供龐大的預支版稅與暖氣公寓", 
+                "父親主動伸出援助之手，並鼓勵她將失敗的異國婚姻經驗寫成小說", 
+                "英國獨立電視台製作人的邀請，讓她看到了透過紀錄片成名的希望"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "細節因果推論：文中第三段指出「所幸，摯愛的女兒救回她一命。每天早上睜開眼，羅琳看見一個小生命安詳無憂地躺在她身旁……她驚覺，自己必須為所愛的人活下去，於是開始向外求援，接受了九個月的心理諮詢治療」。" 
+        },
+        { 
+            txt: "【推論訊息】羅琳在紀錄片中重回當年寫作的小公寓時感嘆：「雖然當時我的生活過得一榻糊塗，但反而因此得到解放！」這句話最主要的含意是什麼？", 
+            opts: [
+                "當人生已經跌入最糟糕的谷底時，反而能放下對失敗的恐懼，全心發揮才華", 
+                "沒有暖氣的簡陋環境能激發人的生存本能，比舒適的豪宅更適合寫作", 
+                "擺脫了異國婚姻與家庭的束縛後，終於可以隨心所欲地到處旅行尋找靈感", 
+                "被眾多出版社退稿是所有暢銷作家的必經之路，不需為此感到悲傷落淚"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "情節發展推論：文中描述羅琳當時的心態「心想最糟不過是被退稿，怕什麼！而當這枝彷彿施了魔法的想像之筆逸出牢籠，一寫就是十七年」，說明放下恐懼後解放了創作才華。" 
+        },
+        { 
+            txt: "【詮釋整合】綜合全文關於 J. K. 羅琳的人生經歷與受訪內容，下列對於這篇文章所傳達的核心生命精神，何者歸納最為準確？", 
+            opts: [
+                "展現以愛與勇氣面對人生磨難、從創傷中堅毅重生，並將自身才華揮灑至極致的精神", 
+                "強調只要寫出奇幻冒險小說就能獲得巨大財富，並躍升為全球知名風雲人物", 
+                "說明單親媽媽在缺乏家庭支持的情況下，唯有依靠政府補助才能度過難關", 
+                "警惕世人切莫輕易嘗試異國婚姻，否則將會招致身無分文與患病的悲慘下場"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "高階詮釋整合：文章透過羅琳的受訪談話（勇氣是從創傷中重生）、失婚患病後為了女兒堅強振作、寫出《哈利波特》並保持初衷等情節，完整歸納出以愛與勇氣克服磨難、發揮才華的精神。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十三冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-夸父逐日",
+    c: "        遠古時候，在北方荒野中，有一座巍峨雄偉、高聳入雲的高山。在山林深處，生活著一群力大無窮的巨人。\n        他們的首領，是幽冥之神「後土」的孫子、「信」的兒子，名字叫做夸父。因此這群人就叫做夸父族。他們身強力壯、高大魁梧，意志力堅強且氣概非凡；而且心地善良、勤勞勇敢，過著與世無爭、逍遙自在的日子。\n        那時候大地荒涼，毒蛇猛獸橫行，人們的生活非常艱苦。夸父為了讓本部落的人們能夠活下去，每天都率領眾人跟洪水猛獸搏鬥。\n        夸父常常將捉到的凶惡黃蛇掛在自己的兩隻耳朵上當作裝飾，或是抓在手上揮舞，並以此為榮。\n        有一年的天氣非常炎熱，火辣辣的太陽直射在大地上，烤死農作物、曬焦樹木，連河流都乾涸了。人們熱得難以忍受，夸父族的人紛紛死去。\n        夸父看到這種情景非常難過，他仰頭望著太陽，告訴族人：「太陽實在太可惡了，我要追上太陽、捉住它，讓它聽從人的指揮。」族人聽了紛紛勸阻。\n        有的人說：「你千萬別去呀，太陽離我們那麼遠，你會累死的。」\n        有的人說：「太陽那麼熱，你會被烤死的。」\n        夸父心意已決，發誓要捉住太陽，讓它聽從人們的吩咐、為大家服務。他看著愁苦不堪的族人說：「為了大家的幸福生活，我一定要去。」\n        太陽剛從海上升起，夸父告別族人，懷著雄心壯志，從東海邊朝著太陽升起的方向，邁開大步追去，展開他逐日的征程。\n        太陽在空中飛快地移動，夸父在地上如疾風般拼命地追呀追。他穿過一座座大山，跨過一條條河流，大地被他的腳步震得「轟轟」作響、來回晃動。\n        夸父跑累的時候，就稍微打個瞌睡，把鞋裡的土倒在地上，結果堆成了一座座大土山。餓的時候，他就採摘野果充饑，有時候夸父也會煮飯。他用三塊石頭架鍋，這三塊石頭最後就變成了三座鼎足而立的高山，有幾千公尺高。\n        夸父追著太陽跑，眼看離太陽越來越近，他的信心也越來越強。越接近太陽，他就渴得越厲害，已經不是捧河水喝就能止渴的了。但是他沒有害怕，並且一直鼓勵自己：「快了！就要追上太陽了，人們的生活就會幸福了。」\n        經過九天九夜，在太陽落山的地方，夸父終於追上了它。\n        紅通通、熱辣辣的火球就在夸父面前，萬道金光籠罩在他的頭上與身上。\n        夸父無比歡欣地張開雙臂，想要把太陽抱住。可是太陽熾熱異常，夸父感到又渴又累。他就跑到黃河邊，一口氣把黃河的水喝乾；他又跑到渭河邊，把渭河的水也喝光，卻依然不解渴；夸父於是再向北跑去，那裡有縱橫千里的大澤，大澤裡的水足夠讓夸父解渴。\n        但是，夸父還沒跑到大澤，就在半路上被渴死了。\n        夸父臨死的時候，心裡充滿遺憾，他依然牽掛著自己的族人，於是將自己手中的木杖扔了出去。木杖落地的地方，頓時長出了一大片鬱鬱蔥蔥的桃林。\n        這片桃林四季常青、終年茂盛，為往來的過客遮蔭，結出的鮮桃更能為勤勞的人們解渴，讓人們能夠消除疲勞、精力充沛地踏上旅程。\n\n--------------------\n【資料來源】：https://www.ntdtv.com/b5/2012/07/10/a724590.html",
+    q: [
+        { 
+            txt: "根據文章內容，夸父在極度口渴時，先後喝乾了哪兩條河流的水，隨後才打算前往北方的大澤解渴？", 
+            opts: [
+                "黃河與渭河", 
+                "長江與淮河", 
+                "姬水與姜水", 
+                "黑河與銀河"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中倒數第三段明確記載「他就跑到黃河邊，一口氣把黃河的水喝乾；他又跑到渭河邊，把渭河的水也喝光」。" 
+        },
+        { 
+            txt: "夸父在臨死前將手中的木杖扔了出去，化作一片鬱鬱蔥蔥的桃林，這項舉動最能體現夸父何種情懷與精神？", 
+            opts: [
+                "臨終前仍深切牽掛族人與後人，渴望化作遮蔭與鮮桃繼續造福世人", 
+                "對未能在生前打敗太陽感到無比憤怒，藉由木杖發洩心中的不甘", 
+                "為了向天帝傳達求救訊號，利用桃林作為標記指引族人前來尋找他", 
+                "希望透過植物的生長將北方大澤的水分全部吸乾，以懲罰極端的酷熱"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中最後兩段說明「夸父臨死的時候……依然牽掛著自己的族人，於是將自己手中的木杖扔了出去。木杖落地的地方，頓時長出了一大片鬱鬱蔥蔥的桃林……為往來的過客遮蔭，結出的鮮桃更能為勤勞的人們解渴」。" 
+        },
+        { 
+            txt: "夸父不顧族人「遠會累死、熱會烤死」的勸阻，依然堅持踏上逐日征程，其最根本的動機是什麼？", 
+            opts: [
+                "拯救飽受酷熱與乾旱折磨的族人，希望捉住太陽讓它聽從指揮為大眾服務", 
+                "為了向天下展示夸父族身強力壯與力大無窮的威名，爭奪部落聯盟首領", 
+                "受到幽冥之神後土的指引，必須尋找到太陽落山的地方才能獲取長生仙藥", 
+                "因為聽信了太陽的挑釁，決定獨自一人徒步追趕以證明自己的奔跑速度"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「夸父看到這種情景（太陽烤死作物、乾涸河流、族人死去）非常難過……發誓要捉住太陽，讓它聽從人們的吩咐、為大家服務……『為了大家的幸福生活，我一定要去。』」" 
+        },
+        { 
+            txt: "綜合全文關於「夸父逐日」的神話情節，下列對於夸父這一位遠古英雄形象與故事寓意的總結，何者歸納最為準確？", 
+            opts: [
+                "讚揚為了人類福祉而不惜挑戰極限、大公無私且至死不渝的英勇犧牲精神", 
+                "警惕凡人切莫自不量力挑戰大自然的規律，否則終將落得悲慘渴死的下場", 
+                "說明古代北方平原與高山形成的地理演變過程，以及桃樹栽種技術的起源", 
+                "強調夸父族因為缺乏防曬裝備與足夠的水源儲備，導致逐日計畫徹底失敗"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事塑造了夸父為了保護族人免受太陽傷害而出發，經歷九天九夜追趕太陽，展現宏大意志，臨終前化木杖為桃林繼續造福後人，完美詮釋了為公眾福祉奉獻犧牲的英雄精神。" 
+        }
+    ]
+},
+{
+    t: "西遊記第十八章-歷盡磨難成正果",
+    c: "        唐三藏師徒四人，歷經千辛萬苦，終於來到如來佛祖所在處的靈山。那靈山霞光普照、瑞氣呈祥，但上山的途中卻遇到一條河。\n        唐三藏正在發愁如何渡過，河面上飄來一葉扁舟，渡船的人過來迎接他們。\n        唐三藏看到那船底，立刻大叫起來：「這是個無底船啊！」\n        「師父莫怕，快上去吧！」孫悟空說著，用力一推，把唐三藏推上了船。奇怪，那船雖然無底，唐三藏還是能站得穩穩的。\n        這時，只見一具屍體從水中飄過，唐三藏怕極了。撐船的人笑道：「那具屍體是原來的你，現在你已經脫胎換骨了。」\n        無底船靠岸後，師徒四人走進了如來佛祖所在的雷音寺，如來佛祖知道他們的來意，讓兩個尊者帶他們去領經書。\n        尊者離開大殿，對他們說：「這經書不是白給的，你要拿禮物來換。」\n        唐三藏為難的說：「弟子路途遙遠，未能準備禮物。」\n        那兩個尊者沒再說什麼，給了他們一些經書，師徒四人裝好經書往回走。忽然一陣狂風吹了過來，經書被吹得七零八落。孫悟空抓住一本，發現竟然是無字天書。\n        孫悟空大怒，返回雷音寺，見到如來佛祖大喊：「我們辛辛苦苦才到這裡，為什麼給我們無字天書？」\n        如來佛祖說道：「經不可輕傳，也不可空取。」然後，仍舊讓兩位尊者給他們取經書。\n        尊者離開前，又再度問了一次：「這次可有禮物？」\n        唐三藏翻遍包袱，最後只得把大唐皇帝送給他的紫金缽盂送給尊者。\n        這一回，總算得到有字的經書。師徒四人正要離去，八大金剛駕雲而來，說是來送他們回大唐的呢！\n        唐三藏說：「可是我無法騰雲駕霧呢！」\n        「你就上來試試看吧！」八大金剛笑說。\n        唐三藏已褪去凡胎肉體，竟然能夠輕輕飄飄的踏上白雲。\n        就在這時候，觀音菩薩掐指一算，唐三藏師徒四人還少一難，才足九九八十一難，於是，她讓八大金剛把師徒四人丟了下去，正好落在通天河裡。\n        豬八戒嚷了起來說：「這八大金剛真不夠意思，要送也不送到底！」\n        這時，有人在水底高喊：「聖僧！聖僧！快上我的背。」\n        四人見到是先前載他們過河的那一隻老黿，都高興極了。老黿再一次馱著師徒四人，往岸邊前去。\n        到了河中央，老黿轉頭問道：「聖僧，你到佛祖面前，問過我的壽命還剩多少啊？」\n        唐三藏一驚，這一路上他滿腦子都是取經，真的忘記此事了。如今老黿發問，他不知如何是好？\n        老黿等了一會兒，不見回答，就知道唐三藏把他的問題給忘了，一生氣，翻個身，把師徒四人都丟到河裡。\n        孫悟空師兄弟忙好一陣子，總算把師父跟經書都救上岸，可惜經書都溼透，師徒四人只得把經書攤開來晒。\n        經書晒得差不多的時候，八大金剛又出現了，唐三藏師徒四人重新接上雲頭，這次可平安送回東土大唐。\n        唐太宗遠遠的看到唐三藏歸來，高興極了，出城迎接。唐三藏把帶回來的五千零四十八卷經書全交給唐太宗，唐太宗命人將這些經書收放在大雁塔。\n        幾日後，唐三藏正要講經，忽然空中香風陣陣，原來是八大金剛來接他們回去西方。\n        師徒四人回到靈山，如來佛祖賜封唐三藏為旃檀功德佛，孫悟空為鬥戰勝佛，封豬八戒為淨壇使者，封沙悟淨為金身羅漢，封白龍馬為八部天龍廣力菩薩。\n        至此，唐三藏師徒四人西行取經的任務，終於圓滿結束了。\n\n--------------------\n【資料來源】：Hami書城-名著好好讀-西遊記",
+    q: [
+        { 
+            txt: "根據文章第五段的記載，唐三藏搭乘無底船渡河時，看到水中飄過一具屍體而感到非常害怕，當時撐船的人如何安慰並解釋這個現象？", 
+            opts: [
+                "說明該具屍體是過去凡胎肉體的唐三藏，如今他已經脫胎換骨了", 
+                "安慰唐三藏那是河中妖怪的幻術，只要專心念經就不會受到傷害", 
+                "解釋那是老黿蛻下的舊皮囊，代表眾人即將順利抵達靈山雷音寺", 
+                "告訴唐三藏那是天庭派來考驗師徒四人的假人，不必放在心上"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段撐船的人明確解答「那具屍體是原來的你，現在你已經脫胎換骨了」。" 
+        },
+        { 
+            txt: "唐三藏師徒第一次從尊者手中領到的經書，為何被風吹散後會發現全都是「無字天書」？", 
+            opts: [
+                "因為唐三藏先前未能準備禮物相贈，尊者遵照「經不可空取」之理而給予無字經", 
+                "因為觀音菩薩為了湊足九九八十一難，暗中施展法術將有字經書變成了無字天書", 
+                "因為孫悟空在雷音寺大殿大吵大鬧，惹怒了尊者而故意給他們假的經書", 
+                "因為通天河的水氣打濕了經書，導致原本寫在上面的墨跡全部褪色消逝"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "尊者先問禮物，唐三藏說未準備，隨後領到無字經；如來佛祖亦明確解釋「經不可輕傳，也不可空取」，直到遞上紫金缽盂才拿到有字經書。" 
+        },
+        { 
+            txt: "在河中央時，老黿之所以生氣地翻身將唐三藏師徒四人全丟進通天河裡，其最主要的原因是什麼？", 
+            opts: [
+                "得知唐三藏一心只顧取經，完全忘記幫忙向佛祖詢問自己的壽命還有多少", 
+                "因為八大金剛突然從空中降臨，驚嚇到了正在水中游行的老黿", 
+                "發現唐三藏帶回來的經書全是被水打濕的無字天書，感到受騙而發怒", 
+                "因為豬八戒在老黿背上抱怨連天，動搖了老黿繼續馱載師徒四人的耐心"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "老黿詢問當初託付的問題，唐三藏因忘記而無法回答，老黿等待無果得知被遺忘，「一生氣，翻個身，把師徒四人都丟到河裡」。" 
+        },
+        { 
+            txt: "綜合「無底船脫胎換骨」與「觀音菩薩補足八十一難」這兩處局部情節，下列關於唐三藏西天取經最終圓滿成正果的條件歸納，何者最為準確？", 
+            opts: [
+                "成正果不僅需要褪去凡胎肉體，更必須完整經歷並通過所有預定的劫難考驗", 
+                "只要將紫金缽盂獻給尊者並取得有字經書，就能立刻獲封為佛而無須經受水災", 
+                "八大金剛的護送是成佛的唯一條件，即使少了一難也不會影響最終的封賞結果", 
+                "唐三藏之所以能成正果，主要是因為在通天河順利答出了老黿關於壽命的提問"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "無底船象徵「褪去凡胎肉體（肉身解脫）」，而觀音菩薩算少一難便丟下通天河則象徵「九九八十一難缺一不可（歷練圓滿）」，兩者結合方能修成正果。" 
+        }
+    ]
+},
+{
+    t: "唐代詩人王維為何被稱作「詩佛」？",
+    c: "        王維以擅長寫景詩而著稱於世，成為盛唐時代田園山水詩派的領袖。宋代大文豪蘇軾對王維的評價甚高，稱讚他「詩中有畫，畫中有詩」。所謂「詩中有畫」，就是說王維的詩猶如畫般優美動人；所謂「畫中有詩」，就是說畫中富有詩意，韻味無窮。然而，王維被冠以「詩佛」之名，又是甚麼原因？詩人與佛教又有著何等深厚因緣？\n        縱觀王維的一生，皆是與佛有緣。首先，他是在一個佛教家庭中長大的，母親崔氏是個虔誠的佛教徒，王維自小受她的薰陶感化，影響至深。對於母親事佛的虔誠，王維有文提到：「……故博陵縣君崔氏，師事大照禪師三十餘歲，褐衣蔬食，持戒安禪，樂住山林，志求寂靜。」（王右丞集・卷十七）\n        王維是家中長子，父親很早就去世，由母親撫養長大。母親給他取名「維」，字「摩詰」，別具意思。「維」與「摩詰」連結而成「維摩詰」。眾所周知，「維摩詰」恰是佛經瑰寶《維摩詰所說經》中神通廣大的主人翁，他是佛陀的在家弟子，其梵名為「維摩羅詰」，意譯為「淨名」，乃清淨無垢之意。維摩詰雖身在俗塵，卻精通大乘教義，他並未出家，而以在家居士的形象積極行善、修道，以般若空的思想，實踐六度，利樂眾生，襄助釋迦牟尼弘揚佛法，是大乘佛教在家眾的典範。從其名字可以推斷，王維在呱呱落地之時，其母已寄望他能一生追求佛道，並以維摩詰作為人生修行的目標與榜樣。\n        劉昫在《舊唐書》本傳上說：「維弟兄俱奉佛，居常蔬食，不茹葷血，晚年長齋，不衣文彩。」因為王維篤志信佛，所以他的詩歌創作也在不同程度上受到了佛教思想的影響。在他的田園山水詩中，有許多作品皆蘊含著濃濃的禪意，如「行到水窮處，坐看雲起時」（〈終南別業〉）、「君問窮通理，漁歌入浦深」（〈酬張少府〉）等，哲理與禪趣兼備，千百年來為人所樂道。\n        王維天才橫溢，琴棋書畫無所不通，弱冠之年已考取功名，名動京師，但他的仕途並不如意，屢遭貶謫。三十二歲時，妻子更因難產連同腹中胎兒一同遇難。王維萬分悲痛，辭去官職，決定終生不娶，到嵩山隱居學禪，以求解脫之道。此後，他一個人孤獨地生活了三十年。\n        人生的變故使他的思想發生很大的變化，佛教對他確實也有情感撫慰的作用，使他以無欲無求的淡泊心境對待外物和外在世界。王維也是出名的孝子，侍奉母親，以孝聞名。他曾在藍田輞川購置別業，以供他母親念經修佛。公元七五零年，母親逝世。歷史記載，王維服喪期間，形銷骨立，幾乎沒能活下來。這時的王維已五十多歲，「晚年唯好靜，萬事不關心」（〈酬張少府〉），詩人已不復往日的雄心壯志，對於爭權奪利的日子已感厭煩，於是採取了亦官亦隱的生活模式。\n        晚年的王維歸隱田園，不時與僧人為伍。公元七六一年，王維上書請求朝廷盡削己職。不久病逝，享年六十三歲。\n\n--------------------\n【資料來源】：https://www.buddhistdoor.org/mingkok/唐代詩人王維為何被稱作「詩佛」？/",
+    q: [
+        { 
+            txt: "根據文章內容，王維的名字「維」與字「摩詰」連結而成的「維摩詰」，是佛經《維摩詰所說經》中的哪一位人物？", 
+            opts: [
+                "精通大乘教義且積極行善修道的佛陀在家弟子", 
+                "大照禪師麾下的三十位高僧之一", 
+                "引導王維母親持戒安禪的印度出家沙門", 
+                "藍田輞川別業中掌管開示禪理的長老"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確指出「『維摩詰』恰是佛經瑰寶《維摩詰所說經》中神通廣大的主人翁，他是佛陀的在家弟子……以在家居士的形象積極行善、修道」。" 
+        },
+        { 
+            txt: "王維三十二歲時遭遇妻子因難產與胎兒一同遇難的劇痛，這項人生變故對他後來的生命選擇與思想產生了什麼影響？", 
+            opts: [
+                "辭官並決定終生不娶，前往嵩山隱居學禪，以無欲無求的淡泊心境尋求解脫", 
+                "徹底放棄詩歌創作，專心研究指南車與建築技術以改善世人生活", 
+                "發誓上書朝廷盡削己職，並帶領全家族前往西方崦嵫山尋找長生仙藥", 
+                "化悲憤為力量，在朝廷中積極投入爭權奪利以實現早年考取功名的雄心"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段與第六段記載「妻子更因難產連同腹中胎兒一同遇難……辭去官職，決定終生不娶，到嵩山隱居學禪，以求解脫之道……佛教對他確實也有情感撫慰的作用，使他以無欲無求的淡泊心境對待外物」。" 
+        },
+        { 
+            txt: "《舊唐書》記載王維晚年「長齋，不衣文彩」，並且詩作如「行到水窮處，坐看雲起時」充滿哲理與禪趣，這最能說明王維被稱為「詩佛」的原因為何？", 
+            opts: [
+                "生活習慣長年奉佛持戒，且其山水詩作深刻融入了佛教思想與淡泊禪意", 
+                "曾親自出家擔任高僧，並在藍田輞川開創了盛唐最大的佛教宗派", 
+                "因為他曾撰寫多篇經典神話故事，讚揚女媧補天與大禹治水的偉大功績", 
+                "獲得宋代大文豪蘇軾頒發佛門榮譽頭銜，並尊稱其為「詩中有畫」的祖師"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文章說明王維深受母親與佛法影響，生活「蔬食長齋」，且詩歌創作蘊含濃濃禪意（如〈終南別業〉），將佛教哲理與山水結合，因而被尊稱為「詩佛」。" 
+        },
+        { 
+            txt: "綜合全文關於王維的成長背景、家庭薰陶、人生經歷與詩歌創作特點，下列對於王維一生與佛教因緣的總結，何者歸納最為準確？", 
+            opts: [
+                "自幼受母親虔誠信佛薰陶，歷經妻亡母逝等變故後藉佛法撫慰心靈，將淡泊禪趣融入詩歌與亦官亦隱的生活", 
+                "因仕途一帆風順且名動京師，為了追求更高的官位而利用佛教建立政治人脈網絡", 
+                "從小被迫出家為僧，晚年因厭倦宗教生活而上書朝廷請求重返朝堂恢復官職", 
+                "主要依靠研究《維摩詰所說經》中的魔法技術，幫助朝廷軍隊平定各地方部落的叛亂"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章交代王維名字由來與母親薰陶、仕途與家庭變故（妻逝母亡）促使其轉向學禪，並將禪意寫入詩中，晚年採取亦官亦隱生活，選項A完整總結了這條一生與佛結緣的脈絡。" 
+        }
+    ]
+},
+{
+    t: "風神駕到 難以捉摸龍捲風暴",
+    c: "        說到龍捲風，不難想到綠野仙蹤的故事裡，主角桃樂絲便是被龍捲風吹到了遙遠的奧茲國，展開一段奇幻旅程；在中國，也有文字學家猜測「龍」這個字便是古人驚訝於龍捲風強大的威力，而按照龍捲風的形象所創造，並進而成為中國人心目中的神獸。而在台灣，雖然頻率不高，但是每年偶爾仍會見到龍捲風出現的消息。\n        龍捲風是人類所知最具破壞力的自然風暴，其中心的氣壓極低，甚至比颱風還低，因此產生極強烈的氣旋式渦旋。龍捲風的氣流迅速繞著近似垂直的軸心旋轉，風速可達每秒五十至一百公尺（每小時一百八十公里至三百九十六公里）。\n        龍捲風的規模一般只有一百五十公尺寬，寬度達一公里者已經可以稱為龍捲風的「巨無霸」，由於它的範圍極窄，故其破壞路徑往往侷限於一條狹長地帶，同時亦造成在監測上難以直接觀測到龍捲風的發生。\n        基本上，只要符合特定氣象條件，世界各地皆有可能出現龍捲風。根據統計，台灣平均一年龍捲風會出現兩次左右。龍捲風在台灣出沒地點北至台北新店，南至屏東，甚至外島如澎湖、基隆嶼等地都有過龍捲風的紀錄。\n        龍捲風是大氣環境不穩定下的產物，通常出現在冷暖空氣交會的地方，此時由於暖空氣較輕，冷空氣較重，兩者之間容易產生垂直方向的大氣運動，並進一步發展出高聳的對流雲系。\n        高聳的對流雲系便是不穩定大氣最具體的現象，或稱為深對流系統（deep convective cloud），這些直入雲霄的積雲便是龍捲風形成的母雲。以台灣而言，以颮線（squall lines）、颱風與西南氣流為發生龍捲風之大宗。\n        另外一個形成龍捲風的條件是強烈的垂直風切，也就是上下層大氣的風在風向或風速上有很大的變化。這種情況下容易產生旋轉，並將原先水平方向運動的渦管扭轉成垂直，也就是我們所看到的龍捲風。\n        最適合龍捲風的地形是一望無際的平原，山地會破壞大氣的旋轉運動，故山區不易見到龍捲風。在台灣，屏東平原過去便因為地形因素，最常發生龍捲風，而有「龍捲窩」的稱號。\n        龍捲風是大自然災害中最為劇烈的現象之一，擁有強大的破壞力，其影響範圍小、歷時短暫的特性往往讓人措手不及。所幸台灣並非龍捲風好發地區，但每年都會有龍捲風伴隨著梅雨鋒面、颱風而來，故亦不能掉以輕心。\n\n--------------------\n【資料來源】：https://scitechvista.nat.gov.tw/Article/c000009/detail?ID=8a6a97dc-28bd-45b7-940e-6eb0e97713fa ",
+    q: [
+        { 
+            txt: "根據文章內容，台灣過去因為地形因素最常發生龍捲風，因而擁有哪一個特殊的稱號？", 
+            opts: [
+                "龍捲窩", 
+                "風暴谷", 
+                "氣旋原", 
+                "暴風岬"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「在台灣，屏東平原過去便因為地形因素，最常發生龍捲風，而有『龍捲窩』的稱號」。" 
+        },
+        { 
+            txt: "為什麼山地地形不容易看見龍捲風？其主要原因是什麼？", 
+            opts: [
+                "山地會破壞大氣的旋轉運動，因而阻礙了龍捲風的形成", 
+                "山區的氣壓通常比平原地區高出許多，無法產生強烈氣旋", 
+                "山區溫度過低，導致冷暖空氣無法交會並產生垂直對流雲系", 
+                "山地的強烈垂直風切會將水平渦管直接吹散，無法轉為垂直"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中提到「最適合龍捲風的地形是一望無際的平原，山地會破壞大氣的旋轉運動，故山區不易見到龍捲風」。" 
+        },
+        { 
+            txt: "龍捲風在氣象監測上往往難以直接被觀測到，主要是因為它具備下列哪一項物理特性？", 
+            opts: [
+                "規模極窄且破壞路徑侷限於狹長地帶", 
+                "中心的氣壓極低且風速可達每秒上百公尺", 
+                "經常伴隨著颮線、颱風與西南氣流同時發生", 
+                "生命週期極為短暫且通常在夜間無預警生成"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確說明「龍捲風的規模一般只有一百五十公尺寬……由於它的範圍極窄，故其破壞路徑往往侷限於一條狹長地帶，同時亦造成在監測上難以直接觀測到龍捲風的發生」。" 
+        },
+        { 
+            txt: "綜合全文關於龍捲風的成因、規模與台灣發生特性的介紹，下列對於龍捲風自然風暴的總結，何者最為準確？", 
+            opts: [
+                "龍捲風是冷暖空氣交會與強烈風切下的強烈氣旋，雖範圍狹小但破壞力極強，在台灣仍需保持警覺", 
+                "龍捲風只會發生在一望無際的高山地區，其極高的中心氣壓使其成為世界上最溫和的風暴", 
+                "台灣的龍捲風好發頻率極高且範圍涵蓋全島，因此民眾必須隨時準備避難所防範巨無霸風暴", 
+                "文字學家證實古代的「龍」字完全是模仿颱風中心氣壓所創造出來的神獸形象"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章涵蓋龍捲風的成因（冷暖空氣交會、垂直風切）、破壞力與規模（範圍極窄、破壞力強），以及台灣的發生狀況（頻率不高但伴隨梅雨鋒面與颱風，不能掉以輕心），選項A完整總結了這些特點。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

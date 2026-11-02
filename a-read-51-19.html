@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十九冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-牛郎織女",
+    c: "        在很久很久以前，天庭和人間只隔著一條會發光的淺淺銀河。銀河終日琤琤淙淙的流著，河的東邊就是天庭，河的西邊就是人間。\n        住在天庭裡的織女是王母娘娘最疼愛的小孫女，不但又美麗又溫柔，而且有一雙特別纖細靈巧的手，能用金梭織出特別絢爛奪目的雲彩，在天上不停變幻。織女和六個姊姊一起織雲，一起遊戲，過著無憂無慮的日子。\n        可是牛郎住在凡間，日子卻大不相同。牛郎的父母很早就死了，留下他和哥哥嫂嫂一塊過窮苦日子。哥哥嫂嫂常常欺負心地善良的牛郎，分家的時候，只給了他一頭老牛，就把他趕走了。\n        牛郎卻不埋怨，他牽牛吃草喝水，細心的照顧老牛，而老牛好像有靈性似的，也努力的幫牛郎整地，耕田。不多久，就在河邊的荒草中開闢出肥沃的土地。\n        但是，日子太平靜了，孤孤單單的牛郎，沒有人和他談天說笑。渴了，餓了，也沒人關心。有一天，他自言自語的說：「要是有個人和我作伴，那該有多好啊！」\n        「那不難！」老牛忽然開口說話了：「河邊正有七位美麗的仙子在洗澡，她們好看的衣裳都放在河岸上。你趕快到河邊，偷偷藏起一件衣裳，那位找不著衣裳的仙子就會留下來做你的妻子啦！快騎上我的背，我帶你去。」牛郎立刻騎上老牛，趕到河邊。\n        果然，河裡正有七位白蓮般美麗的仙女在嬉鬧玩水，這七位仙女就是織女和她的六個姊姊。她們放在岸上的衣服有紅有紫，有金有銀，一件比一件漂亮，但是牛郎一眼就看到當中一件白瑩瑩的衣裳，特別耀眼美麗。她毫不猶豫地拿了這件衣裳，轉身就跑。\n        本來玩得正開心的仙子，忽然看見牛郎，就像膽小的鳥兒一樣，驚叫著披了衣裳，一下子飛散了，只留下不見了衣服的織女一個人。織女忍不住哭泣起來，細聲哀求牛郎：「把衣裳還給我好不好？」\n        牛郎說：「只要你答應做我的妻子，我就把衣服還給你。你做我的妻子好嗎？」\n        織女想了想，便點點頭答應了牛郎。\n        牛郎歡喜極了，他把美麗的織女帶回家，和她結成夫妻，恩恩愛愛的過著日子。男的耕田，女的織布，一眨眼就過了十年。他們的一對兒子、女兒，都已經五、六歲了。\n        一天，老牛又開口說話了，他憂愁的說：「主人，我老了，再也不能陪伴你了，謝謝你照顧我這麼多年。」他喘口氣又說：「我死後，你別難過，把我的皮留下來，帶在身邊。不論發生什麼危難，你只要披上我的皮，就會度過難關了。」說完話，老牛就死了。牛郎含淚把他埋了，又聽從老牛的話，把牛皮留下來。\n        人間十年在天上只不過是短短的十天。自從織女留在凡間，不再為天空織新衣，雲彩就失了顏色。\n        「這還了得！」王母娘娘一問之下，就大怒起來，立刻要捉拿織女。\n        這時候，織女正在茅屋裡用心織布，一兒一女繞著織布機玩耍。忽然天空黑了下來，又閃起電光，嚇得小孩哇哇大哭。\n        一隻喜鵲慌慌張張的飛來，停在窗口說：「織女！不得了啦！不得了啦！王母娘娘命我傳旨，織女荒廢十天的工作，犯了大罪，就要捉拿你回去啦！捉拿你回去啦！」織女一聽，臉色變得蒼白。但是她堅決的搖搖頭說：「不，我不回去！」\n        「再不回去，就要降罪給你們一家人啦，降罪給你們一家人啦！」喜鵲又說。\n        一時「轟隆轟隆」，又是雷又是電的，喜鵲嚇飛了。赤紅臉膛，拿著刀斧的天兵神將忽然現了身，硬抓了織女往銀河那邊走。\n        「不要抓我的媽媽啊！媽媽不要走啊！」一對小兒女一面哭喊，一面急忙跑到田裡，拉著牛郎，指著銀河說：「媽媽被天上的神帶走了。」\n        牛郎一急，把兒女一前一後放在裝稻穀的籮筐裡，用扁擔一挑，就追趕過去。慌忙中他又抓起一個舀水的杓子，放在女兒坐的那個比較輕的籮筐中，免得扁擔前後不平衡。牛郎邊跑邊叫：「快留下我的妻子啊！」\n        沒想到，王母娘娘看到牛郎沒命的追來，已經追到了銀河邊，立刻施展法力，把銀河一搬就搬到高高的天空。\n        苦惱的牛郎忽然想起老牛的囑咐，馬上披起牛皮，剎那間就飛上了天。只聽見風聲呼呼的響，父子三人穿行在亮晶晶的星星中間，眼看就要度過銀河，追上織女。一雙小兒女不禁招手叫喚：「媽媽，回來啊！」\n        王母娘娘一看不妙，立刻拔下頭上的金簪，就在銀河當中一劃，頓時清清淺淺的銀河，竟然開始波濤滾滾，織女和牛郎就這樣硬生生的被拆散了。\n        「爸爸，我們不要灰心，我們用杓子來把河水舀乾。」小兒女一起說著。\n        「對！我們一起把河水舀乾！」牛郎不再悲傷，父子三人就同心協力的舀河水。牛郎累了，兒子舀。兒子累了，再由小女兒舀。他們一杓杓的舀著，織女就隔著銀河癡癡的望著他們。\n        終於，牛郎織女堅定的愛情感動了王母娘娘，答應他們每年在七月七日這一天，能夠渡河相會一次。\n        好心的喜鵲也為牛郎織女高興，所以每到七夕便會成群結隊飛來，在銀河上面一隻一隻緊緊排在一起，搭成一座長長的鵲橋，讓牛郎織女能早早渡河團聚。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/sc6.htm",
+    q: [
+        { 
+            txt: "根據文章內容，老牛在臨終前叮嚀牛郎，死後要把哪一樣東西留下來帶在身邊以應對危難？", 
+            opts: [
+                "把老牛的皮留下來，不論發生什麼危難只要披上就能度過難關", 
+                "把老牛生前使用的耕田扁擔留下來，可以用來挑著籮筐飛上天", 
+                "把老牛頭上的角留下來，可以用來劃開銀河波濤並與織女相會", 
+                "把老牛喝水的木杓留下來，可以用來把銀河的河水一杓杓舀乾"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「我死後，你別難過，把我的皮留下來，帶在身邊。不論發生什麼危難，你只要披上我的皮，就會度過難關了」。" 
+        },
+        { 
+            txt: "牛郎在帶著一兒一女趕著去追被抓走的織女時，為什麼要在女兒坐的較輕籮筐中放進一個舀水的杓子？", 
+            opts: [
+                "為了保持扁擔前後的重量平衡，以免挑籮筐時一邊重一邊輕", 
+                "為了當作對抗天兵神將的武器，必要時可以拿來敲打神仙", 
+                "為了抵達銀河邊時，能夠第一時間用杓子把河水舀乾救出妻子", 
+                "為了讓女兒在籮筐裡有玩具可以玩，減少追趕路途上的恐懼"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述牛郎「慌忙中他又抓起一個舀水的杓子，放在女兒坐的那個比較輕的籮筐中，免得扁擔前後不平衡」，顯示其主要目的是為了平衡扁擔重量。" 
+        },
+        { 
+            txt: "王母娘娘原本非常憤怒並用金簪在銀河劃出波濤滾滾的河水阻攔牛郎，最後為什麼會答應讓牛郎織女每年七夕相會一次？", 
+            opts: [
+                "被牛郎父子三人同心協力、不放棄地一杓杓舀河水的堅定情感所感動", 
+                "因為天庭的眾神紛紛向王母娘娘求情，希望她能網開一面放過織女", 
+                "因為牛郎披著老牛皮強行渡過銀河，展現了連天兵神將也無法抵擋的神力", 
+                "因為織女答應從此不再留在人間，並承諾回到天庭日夜不停地織出絢爛雲彩"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中記載父子三人同心協力舀河水後，「終於，牛郎織女堅定的愛情感動了王母娘娘，答應他們每年在七月七日這一天，能夠渡河相會一次」。" 
+        },
+        { 
+            txt: "綜合全文關於牛郎織女從相識、被拆散到每年七夕相會的情節，下列對於這則民間傳說所傳達的核心意涵，何者歸納最為準確？", 
+            opts: [
+                "歌頌超越天人界線與重重阻礙的真摯愛情，並展現面對困境時的堅定毅力與團聚盼望", 
+                "警惕世人切莫私自藏匿仙女衣裳，否則將會招致天庭雷電交加的嚴厲懲罰", 
+                "說明自然界中銀河星象與七夕星座形成的科學原理，以及喜鵲遷徙的季節規律", 
+                "強調家庭分工中男耕女織的重要傳統，並讚揚老牛對主人無私奉獻的忠誠美德"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事描寫牛郎織女深厚的夫妻情感、遭受王母娘娘拆散時的不屈不撓（父子同心舀水），以及最終因愛情感動天庭而獲准每年相會（鵲橋相會），完整展現了忠貞愛情與堅毅精神的意涵。" 
+        }
+    ]
+},
+{
+    t: "星座故事-射手座的傳說",
+    c: "        射手座又叫人馬座，夏夜的時候，抬頭看南方的天空，人馬座就在天蠍座的東邊。\n        希臘神話故事中的射手座，是一個上半身為人形、下半身是馬的怪物，名叫奇龍。這種半人半馬的怪獸被稱為山杜爾族，居住在派利翁山上。他們以狩獵維生，性情非常兇猛。奇龍卻與其他的山杜爾族不一樣，他以善良和智慧聞名，是族中受人尊敬的賢者。他是族中唯一能長生不老的人，但是最後還是逃不過死神的召喚。\n        希臘最偉大的英雄赫丘力是奇龍的好朋友，曾向奇龍學習過天文學。有一次，他到艾拉曼特山圍獵大野豬時，途中拜訪了另一個山杜爾人波洛士。見到赫丘力，波洛士非常高興，準備了許多山珍美味招待他。赫丘力吃著肉，突然大叫沒有甘醇的美酒太可惜。波洛士一臉為難，表示地窖裡的酒是山杜爾族共有的財產，私自飲用會受到處罰，且酒香會引來族人。赫丘力拍胸脯保證會保護他，強行要波洛士拿酒出來享用。\n        陣陣酒香瀰漫四周，其他的山杜爾族聞到香味，紛紛跑進山洞憤怒質問。山杜爾人舉起長槍拉好弓，準備攻擊赫丘力。赫丘力手一揮打落許多槍劍，一連摔倒了好幾個山杜爾人。山杜爾人見無法打敗赫丘力，便一溜煙逃跑。赫丘力一路追擊到奇龍居住的馬雷里。\n        喊叫聲將奇龍引了出來。此時赫丘力拉好弓，大叫「你們休想逃走！」並放出了塗有劇毒的箭。這枝毒箭穿過亂成一團的人群，不幸射中了奇龍。赫丘力愧疚萬分，連忙拔出箭並敷抹奇龍特製的藥，但已無濟於事，奇龍隨即奄奄一息並嚥下了最後一口氣。\n        山杜爾人哀痛大哭，波洛士憤恨地拿起那枝毒箭將其折成兩半，卻一不小心手腕碰到了箭梢，毒素迅速蔓延，波洛士也跟著魂歸西天。宙斯因為惋惜奇龍的死，就讓他升天成為射手座；而倒楣的波洛士則成為奇龍南方的半人馬座，兩顆星相互輝映，成為夏天中最明亮的星座。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章所述，賢者奇龍雖然屬於性情兇猛的山杜爾族，但他與其他族人相比，最顯著的特徵是什麼？", 
+            opts: [
+                "以善良與智慧聞名，且是族中唯一擁有長生不老之身的人", 
+                "擅長使用塗有劇毒的弓箭狩獵，並擁有駕馭太陽車的能力", 
+                "掌管山杜爾族共同地窖的所有美酒，擔任族中的審判官", 
+                "上半身是巨龍、下半身是駿馬，體型比一般山杜爾人巨大"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確指出「奇龍卻與其他的山杜爾族不一樣，他以善良和智慧聞名……他是族中唯一能長生不老的人」。" 
+        },
+        { 
+            txt: "波洛士最初對於拿地窖的美酒招待赫丘力感到非常猶豫，其最主要的擔憂是什麼？", 
+            opts: [
+                "美酒屬於山杜爾族共有財產，私開會引來族人憤怒並引發衝突", 
+                "地窖的美酒帶有劇毒，只有懂得調配解藥的奇龍才能飲用", 
+                "擔心赫丘力喝醉後會發瘋，進而毀壞派利翁山上的房屋與森林", 
+                "害怕天后赫拉發現他們私自飲酒後，會降下雷霆懲罰山杜爾族"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述波洛士解釋「那是山杜爾族共有的財產，如果私自飲用，會受到處罰的……酒香會引他們過來，他們一生氣，就很難應付的」，顯示其擔憂族人憤怒與衝突。" 
+        },
+        { 
+            txt: "英雄赫丘力原本只是前往圍獵野豬並拜訪朋友，最終卻導致好友奇龍與波洛士雙雙喪命，這場悲劇的根本原因是什麼？", 
+            opts: [
+                "赫丘力自負魯莽強行開酒引發衝突，且在追擊時盲目射出劇毒之箭", 
+                "山杜爾族人貪婪無度，為了搶奪赫丘力的武器而主動圍攻奇龍的山洞", 
+                "波洛士故意在美酒中摻入奇龍特製的劇毒，企圖陷害赫丘力與山杜爾族", 
+                "宙斯為了讓奇龍升天成為星座，暗中操控赫丘力的弓箭射向奇龍"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "赫丘力不聽勸告強行要酒（引發衝突動因），隨後一路盲目追擊並朝亂成一團的人群射出「塗有劇毒的箭」，直接導致射殺奇龍，並間接引發波洛士碰毒折箭身亡的連鎖悲劇。" 
+        },
+        { 
+            txt: "綜合全文關於「奇龍被誤傷」與「波洛士折箭」的情節，下列對於射手座與半人馬座神話所呈現的意涵歸納，何者最為準確？", 
+            opts: [
+                "警惕世人衝動與莽撞可能釀成無法挽回的悲劇，並讚頌智慧賢者的精神永存星空", 
+                "說明希臘神話中英雄赫丘力如何靠著強大武力消滅山杜爾族並獲得封神的過程", 
+                "強調長生不老的神力才是戰勝死神的唯一途徑，而劇毒則是邪惡勢力的象徵", 
+                "展現山杜爾族人為了維護共有財產而不惜犧牲生命的團結與忠誠精神"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事因赫丘力的強橫衝動（強行要酒、盲目射毒箭）導致賢友奇龍慘死與波洛士意外喪命（悲劇警示）；宙斯因惋惜奇龍的智慧與善良而將其昇華為射手座（讚頌賢者精神永存）。" 
+        }
+    ]
+},
+{
+    t: "年獸襲來，過年補完計畫啟動：除夕結束的那聲恭喜背後，年獸傳說的真相究竟是……？",
+    c: "        相傳古代有種叫作「年」的怪獸，這種怪獸頭長犄角、眼如銅鈴，並且凶猛異常。每年，「年」都會下山來吃食牲畜、糟蹋莊稼，甚至還會吃人！因此每到「年」即將出現的時候，村民們便會躲到深山以躲避年獸。\n        某一年除夕，村外來了個老乞丐。這老乞丐拄著拐杖，有著長長的白鬍，看似還有那麼些仙風道骨。他來到村子裡乞討，可是平時遇見乞丐，村民都不一定理會，這個時候大家忙著收拾，根本無人搭理。老乞丐沿路乞討，終於遇上了一位好心的老婆婆，老婆婆將乞丐請回家中，給予他一些食物，並且告訴他年獸就要來了，勸他跟著居民一起上山避難。誰知老乞丐聽了哈哈大笑，說只要讓他待在家中一夜，一定可趕走年獸。老婆婆苦勸不聽，只好答應他的請求，上山避難去了。\n        當晚，年獸進村。放眼望去，只有老婆婆家燭火通明，仔細看門戶都貼滿了紅紙。年獸看見光明，認為家中有人，便向老婆婆家中跑去，忽然聽到霹哩啪啦的聲響，立刻嚇得停下腳步。這時家門大開，老人現身，手中拿著爆竹往年獸扔去。年獸大驚失色，落荒而逃。\n        隔天早上，回到村子的村人們發現村中安然無恙，而老婆婆家貼著紅紙，院子裡一堆竹節在柴火中劈啪作響，屋內蠟燭還發著餘光。一問之下才知道是老人趕走了年獸。事情傳開了，鄉親們紛紛到親友家道喜問好。從此之後，大家都知道了驅趕年獸的方法。年獸怕紅、怕巨響、怕火光，於是每到過年，家家戶戶都會貼春聯、放鞭炮，當夜也會燈火通明，稱作「守歲」，並在初一時候互道恭喜。\n        這樣的故事相信大家都很熟悉，但除了年獸之外，還有另一種「夕獸」，做的事情和年獸相當類似，這則傳說大家可能就陌生了。據說，「年」與「夕」的關係就像「鳳」與「凰」，公的被稱為「年」，母的被稱為「夕」。\n        夕獸的故事\n        很久以前，有種怪獸叫「夕」，牠在每年的年關都要出來傷人，連保護老百姓的灶王爺也拿它沒辦法。\n        於是有一年，灶王爺上天請來了一位叫作「年」的神童，神童法力高強，用紅綢和放在火中燒得劈啪作響的竹竿消滅了夕獸，這一天正好是臘月的最後一天，老百姓為了感謝和紀念神童在這一天除掉了夕，就把農曆每年的最後一天叫「除夕」，把新年的第一天叫做‘過年’。每到這時，百姓都希望自己都有「年」手中的紅綢和爆竹，於是紅綢和放在火中燒的竹竿，逐漸演變成了過年時都有的紅對聯、紅鞭炮。\n        有趣的是，這則故事順便解釋了過年的由來，排擠了年獸的存在。而不解的是年獸只是被嚇跑，夕獸是被順利「除掉」的，因為「年」年年要過，但除夕有個「除」字，只能委屈夕獸在故事中死去了。",
+    q: [
+        { 
+            txt: "根據文章內容，當老乞丐在除夕夜獨自留在老婆婆家時，他用什麼東西將進村的年獸嚇得落荒而逃？", 
+            opts: [
+                "手中的爆竹", 
+                "長長的白鬍子", 
+                "村外帶回的莊稼", 
+                "桌上的燭火餘光"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段明確記載「這時家門大開，老人現身，手中拿著爆竹往年獸扔去。年獸大驚失色，落荒而逃。」" 
+        },
+        { 
+            txt: "在關於「夕獸」的傳說中，老百姓為什麼要把農曆每年的最後一天稱為「除夕」？", 
+            opts: [
+                "為了感謝和紀念神童「年」在這一天除掉了怪獸「夕」", 
+                "因為家家戶戶在這一天必須上山避難，把村子徹底清除乾淨", 
+                "因為灶王爺這一天要上天向玉皇大帝報告民間的除舊佈新", 
+                "為了紀念好心的老婆婆成功將年獸趕出村子的除舊儀式"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中關於夕獸的故事提到「老百姓為了感謝和紀念神童在這一天除掉了夕，就把農曆每年的最後一天叫『除夕』」。" 
+        },
+        { 
+            txt: "傳統故事中提到年獸害怕三種事物，下列何者「不屬於」文中提及年獸害怕的特徵？", 
+            opts: [
+                "怕金屬碰撞聲", 
+                "怕紅色", 
+                "怕巨響", 
+                "怕火光"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段總結「年獸怕紅、怕巨響、怕火光，於是每到過年，家家戶戶都會貼春聯、放鞭炮，當夜也會燈火通明」，並未提及害怕金屬碰撞聲。" 
+        },
+        { 
+            txt: "綜觀全文，這篇短文除了講述傳統年獸的驅趕由來之外，還額外介紹了哪一個鮮為人知的傳說與其隱含的意涵？", 
+            opts: [
+                "介紹了公母之分的「夕獸」傳說，並說明其被神童「年」消滅的過程，藉此解釋「除夕」與「過年」名稱的由來", 
+                "介紹了灶王爺如何帶領村民上山避難的完整過程，藉此強調團結合作對抗怪獸的重要性", 
+                "介紹了吉爾巴斯群島人為調整換日線的時空奇蹟，藉此對比古今過年時間的差異", 
+                "介紹了流落村莊的老乞丐真實身分，藉此宣導平時應多關懷弱勢乞丐的道德觀念"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章後半部引入了「夕獸」的傳說，說明「年」與「夕」的關係，並解釋了農曆年末稱「除夕」及新年稱「過年」的由來，帶出對雙獸命運差異的趣味解析。" 
+        }
+    ]
+},
+{
+    t: "0050是什麼？",
+    c: "        ●0050是什麼？是股票還是基金？\n        0050是由元大投信發行、追蹤臺灣50指數的ETF，全名為「元大台灣卓越50證券投資信託基金」。0050本質上是一檔基金，但能透過證券帳戶像股票一樣買賣，證券代號為0050。\n        0050主要投資臺灣上市公司中總市值較大的50家公司。買進0050，等於依照指數權重間接持有台積電、聯發科、台達電及鴻海等大型企業，不必逐一買進所有成分股。\n        不過，0050採市值加權，市值越大的公司占比越高。即使基金持有50檔股票，資產仍可能集中在台積電及電子產業，因此不代表完全分散風險。\n        ●0050成分股有哪些？最新持股比例與排名\n        0050成分股共有50檔，主要依公司市值決定權重。市值越大的公司，占0050的比例通常越高，因此0050的基金表現容易受到台積電等大型權值股影響。\n        依元大投信2026年8月19日公布的基金持股，0050前五大成分股如下。1、台積電。2、聯發科。3、台達電。4、鴻海。5、日月光投控。\n        ●0050成分股多久調整一次？\n        臺灣50指數原則上每年進行4次定期審核，調整於3、6、9、12月第三個星期五後的下一個交易日生效。若成分公司發生下市、合併或其他重大事件，也可能進行非定期調整。\n        ●0050真的能分散投資風險嗎？\n        0050一次持有50家公司，確實比只買進單一公司更能分散個股風險；但因採市值加權，台積電占比可能超過五成，電子產業權重也相當高，因此仍存在大型科技股集中及臺灣單一市場風險。\n        ●0050年化報酬率多少？近1年、5年、10年績效\n        截至2026年5月底，0050近5年累積報酬率約245.62%，換算平均年化報酬率約28.15%；近10年累積報酬率約797.07%，換算平均年化報酬率約24.53%。不過，報酬率會因計算起訖日不同而有明顯差異，這些數字也不代表未來每年能獲得相同報酬。\n        ●0050一年配息幾次？配息月份與時間\n        0050目前採半年配息，一年評估配息2次，通常於1月及7月除息，現金收益多在2月及8月發放。實際是否配息、每單位配息金額及發放日期，仍須以元大投信與臺灣證券交易所公告為準。\n        配息不是基金額外創造的報酬。ETF除息後，配息金額會反映在基金淨值與市場價格中，因此不能只比較領到多少現金，仍須把市價漲跌與配息合併評估。\n        ●投資0050有哪些優缺點與風險？\n        0050優點       \n        1、一次投資50家大型上市公司\n        2、持股與淨值資訊透明\n        3、可使用整張、零股或定期定額投資\n        4、交易方式與股票相近\n        5、基金規模大，市場交易活絡\n        0050缺點與風險\n        1、台積電與電子產業權重集中\n        2、承受臺灣單一市場風險\n        3、基金淨值可能大幅下跌\n        4、配息金額與填息時間沒有保證\n        5、市價可能出現折價或溢價\n\n--------------------\n【資料來源】：https://www.money101.com.tw/blog/0050-成分股-配息-年化報酬率",
+    q: [
+        { 
+            txt: "根據文章內容，0050（元大台灣卓越50證券投資信託基金）追蹤的「臺灣50指數」，原則上每年會進行幾次定期審核？", 
+            opts: [
+                "4次（於3、6、9、12月）", 
+                "2次（於1、7月）", 
+                "12次（每月第一個交易日）", 
+                "5次（依前五大成分股公告）"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第五段明確記載「臺灣50指數原則上每年進行4次定期審核，調整於3、6、9、12月第三個星期五後的下一個交易日生效」。" 
+        },
+        { 
+            txt: "文中提到0050雖然一次持有50家大型上市公司，但為何投資人依然無法達到完全分散風險的效果？", 
+            opts: [
+                "因為採市值加權計算，資產高度集中於台積電與電子產業，仍有科技股及單一市場風險", 
+                "因為0050只能使用整張交易，一般投資人無法透過零股或定期定額分散時間風險", 
+                "因為臺灣證券交易所規定配息金額必須扣除折舊，導致基金淨值每年持續下跌", 
+                "因為0050本質上是股票而非基金，無法像投資信託基金一樣享有風險分散機制"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段與第六段指出「0050採市值加權……資產仍可能集中在台積電及電子產業」、「台積電占比可能超過五成……仍存在大型科技股集中及臺灣單一市場風險」。" 
+        },
+        { 
+            txt: "關於0050的配息機制，作者為何提醒投資人「不能只比較領到多少現金」？", 
+            opts: [
+                "因為配息會反映在基金淨值與市價的扣除中，必須結合市價漲跌與配息進行綜合評估", 
+                "因為除息後元大投信會強制回收投資人的零股，導致實際持有資產總額減少", 
+                "因為配息金額會因非定期調整成分股而全數轉換為法定的折價或溢價費用", 
+                "因為每年1月與7月的配息金額均屬於基金額外創造的無風險保證報酬"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第八段明確指出「配息不是基金額外創造的報酬。ETF除息後，配息金額會反映在基金淨值與市場價格中，因此不能只比較領到多少現金，仍須把市價漲跌與配息合併評估」。" 
+        },
+        { 
+            txt: "這篇文章主要透過投資機制、績效與優缺點的分析，向讀者傳達了關於0050的何種整體認識？", 
+            opts: [
+                "0050是便利的大型股投資工具，但具備市值加權集中度與市場波動等風險，需理性評估整體報酬", 
+                "0050保證每年能獲取24%以上的年化報酬率，是最適合替代銀行存款的零風險理財產品", 
+                "0050因成分股每年調整4次，導致投資人必須每天手動買賣50家公司的股票以維持權重", 
+                "0050僅適合專業機構投資，一般學生或零股投資人無法透過證券帳戶進行買賣"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文說明0050具備一次買進50家大公司與交易方便等優點，但也強調其市值加權集中的特性、歷史績效不代表未來保證、配息機制與市場風險，引導讀者進行全盤客觀的理解。" 
+        }
+    ]
+}      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

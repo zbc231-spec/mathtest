@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十四冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-精衛填海",
+    c: "        炎帝有一個小女兒，叫女娃。女娃十分乖巧，黃帝見了她，也都忍不住誇獎她，炎帝視女娃為掌上明珠。\n        炎帝不在家時，女娃便獨自玩耍，她很想讓父親帶她出去，到東海——太陽升起的地方去看一看。可是因為父親忙於公事：太陽升起時來到東海，直到太陽落下；日日如此，總是不能帶她去。這一天，女娃沒告訴父親，便一個人駕著一隻小船向東海太陽升起的地方劃去。不幸的是，海上突然起了狂風大浪，像山一樣的海浪把女娃的小船打翻了，女娃不幸落入海中，終被無情的大海吞沒了，永遠回不來了。\n        女娃死了，她的精魂化作了一隻小鳥，花腦袋，白嘴殼，紅色的爪子，十分可愛，可發出的，卻是「精衛、精衛」的悲鳴，所以，人們便叫此鳥為「精衛」。\n        精衛痛恨無情的大海奪去了自己年輕的生命，她要報仇雪恨。因此，她一刻不停地從她住的發鳩山上銜了一粒小石子，展翅高飛，一直飛到東海。她在波濤洶湧的海面上迴翔，悲鳴著，把石子樹枝投下去，想把大海填平。\n        大海奔騰著，咆哮著，嘲笑她：「小鳥兒，算了吧，你這工作就幹一百萬年，也休想把我填平！」\n        精衛十分執著，在高空答覆大海：「哪怕是幹上一千萬年，幹到宇宙的盡頭，世界的末日，我終將把你填平的！」\n        輪到大海不解了：「你為什麼這麼恨我呢？」\n        「因為你奪去了我年輕的生命，你將來還會奪去許多年輕無辜的生命。我要永無休止地幹下去，總有一天會把你填成平地。」\n        精衛飛翔著、鳴叫著，離開大海，又飛回發鳩山去銜石子和樹枝。她銜呀，扔呀，成年累月，往復飛翔，從不停息。後來，一隻海燕飛過東海時無意間看見了精衛，他為她的行為感到困惑不解，但了解了事情的起因之後，海燕為精衛大無畏的精神所打動，就與其結成了夫妻，生出許多小鳥，雌的像精衛，雄的像海燕。小精衛和她們的媽媽一樣，也去銜石填海。直到今天，她們還在做著這種工作。\n        「精衛填海」是中國遠古神話中最為有名，也是最為感人的故事之一，世人常因炎帝小女兒被東海波濤吞噬化成精衛鳥而嘆息，更為精衛鳥銜運西山木石以填東海的頑強執著精神而拋灑熱淚。精衛鍥而不捨的精神，善良的願望，宏偉的志向，受到人們的尊敬。晉代詩人陶潛在詩中寫道：「精衛銜微木，將以填滄海」，熱烈讚揚精衛小鳥敢於向大海抗爭的悲壯戰鬥精神。後世人們也常常以「精衛填海」比喻志士仁人所從事的艱巨卓越的事業。\n\n--------------------\n【資料來源】：https://storybank.weebly.com/2592520107-blog/328",
+    q: [
+        { 
+            txt: "根據文章內容，女娃的精魂化作精衛鳥後，每天一刻不停地從哪一座山銜取石子與樹枝飛往東海填海？", 
+            opts: [
+                "發鳩山", 
+                "崦嵫山", 
+                "茅山", 
+                "羽山"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段明確指出「她一刻不停地從她住的發鳩山上銜了一粒小石子，展翅高飛，一直飛到東海」。" 
+        },
+        { 
+            txt: "精衛鳥面對大海「幹一百萬年也休想填平」的嘲笑時，依然堅持永無休止地銜石填海，其背後最主要的信念與原因是什麼？", 
+            opts: [
+                "除了為自己報仇外，更為了防止無情的大海未來繼續奪去許多年輕無辜的生命", 
+                "受海燕的感召與鼓勵，希望透過這項壯舉向天帝證明精衛一族的飛行能力", 
+                "為了遵循父親炎帝的公事指令，設法在東海太陽升起的地方打造出一座陸地公園", 
+                "希望透過不斷投擲木石激怒天帝，請求神仙下凡施展法力將整片大海徹底蒸乾"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第八段精衛回答大海「因為你奪去了我年輕的生命，你將來還會奪去許多年輕無辜的生命。我要永無休止地幹下去，總有一天會把你填成平地」，展現善良願望與大無畏精神。" 
+        },
+        { 
+            txt: "海燕在了解精衛銜石填海的前因後果後，選擇與她結為夫妻並共同繁衍後代，海燕之所以這樣做最主要的原因為何？", 
+            opts: [
+                "被精衛不畏艱難、大無畏且堅韌執著的精神所深深打動", 
+                "希望借助精衛鳥的魔法力量，幫助海燕一族尋找到更多的食物", 
+                "為了阻止小精衛鳥繼續冒險飛越波濤洶湧的東海", 
+                "受晉代詩人陶潛的詩句啟發，決定加入這場向自然界抗爭的行動"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第九段明確說明「海燕為精衛大無畏的精神所打動，就與其結成了夫妻……小精衛和她們的媽媽一樣，也去銜石填海」。" 
+        },
+        { 
+            txt: "綜合全文關於「精衛填海」的故事情節與後世評述，下列對於這則神話所傳達的核心意涵與成語比喻，何者歸納最為準確？", 
+            opts: [
+                "讚揚不畏艱險、鍥而不捨的頑強意志與善良願望，後世常用來比喻志士仁人所從事的艱巨卓越事業", 
+                "警惕兒童切莫在沒有父母陪同下私自駕船出海，強調家庭安全教育與遵守父命的重要性", 
+                "說明古人如何透過鳥類遷徙與海陸變遷現象，來解釋東海海岸線逐漸升高的地質歷史", 
+                "強調面對強大無比的自然災害時應保持順應與妥協，避免進行毫無意義且徒勞無功的抗爭"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章最後一段點明主題「精衛鍥而不捨的精神，善良的願望，宏偉的志向，受到人們的尊敬……後世人們也常常以『精衛填海』比喻志士仁人所從事的艱巨卓越的事業」。" 
+        }
+    ]
+},
+{
+    t: "星座故事-獅子座的傳說",
+    c: "        希臘神話中的獅子座，是尼米亞的食人獅，被英雄赫丘力殺死之後，升天成為星座的。\n        赫丘力是天神宙斯與愛克美娜的兒子，天后赫拉為了報復宙斯的不忠，曾經偷偷的在赫丘力的搖籃裡放進兩隻毒蛇，結果蛇反而被年幼的他掐死了。\n        赫拉知道她無法控制宙斯的個性，為了復仇，她就想辦法讓長大之後的赫丘力發瘋，使他殺死自己的妻子和兒子。赫丘力恢復正常後，就前往杜耳拜神殿，請求神旨的安排，以彌補他的罪惡。他得到的答覆是，必須為由里斯西厄斯王服務二十年，並且完成十二件危險的任務。如果他可以完全服從國王的命令，就可以永遠不死，加入神的行列。\n        可是由里斯西厄斯受到赫拉的威脅和監督，想出了一連串艱難危險的工作。他找來赫丘力，故意裝著愁眉苦臉的樣子說：「據說尼米亞森林裡，有一隻兇猛的食人獅，牠不分晝夜的到處走動，不僅吞食家畜，連人都不放過。那兒的居民每天提心吊膽的。所以我現在命令你去殺掉那隻畜生。」\n        於是赫丘力攜帶著弓與箭筒，前往尼米亞森林搜尋食人獅。他走了好幾天才到達目的地。\n        他在森林中四處尋找，獅子卻連一絲蹤影也沒有。他也想找個人詢問，可是偌大的森林中，連隻牛羊也找不到，偶爾看到一間小屋，也早已人去屋空。\n        「看樣子，森林里的住家都被獅子嚇跑了！」\n        赫丘力卻不知道，獅子是藏在一個有雙重入口的山洞中。山洞非常隱密，除非特別注意，否則很難發覺。\n        這一天，赫丘力走到山洞附近，由於連日來的奔波使他非常疲累，便在離洞口不遠的樹叢裡睡著了。太陽逐漸西沉，赫丘力從睡夢中醒來，一抬頭，便看見從對面樹林鑽出來的食人獅。牠吃了許多活生生的動物，因此，鮮血染紅了牠厚密的毛髮，從頭部到胸前，沾濡著可怕的血跡。\n        牠慢慢踱到山洞口坐下，炯炯發光的眼睛瞪視著四周，一張血盆大口張得好大，足可吞下一個人。\n        「天啊！牠足足有一般獅子的五倍吧！」赫丘力都看呆了。他輕輕的拉好弓弦，小心翼翼的走出隱身的樹叢。\n        「咻！」箭飛快的射出，筆直的朝獅子飛去，獅子驀地站了起來，箭雖然射中牠，但是卻又像碰到石頭或鐵板般的彈了回去，掉落在地上。\n        食人獅圓睜著眼，看到了赫丘力，牠張開大嘴，大聲的吼了起來，吼聲迴蕩在整座森林，有如雷聲隆隆。\n        「可惡！這次要對準心臟了！」\n        赫丘力再次拉弓，瞄準好目標，射出了第二枝箭。箭嗖的飛出去，再度射中獅子，卻也再度被彈回來了。\n        「真糟糕！牠的皮有多堅硬啊？！」\n        當赫丘力打算射出第三枝箭時，憤怒的獅子大吼一聲，凶狠地向他撲了過來。\n        赫丘力連忙轉身就逃，一轉頭，看見不遠處長著幾棵橄欖樹，他一面躲著獅子，一面跑向橄欖樹叢，一伸手撿起一根橄欖木棍，對著迎面衝來的獅子，使出渾身力氣猛打。忽然，木棍從中折斷了，赫丘力生氣的丟掉木棍，赤手空拳的躍向這隻發狂怒吼的猛獸。\n        一場昏天暗地的格鬥，就這麼展開了。赫丘力拼命勒住食人獅的脖子，用盡所有力氣，越勒越緊。終於，食人獅的眼球凸了出來，舌頭也長長的吐出，哀叫了一聲，從此一命嗚呼了。\n        天神宙斯為了紀念赫丘力的功績，便將食人獅帶到天空，成了獅子星座，定時出現在春天的天空中。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章第三段所述，赫丘力恢復正常後前往神殿尋求神旨，他必須達成什麼條件才能「永遠不死，加入神的行列」？", 
+            opts: [
+                "完全服從由里斯西厄斯王的命令服務二十年，並完成十二件危險任務", 
+                "前往天庭向天后赫拉親自謝罪，並在搖籃裡親手殺死兩隻毒蛇", 
+                "赤手空拳打敗天下所有的巨獸，並將牠們的皮毛獻給天神宙斯", 
+                "在尼米亞森林建立神殿，保護當地居民不再受到任何野獸襲擊"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「必須為由里斯西厄斯王服務二十年，並且完成十二件危險的任務。如果他可以完全服從國王的命令，就可以永遠不死，加入神的行列」。" 
+        },
+        { 
+            txt: "在對決食人獅的過程中，赫丘力連續射出兩枝箭都被彈開，且橄欖木棍也在揮打時折斷，他最終能擊敗這隻堅不可摧的猛獸關鍵原因為何？", 
+            opts: [
+                "果斷放棄武器並展現驚人蠻力，貼身赤手空拳死死勒住獅子的脖子使其窒息", 
+                "利用雙重入口山洞地形封鎖獅子去路，並用火點燃橄欖樹林將獅子燒死", 
+                "在危機時刻向父親宙斯祈求神力加持，獲得了能穿透硬皮的第三枝神箭", 
+                "故意引誘食人獅掉入村民事先挖好的陷阱，趁獅子無法動彈時將其擊斃"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述箭無效、木棍折斷後，赫丘力「赤手空拳的躍向這隻發狂怒吼的猛獸……拼命勒住食人獅的脖子，用盡所有力氣，越勒越緊」，最終使獅子窒息死亡。" 
+        },
+        { 
+            txt: "天后赫拉逼迫赫丘力發瘋殺害妻兒，並指使國王派他去執行消滅食人獅等危險任務，其最根本的動機是什麼？", 
+            opts: [
+                "出於對宙斯不忠的報復心態，意圖藉由無休止的殘酷折磨與危險任務毀掉赫丘力", 
+                "為了考驗赫丘力是否擁有資格繼承斯巴達王位，並試探其對天庭的忠誠度", 
+                "因為尼米亞森林的居民向赫拉祈求解救，赫拉才順水推舟給予赫丘力贖罪機會", 
+                "為了逼迫赫丘力使用毒箭殺死食人獅，從而向宙斯證明凡人英雄無法對抗神明"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二與三段說明「天后赫拉為了報復宙斯的不忠……為了復仇，她就想辦法讓長大之後的赫丘力發瘋」，且國王也是「受到赫拉的威脅和監督，想出了一連串艱難危險的工作」，顯示一切源於赫拉的報復動機。" 
+        },
+        { 
+            txt: "綜合全文關於「赫丘力克服逆境」與「食人獅升天成為星座」的情節，下列對於獅子座神話所呈現的核心意涵，何者歸納最為準確？", 
+            opts: [
+                "凸顯英雄在絕境中憑藉超凡勇氣與蠻力戰勝強敵，其榮耀功績經由宙斯昇華為永恆星空", 
+                "警惕世人不可與神明對抗，否則即使擁有強大的皮毛與蠻力，最終仍會招致毀滅", 
+                "說明希臘神話中神明之間的權力鬥爭，遠比凡人英雄的生死存亡來得更加重要", 
+                "強調贖罪過程必須完全依賴武器裝備，否則凡人無法戰勝具有神聖防禦力的巨獸"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章前半描寫赫丘力承擔贖罪考驗與赫拉的迫害，後半描寫他在武器失效時憑藉驚人勇氣與蠻力克服難關戰勝巨獸，最終宙斯將其戰利品/對手昇華為獅子座以紀念這段偉大功績。" 
+        }
+    ]
+},
+{
+    t: "原民神話禁忌：山林的守護神",
+    c: "        早期原住民是「大地子民」、「山林子弟」，一直扮演著山林守護神的角色，與土地及自然緊密結合，「永續經營」，約束他們的不是繁瑣法令，而是老祖宗的神話、禁忌。\n        在動物方面，原住民不獵殺小動物、季節性捕捉動物、以圖騰保護稀有動物。在魯凱族社會，獵殺小動物有損真正大男人在部落的地位，魯凱族稱這些人是「女孩子中的男人」，會被貶低族群地位。\n        原住民也會以信仰保護小動物，例如，長輩會告訴下一代，嬌小美麗的五色鳥會帶領獵人找尋獵物，是幸運的象徵，不能捕殺。不准獵殺小動物，就是要讓動物得以順利繁衍。\n        另外，原住民也會將稀有動物列為族人的「聖物」，加以保護。魯凱族與排灣族都以百步蛇和雲豹作為族群的圖騰，禁止獵殺。而台灣黑熊雖然可以獵殺，但是有古老的咒語防止「濫殺」。在魯凱族裡，黑熊肉限於特定人才能吃，小孩是一律不准吃的。獵得黑熊固然會被視為英雄，但族人也相信可能引來疾病的報應。\n        其次，像是阿美族、雅美族、排灣族等，也都嚴格的限制禁止在動物的繁殖期間捕獵，像是春天是不上山打獵、不下水撒網。\n        在植物方面，對於某些樹種，原住民會加以保護。例如榕樹生長茂密，可提供鳥類棲息，不可以砍伐，高聳的原始林有樹神保護；而木棉花是祭神用的法器之一，不可以摘，有些開發的植物也不能採。\n        在排灣族、卑南族、魯凱族的社會裡，一向不隨意採集山中的野生蘭花、野百合，因為蘭花代表聖潔；野百合只有勇士和聖潔的女孩才可佩帶，而金線蓮是「神」百步蛇的食物，除非醫療用，但也只能用多少，採多少。\n        劃定保護區的觀念也是早已出現於原住民社會。原住民利用「聖地」及「詛咒」禁止族人進入，被列為聖地的地方有水，植物生長茂密，這也是動植物繁殖的最佳環境，即使進入也不可說話，更不能攀折樹木；地形險惡的深水湖泊則是惡魔居住的地方，許多原住民都是不敢一窺究竟。\n        例如，大家最熟悉的魯凱族「小鬼湖之戀」神話，大、小鬼湖是蛇王居住的地方，視為禁地，後代子孫不能靠近，大、小鬼湖也因此不受到干擾，成為大武山上動物聚集繁殖的天堂，直到後來的登山客才揭開它們的神秘面紗。\n        而目前被劃為保護區的大武山，自古以來就被排灣族及魯凱族視為孕育子民的「聖山」——大地之母，侵犯不得。\n        原住民利用神話、禁忌保護小動物、讓動物永續繁殖、以及保護稀有動物的觀念，就是現在的保育觀；而禁止濫採植物、濫伐大樹的限制，也就是結合現在的環保和水土保持觀念，當時劃定「聖地」的大武山，也成為現今的自然生態保育區！\n        現代的保育法令條文嚴格，但許多人仍然游走法律邊緣，科技進步卻是自然和動物的殺手，早期的原住民則以無形的約束保育大自然，形同「山林守護神」，也是保育的先知。\n\n--------------------\n【資料來源】https://tw.news.yahoo.com/原民神話禁忌-守護神山林-125139951.html",
+    q: [
+        { 
+            txt: "根據文章內容，在排灣族、卑南族與魯凱族的社會中，被視為「神」百步蛇的食物，除非醫療需要否則不能隨意採集的野生植物是什麼？", 
+            opts: [
+                "金線蓮", 
+                "野百合", 
+                "野生蘭花", 
+                "木棉花"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第七段明確指出「而金線蓮是『神』百步蛇的食物，除非醫療用，但也只能用多少，採多少」。" 
+        },
+        { 
+            txt: "魯凱族社會將隨意獵殺小動物的人稱為「女孩子中的男人」並貶低其地位，同時告誡後代五色鳥是幸運象徵不可捕殺，其最根本的目的是什麼？", 
+            opts: [
+                "透過社會輿論與信仰約束避免過度捕獵，讓小動物得以順利繁衍並維持生態平衡", 
+                "為了將所有的野生小動物留給部落中的兒童與婦女作為寵物飼養", 
+                "因為小動物體內帶有古老咒語的疾病報應，會導致整個部落陷入瘟疫危機", 
+                "鼓勵男人們專注於開墾原始森林，將時間與精力投入在木棉花與金線蓮的栽培"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文章第二與第三段指出，貶低獵殺小動物者與將五色鳥視為幸運象徵，「不准獵殺小動物，就是要讓動物得以順利繁衍」。" 
+        },
+        { 
+            txt: "魯凱族流傳「小鬼湖之戀」神話，將大、小鬼湖視為蛇王居住的禁地且禁止後代靠近，這項禁忌在客觀上產生了什麼樣的生態效果？", 
+            opts: [
+                "使大小鬼湖區域不受人類活動干擾，自然成為大武山上動植物聚集繁衍的天然保護區", 
+                "導致大小鬼湖因為多年缺乏人工開墾，演變成惡魔聚集且水源枯竭的荒涼廢墟", 
+                "吸引了大量外來登山客前往捕獵稀有百步蛇與雲豹，破壞了原本的生態環境", 
+                "促使排灣族與魯凱族發動戰爭爭奪大武山，並在湖畔築起像城牆一樣的土牆"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第九段說明「大、小鬼湖是蛇王居住的地方，視為禁地，後代子孫不能靠近，大、小鬼湖也因此不受到干擾，成為大武山上動物聚集繁殖的天堂」。" 
+        },
+        { 
+            txt: "綜合全文關於臺灣原住民對動植物保護、繁殖期禁獵及聖地劃定的介紹，下列對於原住民傳統神話與禁忌的總結，何者歸納最為準確？", 
+            opts: [
+                "以老祖宗的神話與禁忌作為無形約束，展現了超前於現代的永續保育與環保水保智慧", 
+                "這些禁忌純粹是用來懲罰違規的族人，對於現代自然生態保育區的劃定毫無參考價值", 
+                "說明原住民完全依賴繁瑣的現代法令條文，才得以順利阻止科技進步對山林的破壞", 
+                "強調原住民禁止採集任何山林植物與獵殺大型猛獸，僅靠種植水稻與養殖魚類維生"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章指出原住民利用神話、禁忌保護動植物與劃定聖地，「就是現在的保育觀……結合現在的環保和水土保持觀念」，以無形的約束保育大自然，形同山林守護神與保育先知。" 
+        }
+    ]
+},
+{
+    t: "霸凌同學要負什麼法律責任？",
+    c: " <img src='x5114-1.jpg' alt='x5114-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n        霸凌這件事，法律上分成刑事責任和民事責任兩條路，可以同時主張。在刑事責任方面，不同的霸凌行為會觸犯不同的刑法法條：毆打並造成身體傷害屬傷害罪（刑法第277條）；若拿球棒攻擊頭部等致命行為則可能構成殺人未遂罪（刑法第271條第2項）；「不從就打你」等言照威脅涉及恐嚇罪（刑法第305條）；逼對方去某個地點屬於妨害自由罪（刑法第302條）；當眾羞辱與叫罵觸犯公然侮辱罪（刑法第309條）；散布謠言與說壞話涉及誹謗罪（刑法第310條）；勒索金錢與物品則觸犯恐嚇取財罪（刑法第346條）。\n        除了刑事追訴，受害者還可以對霸凌者及其家長提起民事訴訟。依據民法第184條侵權行為，受害者可以請求醫療費用、身體傷害的財產損失，以及精神損害慰撫金（就算沒有外傷，心理創傷也能主張）。此外，依據教師法及教育基本法，學校對於學生安全負有保護義務。如果校方知情不報、刻意淡化甚至壓制學生討論，家長可以向教育局投訴、要求學校提供處理紀錄，並視情況對學校提出國家賠償申請。\n        許多家長關心未成年霸凌者是否能提告。答案是可以告，且處理方式依年齡而異：未滿12歲的孩子在刑法上沒有刑事責任能力，報案後不會被送去少年法庭，但案件會移交社政與教育系統進行輔導介入，學校端啟動輔導與懲處機制，且民事賠償仍然成立——家長必須負連帶賠償責任。12歲以上未滿18歲的霸凌者則依據《少年事件處理法》移送少年法庭由少年法官審理，可能被裁定「保護處分」（如假日生活輔導、感化教育、安置輔導等），情節嚴重者更可能被裁定移送刑事庭以成年人標準處理。依據民法規定，未成年人的法定代理人（父母）必須負連帶賠償責任，就算霸凌者本人無力賠償，受害者仍可對其父母提出民事求償。\n\n--------------------\n【資料來源】https://www.acelawyer.org/school-bully/",
+    q: [
+        { 
+            txt: "根據文章內容，當12歲以上未滿18歲的學生涉入霸凌事件時，少年法庭法官可能對其裁定下列哪一種處分？", 
+            opts: [
+                "保護處分（如假日生活輔導、感化教育等）", 
+                "強制將其父母拘留於少年法庭", 
+                "直接剝奪其父母的監護權並沒收家產", 
+                "移交國際法庭進行人權審判"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段明確記載12歲以上未滿18歲者「移送少年法庭由少年法官審理，可能被裁定『保護處分』：假日生活輔導、感化教育、安置輔導等」。" 
+        },
+        { 
+            txt: "霸凌者若未滿12歲且缺乏個人財產，受害者為何依然能透過民事訴訟獲得醫療費與精神慰撫金的賠償？", 
+            opts: [
+                "因為民法規定未成年人的法定代理人（父母）必須負擔連帶賠償責任", 
+                "因為教育局會自動代為支付所有霸凌受害者的民事賠償金額", 
+                "因為少年法庭會強制沒收學校的辦學經費作為給受害者的慰撫金", 
+                "因為未滿12歲的霸凌者會被強制送去服勞役以賺取賠償金"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段與第四段指出未滿12歲民事賠償仍然成立，且「未成年人的法定代理人（父母）必須負連帶賠償責任。也就是說，就算霸凌者本人是學生，無力賠償，你仍然可以對其父母提出民事求償」。" 
+        },
+        { 
+            txt: "若學校老師對於校內的霸凌事件採取「知情不報、刻意淡化」的態度，家長採取國家賠償或投訴的主要法律依據是什麼？", 
+            opts: [
+                "學校依據教師法及教育基本法，對學生安全負有保護義務，忽視該義務即屬失職", 
+                "學校老師觸犯了刑法第346條的恐嚇取財罪，必須承擔刑事連帶責任", 
+                "因為校方未在第一時間召集城隍神與風神前來進行校園安全維護", 
+                "因為國家賠償法規定所有未成年學生的醫療費用全數由學校預算支應"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確說明「依據教師法及教育基本法，學校對於學生安全負有保護義務」，因此校方淡化或知情不報屬於違背保護義務，家長可據此投訴或申請國賠。" 
+        },
+        { 
+            txt: "這篇文章主要透過法律條文與責任分級的說明，向讀者傳達了什麼樣的核心觀念？", 
+            opts: [
+                "霸凌並非單純的校園惡作劇，而涉及明確的法律責任，且未成年與家長皆無法置身事外", 
+                "只要霸凌者年齡未滿18歲，法律就完全無法對其施加任何懲處或輔導機制", 
+                "受害者若想獲得精神慰撫金，前提是必須遭受嚴重的身體外傷並留有住院紀錄", 
+                "面對校園霸凌時，民事賠償與刑事追訴只能二擇一，無法同時主張權益"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文詳細列舉刑事罪名、民事賠償、學校保護義務以及針對不同年齡層（未滿12歲、12-18歲）與家長連帶責任的法律規範，強調霸凌行為具有嚴重法律後果，家長與未成年者皆需負起相應責任。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>

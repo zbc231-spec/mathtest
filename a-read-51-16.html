@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十六冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-嫦娥奔月",
+    c: "        后羿射下九個太陽之後，人間的老百姓為了感謝他，便推舉后羿做皇帝。后羿在人間做皇帝是很享福的，每天吃山珍海味，稀奇的水果，住在最華麗的宮殿裡。天氣冷了，他叫老百姓到深山裡獵來虎豹，剝下皮給他做袍子。熱了，他叫幾十個宮女替他揮扇子，一刻也不休息。過著這樣舒服的日子，實在不比在天上的時候差，可是，后羿並不滿足。\n        有一天，后羿對嫦娥說：「做凡人，最多不過活一百年。我想，像我這樣的大英雄，又是萬人之上的皇帝，竟然也會像普通人一樣的死去，真是令我生氣。」嫦娥說：「如果你盡力做一個好皇帝，將來老百姓世世代代都會紀念你，這不是比長生不老更有意義嗎？」\n        后羿說：「哼！我才不管別人怎麼說，我偏偏要長生不老。」后羿打定了主意，要找到長生不老 Method。他在城門口貼出告示，宣佈：要是誰知道長生不老的方法，就賞給他一萬兩黃金。可是，老百姓哪裡會知道長生不老的方法呢？\n        日子一天天的過去，后羿的脾氣變得很壞，他大聲的罵道：「我一天比一天老了，如果再沒有人說出長生不老的方法，我就把大家通通殺死，誰也別想活！」老百姓知道后羿發脾氣，都非常的害怕。一天，城裡突然來了一個奇怪的白鬍子老先生，他拄著柺杖走進后羿的皇宮裡，對后羿說：「我知道長生不老的方法，在很遠很遠的地方，住了一個叫做王母的神仙，她有長生不老的藥……」\n        后羿高興得從寶座上跳下來，說道：「啊！太好了，快告訴我，王母住在哪裡？」白鬍子老先生慢吞吞的說：「她住在大地西邊的崦嵫山山頂上。」后羿聽了，立刻坐上一輛馬車，飛快的出發了。西邊的崦嵫山很遠，后羿一去就是好多天。\n        嫦娥住在宮殿裡，有一天晚上，她獨自一個人走到花園裡去散步。月亮在深藍的天空，像一個大玉盤，散發出柔和又美麗的光芒。嫦娥看著月亮，心裡憂愁的想：「自從后羿做了人間的皇帝之後，每天只顧著享受，脾氣變得越來越壞。他不但不替老百姓做事，反而把老百姓當作牛馬一樣驅使。如果后羿找到仙藥，變得長生不老，那麼，百姓的苦不是受不完了嗎？」\n        這時候，后羿不眠不休的前進，終於來到了大地西邊的崦嵫山。他在山下抬頭一看，山上籠罩了紫色的濃霧，不時還有神秘的火光閃爍，看起來神秘又危險。后羿下車往山上走去。說也奇怪，他每往上爬一步，紫霧和火光就退開了，露出青色的山石。爬呀爬的，爬到了最高的山頂。后羿到處張望，山頂上光禿禿的，什麼也沒有。\n        突然，背後傳來了一陣可怕的呼嘯，后羿轉頭一望，看見一個相貌很奇怪的老太太坐在山洞裡，她長了一嘴尖牙齒，身後還拖著豹子尾巴。剛才像野獸一樣的嘯聲，原來就是老太太在大笑呢。老太太對后羿說：「哈哈，你就是射下九個太陽的大英雄后羿嗎？」后羿挺起胸膛說：「對，我就是后羿，你是誰？」「我就是你要找的王母。」老太太說：「你來的原因我全明白，你是要來向我求長生不老藥的，哈哈哈。」\n        后羿一聽她就是王母，連忙跪了下來，向她求藥。王母一揮手，三隻像青玉雕出來一樣透明發亮的青鳥，合力銜了一個葫蘆飛過來，放在王母手上。王母說：「這個葫蘆裡只有兩顆長生不老藥，一顆給你，一顆給你的妻子嫦娥。在八月十五月圓的晚上吃了，就可以長生不老。不過藥只有這兩顆，你可別弄丟了啊！」\n        后羿拿到葫蘆，高興極了。他飛快的下山，跳上馬車，趕回皇宮去，把這事告訴嫦娥。八月十五日快要到了，晚上的月亮漸漸圓起來。后羿又急又高興，等著吃長生不老藥。嫦娥卻越來越憂愁，她心想：「假如后羿長生不老，老百姓世世代代都要遭殃了，得想個辦法把仙藥偷來丟掉才行。」\n        十五日晚上，月亮快要升起來的時候，嫦娥穿了一身純白的美麗衣服，拿了銀子做的酒壺，對后羿說：「過一會兒，我們都要吃仙藥了。現在，讓我們喝酒慶祝一下吧！」后羿開心的大笑：「說得對，我要好好喝幾杯！」他不知道，嫦娥在酒壺裡灌了最厲害的烈酒，后羿才喝了三杯，就醉得睡著了。\n        嫦娥看后羿在床上睡熟了，便輕手輕腳偷走后羿藏起來的葫蘆。她把葫蘆裡的兩粒仙藥倒出來，正想找地方把它丟掉，一不小心，她碰翻了燭臺，發出「匡噹」一聲，驚醒了后羿。后羿追過來，大聲喊道：「嫦娥，妳怎麼偷我的仙藥！」\n        嫦娥看到后羿追過來，心裡一著急，就把兩粒仙藥一口吞下肚去。這時候，奇怪的事發生了。嫦娥只覺得一陣清涼的氣通到肚子裡，身體突然變得輕飄飄，軟綿綿的，站也站不穩。嫦娥兩腳離地，像一片雲煙似的飛了起來。很快的，她飛出了皇宮的窗子，越飛越高，飛向繁星萬點的夜空，向皎潔的圓月亮飛去。\n        后羿看見這情形，趕緊取來弓箭，對著天空中的嫦娥胡亂射出許多箭。后羿本來是世界上最偉大的神射手，可是自從他做了皇帝之後，變得好吃懶做，箭也射不準了。后羿失去了長生不老藥，只好像普通人一樣，留在凡間等待老去，死亡了。至於嫦娥呢？她飛呀飛的，就這樣飛到圓圓的月亮中去，並且永遠的住在月亮裡了。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/sc3.htm",
+    q: [
+        { 
+            txt: "根據文章內容，居住在大地西邊崦嵫山山頂上的神仙「王母」，其外貌與特徵為何？", 
+            opts: [
+                "長著一嘴尖牙齒、身後拖著豹子尾巴，身旁有三隻透明發亮如青玉般的青鳥", 
+                "手持銀酒壺與長生不老葫蘆，身穿純白衣服且能隨時召喚金龍馬車", 
+                "長著白鬍子、拄著柺杖，居住在光禿禿山洞中專門為凡人指引迷津", 
+                "擁有發亮羽毛與三隻腳，平時居住在幾千丈高的大扶桑樹枝椏上"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確描述后羿在山頂見到的王母「長了一嘴尖牙齒，身後還拖著豹子尾巴」，並召喚「三隻像青玉雕出來一樣透明發亮的青鳥」銜來葫蘆。" 
+        },
+        { 
+            txt: "嫦娥當初動念偷取后羿的長生不老仙藥，最主要的出發點是什麼？", 
+            opts: [
+                "擔心的后羿若長生不老，老百姓將世世代代受其暴政驅使與壓迫而遭殃", 
+                "為了實現自己飛上月宮成仙的夢想，獨自享受永恆的青春與生命", 
+                "為了報復后羿做了皇帝後變得好吃懶做，並且不再聽從她的勸告", 
+                "受白鬍子老先生的指引，必須將仙藥投擲入月亮以平息天帝的憤怒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述嫦娥的心理活動「如果后羿找到仙藥，變得長生不老，那麼，百姓的苦不是受不完了嗎？……假如后羿長生不老，老百姓世世代代都要遭殃了，得想個辦法把仙藥偷來丟掉才行」，展現其關懷百姓的動機。" 
+        },
+        { 
+            txt: "昔日能射下九個太陽的神射手后羿，在看到嫦娥飛升時拿弓箭射她卻一箭未中，其根本原因是什麼？", 
+            opts: [
+                "做皇帝後沉溺於享樂且好吃懶做，導致武藝衰退、箭法不再精準", 
+                "因為嫦娥身上有仙藥發出的金光護體，擋下了后羿射出的所有神箭", 
+                "因為王母娘娘在仙藥中加入了保護咒語，使凡間的武器無法傷及成仙者", 
+                "因為后羿喝了最厲害的烈酒酒勁未退，眼中看到無數月亮而無法瞄準"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確解釋「后羿本來是世界上最偉大的神射手，可是自從他做了皇帝之後，變得好吃懶做，箭也射不準了」。" 
+        },
+        { 
+            txt: "綜合全文關於「后羿貪圖長生不老」與「嫦娥奔月成仙」的情節，下列對於這則神話所傳達的核心教訓，何者歸納最為準確？", 
+            opts: [
+                "警惕世人權位與享樂易使人腐化墮落，並讚揚為了救護大眾而無私奉獻的道德勇氣", 
+                "說明長生不老藥的調配方法與禁忌，並強調對神明必須時刻保持虔誠信仰", 
+                "強調酒能亂性與警惕枕邊人偷竊的教訓，並展現后羿失去皇帝寶座的懊悔", 
+                "說明中秋節八月十五賞月與吃月餅傳統的起源，以及天庭神仙的階級規則"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "故事對比了后羿獲得功名後變得暴虐貪婪、好吃懶做（權位與享樂令人腐化），以及嫦娥為了不讓暴政延續而冒險偷藥吞藥（無私拯救大眾），深刻表現了道德與人格的抉擇。" 
+        }
+    ]
+},
+{
+    t: "星座故事-天秤座的傳說",
+    c: "        天秤座位在處女座的東邊，春天的晚上會出現在星空中，但卻不太引人注意。\n        天秤座的天秤，是正義女神阿絲特蕾亞所擁有的兩個秤盤。阿絲特蕾亞是天神宙斯和巨人泰坦族的女神迪美斯所生的女兒。在古老的過去，當世界還是「黃金時代」時，地面是個快樂的世界，也是和平的樂園，眾神和人類一起生活在地面上。正義女神阿絲特蕾亞正是負責以天秤來區分善與惡，做公平判斷的裁判官。\n        後來，世界開始有了四季寒暖之分，人類蓋了房子，穿上衣服，開始耕種。而且有了弱肉強食和爭鬥的現象，神衹們便紛紛回到仙界。只有慈悲的阿絲特蕾亞，仍舊留在地上主持正義。\n        「阿絲特蕾亞，我們已經無能為力了，讓人類自生自滅吧！」眾神都這樣勸她，可是她卻回答：「只要水還在流，花還在開，人類就有希望！」\n        到了「銅的時代」，人類開始欺騙和使用暴力，兄弟互相殘殺，朋友反目成仇，爭執終於爆發了戰爭。阿絲特蕾亞再也無法忍受人類的惡言惡行，便悲傷失望的回到天上。\n        海神波塞頓嘲笑她說：「人類根本不懂得什麼叫和平，再怎麼費心也沒用，你還是死心吧！」\n        聽了這些話，阿絲特蕾亞非常不服氣，她激動地說：「現在人類雖然有了戰爭，有一天他們會覺悟的，畢竟和平與幸福是最可貴的！」\n        「哪一天哪？」波塞頓故意誇張的問，眾神都哄笑起來。天神宙斯趕緊打圓場說：「現在停止爭論吧！阿斯特蕾亞，你何不回去看看你母親迪美斯呢？」\n        不料阿絲特蕾亞卻平靜的說：「人類可以受辱，神卻不能受辱，我要波塞頓向我道歉！」\n        但是波塞頓卻不答應。宙斯蹙起眉頭，一個是親生女兒，一個是同胞兄弟，實在左右為難啊！\n        這時，天后赫拉想出一個主意，她說：「不如就讓雙方各自製作一件作品，做得最好的，就是勝利者，若是海神輸了，就必須向阿絲特蕾亞道歉，如果輸的是阿絲特蕾亞，就取消道歉之約。怎麼樣？」\n        於是波塞頓很有自信的走到宮殿廣場上，舉起他的巨叉，大喝了一聲，重重的擊在阿克羅波里城上方，一道清泉就湧了出來。\n        「哇！」眾神興高采烈的鼓掌，波塞頓咧開大嘴大笑起來說：「阿絲特蕾亞，妳還能造出什麼更好的東西呢？」\n        正義女神沉默著，她慢慢走到廣場上，美妙的雙手在阿克羅波里城上方揮舞了幾下，接著，一棵美妙無比的橄欖樹長出來了。閃著金光的果子，累累的掛在樹枝上，葉片泛著銀光，樹幹呈現光亮的前褐紅色。只要看它一眼，內心便充滿祥和，再沒有比這個更完美的作品了。\n        輸贏就這樣決定。宙斯與眾神一致判定阿絲特蕾亞獲勝，海神波塞頓公開的向正義女神道歉，他說：「現在我才了解，愛與和平才是世界上最值得奮鬥的東西，阿絲特蕾亞，我向你道歉。」\n        阿絲特蕾亞微笑著說：「不論人類或神衹，和平相處都是長保幸福的最好方法，我希望大家都能記得。」\n        宙斯為了紀念阿絲特蕾亞的功績，便將她的兩個天秤放在天上，成為天秤座，象徵著正義，和平與寬容。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章內容，當地面處於「黃金時代」時，正義女神阿絲特蕾亞在人間擔任什麼角色？", 
+            opts: [
+                "負責以天秤區分善與惡並進行公平判斷的裁判官", 
+                "負責為人類建造房屋並教導耕種技術的農業女神", 
+                "負責手持巨叉擊出清泉以提供乾淨水資源的守護神", 
+                "負責引導亡靈前往仙界並掌管冥界秩序的裁決者"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確指出「正義女神阿絲特蕾亞正是負責以天秤來區分善與惡，做公平判斷的裁判官」。" 
+        },
+        { 
+            txt: "在波塞頓與阿絲特蕾亞的比試中，眾神與宙斯之所以一致判定阿絲特蕾亞變出的「橄欖樹」勝過波塞頓的「清泉」，其最主要的精神價值為何？", 
+            opts: [
+                "因為橄欖樹能帶來讓人內心充滿祥和的感受，展現了愛與和平的完美象徵", 
+                "因為橄欖樹上的金黃果實可以讓宙斯與天庭眾神享用無盡的豐收美味", 
+                "因為橄欖樹的樹根能防止阿克羅波里城的土地被波塞頓的清泉淹沒", 
+                "因為波塞頓使用巨叉擊出清泉破壞了廣場，引發天后赫拉極度不滿"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述橄欖樹「只要看它一眼，內心便充滿祥和」，且波塞頓輸後體悟到「愛與和平才是世界上最值得奮鬥的東西」，顯示其獲勝關鍵在於和平與祥和的精神價值。" 
+        },
+        { 
+            txt: "當其他神祇因人類浮躁爭斗而紛紛返回仙界時，阿絲特蕾亞最初為何堅持獨自留在地上？", 
+            opts: [
+                "堅信只要萬物自然仍在生長運轉，人類就有覺悟並重拾希望與善良的可能", 
+                "為了向海神波塞頓證明自己的天秤具有壓制人類戰爭與仇恨的魔法力量", 
+                "因為受天神宙斯的嚴厲命令，必須留在人間監督銅之時代的人類建立法律", 
+                "為了保護母親迪美斯留在地上的農作物，防止被貪婪的人類肆意搶奪"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "當眾神勸她離開時，阿絲特蕾亞回答「只要水還在流，花還在開，人類就有希望！」，並在後來堅信人類有一天會覺悟和平與幸福的可貴。" 
+        },
+        { 
+            txt: "綜合全文關於阿絲特蕾亞在人間主持正義以及與海神比試的情節，下列對於天秤座所象徵的核心精神，何者歸納最為準確？", 
+            opts: [
+                "象徵堅守信念、維護尊嚴，以及用愛與祥和超越武力爭端的正義與和平", 
+                "象徵強者利用武力威嚇弱者的權力規則，以及神明之間不可逾越的階級秩序", 
+                "警惕世人若隨意嘲笑他人便會招致天譴，並強調競爭勝負遠高於手足情誼", 
+                "說明希臘神明透過比試爭奪城市主導權的過程，並展現宙斯偏袒女兒的決策"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "阿絲特蕾亞不輕言放棄對希望的堅持，在面對海神嘲笑時勇敢維護尊嚴，並以能感化人心的橄欖樹（和平象徵）贏得尊重，最終宙斯將天秤置於天空「象徵著正義，和平與寬容」。" 
+        }
+    ]
+},
+{
+    t: "你不知道的行憲紀念日",
+    c: "        每年十二月一到，大家是不是就開始煩惱月底聖誕節的交換禮物要準備什麼呢？12月25日除了是傳說中耶穌的誕辰日外，在台灣，其實也是《中華民國憲法》的施行紀念日喔！\n        《中華民國憲法》就像是我們國家的「最高校規」或是「終極遊戲規則」，全文分成14個章節，一共有175條規定。憲法的前半部，詳細規定了我們每一個人可以享有哪些權利。像是大家常聽到的平等權（不論男女貧富大家都是平等的）、人身自由（沒有合理原因警察不能隨便抓人）、言論自由（可以自由表達想法）、財產權，還有長大後可以投票的參政權等。後半部則是規定總統、行政院、立法院等政府機關分別有哪些權力，以及國家運作應該要遵守的基本政策。例如：國家應該要特別關懷婦女、弱勢群體與少數族群，重視生態環境保護，以及實施大家現在正在接受的「義務教育」等等。另外，除了憲法本文之外，後來補充的憲法增修條文，以及大法官歷年來做的解釋，也都和憲法本文一樣具有最高法律地位喔！\n        《中華民國憲法》是在民國35年（1946）12月25日三讀通過的，並在隔年（1947）1月1日公布，同時規定在同年的12月25日正式實施。那為什麼偏偏要選擇12月25日這一天呢？據說，這是因為當時的國民政府主席蔣介石認為，這部新憲法最大的特點，就是要落實基督教裡的核心精神：將個人的尊嚴、平等與自由，普遍地給予全國人民。所以他特別挑選了紀念耶穌誕辰的這一天，作為憲法的施行日！\n        不過，這部在聖誕節誕生的憲法，真的有順利發揮作用嗎？這在歷史上其實有一段奇妙的過程喔！雖然憲法形式上在民國36年（1947）的聖誕節正式生效，但當時因為發生了「國共內戰」，政府不到半年就頒布了《動員戡亂時期臨時條款》，把憲法的許多規定給「暫停凍結」了。這個臨時條款一用就是長達43年，直到民國80年（1991）廢止後，台灣才終於能把憲法拿出來重新整理。就像我們玩的智慧型手機或電腦遊戲一樣，時間久了、功能不夠用了，系統就必須不斷「下載更新檔」！為了適應現代社會的變化，我們的憲法後來也經過了七次的「大升級」（也就是法律上說的「修憲」）。所以，今天我們生活所依據的憲法，早就加上了許多新的附加條款，跟當年那個初版的憲法比起來，早已有了完全不同的全新面貌囉！\n        雖然憲法的內容經過了不少改變，但它最重要的精神從來沒有變過。到了今天，不管是我們每天能開心地去學校上學、在網路上自由地發表文章，還是生病時有完善的健保制度可以看醫生，背後其實都有憲法在為我們撐腰！所以，下次在12月25日開心拆聖誕禮物、吃大餐的時候，別忘了也可以順便跟家人朋友分享這個小知識——原來這一天除了是聖誕節，也是守護我們權利與自由的「憲法生日」喔！\n\n--------------------\n【資料來源】：改寫自https://www.infinity-attorneys.com/edcontent_d.php?lang=tw&tb=10&id=288",
+    q: [
+        { 
+            txt: "根據文章內容，《中華民國憲法》是在哪一年、哪一天三讀通過的？", 
+            opts: [
+                "民國35年（1946）12月25日", 
+                "民國36年（1947）1月1日", 
+                "民國36年（1947）12月25日", 
+                "民國80年（1991）12月25日"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確記載「《中華民國憲法》是在民國35年（1946）12月25日三讀通過的」。" 
+        },
+        { 
+            txt: "當時的國民政府主席蔣介石為何特別挑選12月25日（耶穌誕辰日）作為憲法的正式施行日？", 
+            opts: [
+                "認為新憲法旨在落實基督教中賦予個人尊嚴、平等與自由的核心精神", 
+                "為了迎合當時西方國家的外交需求，以獲得更多國際經濟與軍事援助", 
+                "因為12月25日正好是全國法定的國定假日，方便向民眾發放憲法宣導手冊", 
+                "希望透過與聖誕節合併舉辦慶祝活動，降低民眾對國共內戰的憂慮"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段指出「蔣介石認為，這部新憲法最大的特點，就是要落實基督教裡的核心精神：將個人的尊嚴、平等與自由，普遍地給予全國人民」，故特選此日為施行日。" 
+        },
+        { 
+            txt: "憲法生效後不到半年政府頒布《動員戡亂時期臨時條款》，並凍結許多憲法規定長達43年，其主要歷史背景因素是什麼？", 
+            opts: [
+                "當時國家正面臨「國共內戰」的緊急動盪局勢", 
+                "憲法條文過於簡陋，需要暫停使用以進行七次大修憲", 
+                "大法官要求進行憲法解釋，強制將憲法規定暫停凍結", 
+                "民眾發起大規模遊行要求廢除義務教育與言論自由規定"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第四段敘述憲法生效後「因為發生了『國共內戰』，政府不到半年就頒布了《動員戡亂時期臨時條款》，把憲法的許多規定給『暫停凍結』了」。" 
+        },
+        { 
+            txt: "作者將憲法經過七次「修憲」比喻為智慧型手機「下載更新檔大升級」，這一比喻主要傳達了憲法的何種特性？", 
+            opts: [
+                "憲法並非僵化不變，而是能隨著時代變遷與社會需求進行動態調整與適應", 
+                "憲法如同手機軟體一樣容易發生故障，必須隨時更換全新的國家體制", 
+                "說明憲法內容過於複雜難懂，唯有透過科技軟體才能精準計算條文數量", 
+                "強調初版的憲法完全缺乏實用價值，必須全面刪除才能維護國家運作"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文中第四段將修憲比喻為手機下載更新檔升級，說明「為了適應現代社會的變化，我們的憲法後來也經過了七次的大升級」，深刻體現憲法具備彈性調適、與時俱進的動態特性。" 
+        }
+    ]
+},
+{
+    t: "芬蘭羅瓦涅米聖誕老人村",
+    c: "        聖誕老人村位於芬蘭北部的拉普蘭地區首府羅瓦涅米（Rovaniemi），地處北極圈線上。這裡常年被冰雪覆蓋，每年從十一月到隔年三月都是追尋聖誕魔法和北極光的最佳時機。而且聖誕老人村是官方認證、全球唯一的聖誕老人總部。它不僅僅是一個主題樂園，更是「北極圈冬季旅遊」的代名詞，每年聖誕季節，相關的旅遊、極光和交通攻略搜尋量都會暴增。\n        揭密芬蘭羅瓦涅米聖誕老人村在聖誕節搜尋熱度爆棚的三大原因：\n        一、你會見到真正的聖誕老人。這是村內最核心的活動，您可以在聖誕老人的辦公室裡，與他本人面對面交談、合影。這份獨特的經歷，是帶給孩子和心中保有童真大人最棒的聖誕節禮物。\n<img src='x5116-1.jpg' alt='x5116-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n        二、跨越北極圈線。聖誕老人村最標誌性的地標，就是橫跨園區的北極圈線。遊客可以正式跨越這條線，領取「跨越北極圈證書」，標誌您已進入了極地地區，是網路上非常受歡迎的打卡和紀念活動。\n<img src='x5116-2.jpg' alt='x5116-2.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n        三、聖誕老人郵政總局。這間郵局每年都會收到來自全球數十萬封信件。您可以在這裡購買獨特的郵票，親手寄出帶有北極圈專屬郵戳的明信片給親朋好友，承載著極地的聖誕祝福，可說是相當特別的一份聖誕禮物。\n<img src='x5116-3.jpg' alt='x5116-3.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n        聖誕老人郵局寄信步驟整個過程非常簡單，主要就是「買、寫、貼、投」四個步驟：挑選與書寫明信片時，務必寫上完整且清晰的收件人地址（包含收件人姓名、地址、郵遞區號和國家名稱）；購買專屬郵票與蓋郵戳時，在郵局櫃台購買聖誕老人村專屬郵票，通常會有聖誕主題的圖案，非常值得收藏！而且這裡寄出的信件，一定會蓋上獨一無二的「北極圈聖誕老人專屬郵戳」，這是最大的特色！\n        選擇投遞信箱是最有趣、也最重要的一步，因為這裡有兩個特別的郵筒：橘黃色的郵筒是當天立即寄出，紅色的郵筒則是在聖誕節前夕寄出。\n        寄信費用與注意事項：國際航空的郵票寄到世界各地的郵資是芬蘭的國際公價，大約會落在2.00至3.00歐元左右。（註：價格會依據當年的芬蘭郵政定價浮動，實際費用請以郵局櫃台標價為準。）\n\n--------------------\n【資料來源】：https://www.newamazing.com.tw/eweb_newamazing/Europe/santa-claus-village.asp",
+    q: [
+        { 
+            txt: "根據文章內容，若遊客希望自己寄出的明信片能在「聖誕節前夕」寄達收件人手中，應該投遞至哪一個顏色的郵筒？", 
+            opts: [
+                "紅色的郵筒", 
+                "橘黃色的郵筒", 
+                "藍色的郵筒", 
+                "綠色的郵筒"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確記載「橘黃色的郵筒是當天立即寄出，紅色的郵筒則是在聖誕節前夕寄出」。" 
+        },
+        { 
+            txt: "聖誕老人村提供遊客領取「跨越北極圈證書」，這項服務主要發揮了什麼樣的行銷或旅遊作用？", 
+            opts: [
+                "透過賦予具體的地標儀式感與紀念價值，滿足遊客的打卡成就感並提升景點知名度", 
+                "強制規定所有進入極地地區的旅客必須持有此證書才能進入聖誕老人辦公室", 
+                "作為遊客購買芬蘭國際航空郵票時折抵郵資的官方優惠憑證", 
+                "用來替代護照作為進入芬蘭北部拉普蘭地區首府羅瓦涅米的通關證件"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段指出跨越北極圈線並領取證書能標誌進入極地地區，是「網路上非常受歡迎的打卡和紀念活動」，凸顯其紀念與行銷效益。" 
+        },
+        { 
+            txt: "聖誕老人郵政總局在販售專屬郵票時，為何特別強調寄出的信件都會蓋上「北極圈聖誕老人專屬郵戳」？", 
+            opts: [
+                "強調郵戳的獨特性與不可替代性，增加明信片的收藏價值與來自極地的祝福意涵", 
+                "為了向全球郵政總局證明該信件免收國際公價的航空郵資費用", 
+                "因為只有蓋上該郵戳的信件才能被投入橘黃色的當天寄出郵筒", 
+                "為了避免遊客在明信片上記錄過多個人私密資訊而進行的防衛措施"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段指出專屬郵票與獨一無二的「北極圈聖誕老人專屬郵戳」是「最大的特色」，承載極地聖誕祝福，凸顯其紀念與收藏價值。" 
+        },
+        { 
+            txt: "綜合全文所述，芬蘭羅瓦涅米聖誕老人村之所以能成為全球熱門的冬季旅遊勝地，最核心的成功要素是什麼？", 
+            opts: [
+                "結合獨特的地理位置優勢與童話氛圍，打造具備高度互動與沉浸感的體驗式旅遊", 
+                "完全依賴低廉的國際郵資與免費的極光體驗來吸引全世界的背包客前往", 
+                "依靠大量的商業宣導與強制性的主題樂園門票綑綁銷售策略", 
+                "專注於提供極地高強度冒險運動，藉此吸引熱愛戶外挑戰的極限運動員"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "全文展現聖誕老人村透過北極圈地理地標（證書）、真實互動（見聖誕老人）以及主題體驗（專屬郵局與郵戳），將童話文化與地緣特色融合，創造出無可替代的沉浸式觀光價值。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
