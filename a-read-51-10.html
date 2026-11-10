@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>曙光啟示錄 - 第十冊</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Microsoft JhengHei", sans-serif; height: 100vh; background: #2c3e50; overflow: hidden; }
+
+        /* --- 資訊欄 --- */
+        #top-panel { 
+            height: 15%; background: #ffffff; 
+            display: flex; align-items: center; justify-content: space-around; 
+            border-bottom: 2px solid #ddd; box-sizing: border-box; padding: 0 20px;
+        }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #2ecc71; object-fit: cover; }
+        .stats { font-size: 2.2rem; font-weight: bold; color: #2c3e50; }
+        .heart { color: #e74c3c; font-size: 2.2rem; margin: 0 2px; }
+
+        /* --- 主區域：顯示底圖 b-read.jpg --- */
+        #main-layout { 
+            height: 85%; 
+            background: url('b-read.jpg') no-repeat center center; background-size: cover;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+
+        /* 雙欄容器：完全無底框效果 */
+        .content-card {
+            background: transparent;
+            width: 95%; height: 95%;
+            display: flex; overflow: hidden;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 自訂隱形捲軸 */
+        .article-pane::-webkit-scrollbar, .quiz-scroll-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        .article-pane::-webkit-scrollbar-thumb, .quiz-scroll-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+        }
+        .article-pane::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 左側文章區 / 結算資訊區 */
+        .article-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box;
+            padding: 40px 60px 40px 100px;     
+            overflow-y: auto;
+            border-right: none;
+        }
+        .a-title { font-size: 2rem; color: #27ae60; font-weight: bold; margin-bottom: 20px; border-left: 10px solid #27ae60; padding-left: 15px; }
+        .a-text { font-size: 1.35rem; line-height: 2.1; color: #2c3e50; white-space: pre-wrap; }
+
+        /* 右側題目主區域 (垂直佈局：頂部計時器固定，其餘可滾動) */
+        .quiz-pane {
+            width: 50%;
+            height: 100%;
+            flex: none;
+            box-sizing: border-box; 
+            padding: 20px 30px;          
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #quiz-questions-wrap {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* 頂部固定計時器（不隨卷軸移動） */
+.sticky-timer-box {
+    flex: none;
+    text-align: center;
+    margin-bottom: 8px;     /* 稍微縮小下邊距 */
+    font-size: 1.2rem;     /* 從 1.3rem 調小成 0.85rem */
+    font-weight: bold;    /* 取消粗體 */
+    color: #7f8c8d;         /* 改為較淺的灰藍色，不搶眼 */
+    background: transparent;/* 去掉明顯的白色背景，或改成簡約風 */
+    padding: 4px 8px;       /* 縮小內邊距，節省空間 */
+    border: none;           /* 去掉外框 */
+    box-shadow: none;       /* 去掉陰影 */
+}
+        /* 題目滾動區（包含題目與底部的提交按鈕） */
+        .quiz-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* 結算頁面使用的「無捲軸」狀態 */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+
+        .q-block { margin-bottom: 25px; background: rgba(255, 255, 255, 0.0); padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .q-header { font-size: 1.3rem; font-weight: bold; color: #222222; margin-bottom: 12px; }
+        .opt-item { 
+            display: block; margin-bottom: 10px; padding: 12px; border: 1px solid #ccc; 
+            border-radius: 10px; cursor: pointer; font-size: 1.15rem; background: white;
+        }
+        .opt-item:hover { background: #fefae0; }
+        input[type="radio"] { margin-right: 10px; transform: scale(1.3); }
+
+        /* 解析區樣式 */
+        .ans-feedback {
+            margin-top: 10px; padding: 12px; border-radius: 10px; display: none;
+            font-size: 1.1rem; line-height: 1.5; border: 2px solid;
+        }
+        .is-correct { background: #e8f5e9; border-color: #4caf50; color: #1b5e20; }
+        .is-wrong { background: #ffebee; border-color: #ef5350; color: #b71c1c; }
+
+        /* 按鈕區 (放在滾動區底部) */
+        .btn-box { text-align: center; padding: 20px 0 30px 0; }
+        .btn { 
+            padding: 15px 50px; font-size: 1.3rem; cursor: pointer; border-radius: 15px; 
+            border: none; color: white; font-weight: bold; transition: 0.2s;
+        }
+        .btn-submit { background: #3498db; box-shadow: 0 6px #2980b9; }
+        .btn-next { background: #2ecc71; box-shadow: 0 6px #27ae60; }
+        .btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 結算頁面樣式 --- */
+        .finish-left { color: #2c3e50; text-align: left; padding-top: 10px; }
+        .finish-title { font-size: 2.8rem; color: #27ae60; font-weight: bold; margin-bottom: 15px; }
+        .finish-score { font-size: 2.1rem; color: #d35400; font-weight: bold; margin-bottom: 20px; }
+        .time-list-clean { background: transparent; padding: 0; margin: 15px 0; font-size: 1.25rem; line-height: 2; color: #2c3e50; }
+        .finish-notice { font-size: 2.5rem; color: #2980b9; font-weight: bold; margin-top: 20px; padding: 10px 0; border-top: 2px dashed #bdc3c7; }
+
+        .finish-img-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .finish-img { max-width: 95%; height: 90vh;; object-fit: contain; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); }
+
+        /* --- 冷卻鎖定畫面樣式 --- */
+        #cooldown-screen {
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            text-align: center; background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .cd-icon { font-size: 5rem; margin-bottom: 10px; }
+        .cd-score { font-size: 2.0rem !important;color: #34495e;font-weight: bold;margin-bottom: 15px;}
+        .cd-title { font-size: 2.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 15px; }
+        .cd-msg { font-size: 1.5rem; color: #34495e; line-height: 1.8; margin-bottom: 20px; }
+        .cd-timer { font-size: 2.2rem; color: #d35400; font-weight: bold; background: #fef5e7; padding: 10px 25px; border-radius: 50px; border: 2px dashed #e67e22; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="top-panel">
+        <div class="player-info">
+            <img src="b-head.jpg" alt="頭像" class="avatar">
+            <div class="stats">勇者-幾霸昏</div>
+        </div>
+        <div class="stats">HP：<span class="heart">❤️❤️❤️❤️❤️</span></div>
+        <div class="stats">💰：<span id="score-val" style="color:#f39c12;">0</span></div>
+    </div>
+
+    <div id="main-layout">
+        <!-- 閱讀測驗主卡片結構 -->
+        <div id="game-container" class="content-card">
+            <!-- 左欄：平時放文章，結算時放成績報告 -->
+            <div class="article-pane" id="left-pane">
+                <div id="quiz-article-wrap">
+                    <div id="display-title" class="a-title"></div>
+                    <div id="display-content" class="a-text"></div>
+                </div>
+                <!-- 結算結果 (預設隱藏) -->
+                <div id="finish-report" class="finish-left hidden">
+                    <div class="finish-title">🎉 闖關完成！</div>
+                    <div class="finish-score">獲得總獎勵：<span id="final-score">0</span> 💰</div>
+                    <div id="time-report" class="time-list-clean"></div>
+                    <div class="finish-notice">📢 請至秘書處登記獎勵點數！</div>
+                </div>
+            </div>
+
+            <!-- 右欄：題目區 (只有計時器固定，題目與按鈕皆在捲軸內) -->
+            <div class="quiz-pane" id="right-pane">
+                <div id="quiz-questions-wrap">
+                    <!-- 1. 置頂固定計時器（不隨卷軸滾動） -->
+                    <div id="live-timer-box" class="sticky-timer-box">
+                        ⏱️ 本篇已進行時間：<span id="live-timer-text" style="color: #e67e22;">0 分 0 秒</span>
+                    </div>
+
+                    <!-- 2. 可滾動區域：包含題目列表與提交按鈕 -->
+                    <div class="quiz-scroll-area" id="quiz-scroll-area">
+                        <div id="quiz-list"></div>
+                        
+                        <!-- 按鈕放置在題目最下方，跟著題目一起滑動 -->
+                        <div class="btn-box">
+                            <button id="btn-submit" class="btn btn-submit" onclick="checkAll()">提交全部答案</button>
+                            <button id="btn-next" class="btn btn-next hidden" onclick="goNext()">下一篇挑戰</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 結算圖片 (預設隱藏) -->
+                <div id="finish-image-wrap" class="finish-img-container hidden">
+                    <img src="b-finish.jpg" alt="完成關卡" class="finish-img">
+                </div>
+            </div>
+        </div>
+
+        <!-- 1小時冷卻畫面 (預設隱藏) -->
+        <div id="cooldown-screen" class="hidden">
+            <div class="cd-icon">⏳</div>
+            <div id="cd-score-box" class="cd-score">您剛才的測驗得分：<span id="cd-score-num">--</span> 💰</div>
+            <div class="cd-title">冷卻時間中，暫無法做題！</div>
+            <div class="cd-msg">為了確保學習效果，完成測驗後需等待休息。<br>請冷靜消化剛才的知識，過後再進行下一輪挑戰吧！</div>
+            <div id="cd-timer-text" class="cd-timer">剩餘時間：-- 分 -- 秒</div>
+        </div>
+    </div>
+
+    <script>
+      const rawDb = [
+{
+    t: "中國神話-盤古開天地",
+    c: "        我們知道孩子是從媽媽肚子裡出生的，那藍天和大地是怎樣出生的呢？\n        這個世界最初的模樣，和我們現在見到的並不相同。最初，世界是一個被黑暗與寒冷包裹的雲團，遠看像是一個巨大的雞蛋。\n        在大雞蛋的中心，沉睡著一個小小的生命，就是我們的始祖盤古。\n        盤古在沉睡中慢慢長大，起初他只佔據了大雞蛋裡的一點點空間，之後他越長越大、越長越高。一萬八千年過去，盤古慢慢長成了一個和雞蛋一樣大的巨人。\n        被蛋殼擠壓的盤古醒了過來，發現這個世界一片黑暗。別說周圍的環境，他連自己的雙手也看不清楚。他又試著喊了一聲，卻也聽不見自己的聲音。\n        這樣一個沒有聲音、沒有光線的世界，該有多麼苦悶啊！\n        焦急的盤古在黑暗中仔細摸索，居然摸到一把冰涼的斧頭，這可把盤古高興壞了。他想：「我可以用這把斧頭把這個雞蛋劈開，看看外面是什麼樣子。」他掄起大斧頭，向著混沌的黑暗用力一劈。\n        嘩啦啦——轟隆隆——\n        幾聲巨響過後，大雞蛋的外殼裂開，一道光線進入盤古的視線。\n        他看見一些輕盈又清淡的東西緩緩往上飄，變成了明亮的天空；一些既厚重又渾濁的東西紛紛往下降，變成了堅固的大地。就這樣，天與地誕生了。\n        天地誕生之後，盤古擔心它們會不斷合攏，重新變成原本混沌一團的模樣，就頭頂著天、腳踩著地，用自己的身軀撐住整個世界。\n        每天，盤古的身體都會長高一丈，天空也就跟著上升一丈，大地變厚一丈。一萬八千年過去了，盤古長成了一個有九萬里高的巨人，天空和大地也被他撐開九萬里的距離。它們再也合不攏了。\n        孤獨地站立了一萬八千年的盤古累壞了，他放下雙手，躺在大地上沉沉睡去。\n        他口中吐納的氣息變成了清風和雲朵，他的聲音變成了滾滾雷鳴；他的左眼變成了光輝萬丈的太陽，右眼變成了皎潔無瑕的月亮。至於他的頭髮和鬍鬚，則變成了在夜空中閃爍的星星；他流下的汗水，變成了滋潤萬物的雨水。我們現在所看到的天空，正是這樣形成的。\n        創世神盤古的貢獻還不只這樣。他的四肢變成了東、西、南、北四極，身軀變成了五方的高山丘陵，血液變成了江河湖海，筋脈變成一條條道路，肌肉變成可以種植作物的田地，皮毛則變成了各種花草樹木。\n        猜猜看，盤古的牙齒和骨頭變成了什麼？他的牙齒、骨頭和骨髓，變成了各種有用的金屬、堅硬的石頭和溫潤的美玉。\n        開天的創世巨人永遠沉睡了，但他的心永遠連接著這片天地，永遠守護著這個世界。\n\n--------------------\n【資料來源】：https://online.fliphtml5.com/vihaf/ulum/#p=12",
+    q: [
+        { 
+            txt: "根據文章第九段的記載，當盤古用大斧頭劈開大雞蛋後，天地是如何分開形成的？", 
+            opts: [
+                "輕盈清淡的東西往上飄變成天空，厚重渾濁的東西往下降變成大地", 
+                "盤古將大雞蛋分為兩半，上半半殼變成東方，下半半殼變成西方", 
+                "大雞蛋碎裂成無數微粒，經由暴風吹拂後形成了恆星與行星", 
+                "雞蛋中的蛋白凝固變成高山丘陵，蛋黃融化變成廣闊的江河湖海"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確指出「一些輕盈又清淡的東西緩緩往上飄，變成了明亮的天空；一些既厚重又渾濁的東西紛紛往下降，變成了堅固的大地」。" 
+        },
+        { 
+            txt: "天地剛誕生時，盤古為何要特別用頭頂著天、腳踩著地，獨自孤獨地站立一萬八千年？", 
+            opts: [
+                "擔心天地會再次重新合攏，回復到原本混沌一團的模樣", 
+                "為了向宇宙展現自己擁有九萬里高的強大力量與偉大威嚴", 
+                "因為失去大斧頭之後，無法找到其他工具來將天空固定住", 
+                "為了讓天空上的太陽與月亮能夠依照晝夜順序正常運轉"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第十段說明「盤古擔心它們會不斷合攏，重新變成原本混沌一團的模樣，就頭頂著天、腳踩著地，用自己的身軀撐住整個世界」。" 
+        },
+        { 
+            txt: "關於盤古倒下沉睡後身體器官的化育演變，下列對應何者符合文章的說法？", 
+            opts: [
+                "左眼化為太陽、右眼化為月亮，血液化為江河湖海", 
+                "口中氣息化為雷鳴，發出的聲音化為清風與白雲", 
+                "四肢化為五方高山，肌肉化為夜空中閃爍的星星", 
+                "牙齒與骨頭化為花草樹木，皮毛化為金屬與美玉"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確記載「左眼變成了光輝萬丈的太陽，右眼變成了皎潔無瑕的月亮……血液變成了江河湖海」。" 
+        },
+        { 
+            txt: "綜合全文關於盤古從小生長、闢地開天到最終化身萬物的情節，下列何者最能精準歸納盤古在神話中所展現的核心精神？", 
+            opts: [
+                "敢於破除黑暗混沌的開創精神，以及無私奉獻全身造福世界的犧牲精神", 
+                "追求個人極致力量與永生不朽，並靠一己之力掌控大自然萬物的支配精神", 
+                "遇到困難時善於使用工具解決，並等待其他神明協助分擔責任的合作精神", 
+                "順應自然法則不輕易改變現狀，堅持在黑暗中靜靜等待轉機的忍耐精神"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章前半描寫盤古不甘苦悶而揮斧開天闢地（勇於開創），後半描寫其撐開天地並在倒下後將全身血肉器官化為日月星辰與萬物（無私奉獻守護世界）。" 
+        }
+    ]
+},
+{
+    t: "星座故事-牡羊座的傳說",
+    c: "        牡羊座位於飛馬座與仙女座東邊。關於它的誕生，有一則流傳久遠且感人的希臘神話。\n        希臘底比斯國王亞達馬斯的首任王妃是雲精妮佩蕾，兩人育有普里克索斯王子與海倫公主。後來國王冷落妮佩蕾，妮佩蕾傷心離開。國王隨後娶了第二任妻子伊諾。伊諾生下自己的孩子後，便一心想除掉前妻留下的兩名兄妹，好讓自己的孩子繼承王位。\n        伊諾設計將炒過的穀物發給農夫播種，導致全國農作毫無收成。國王派使者前往神殿求取神諭，伊諾收買了使者，假造神諭稱：「只要獻祭普里克索斯王子，災難就會停止。」在飢餓人民的輿論壓力下，悲痛的國王只好同意犧牲王子。\n        妮佩蕾心碎不已，向天神宙斯虔誠祈禱。宙斯查明真相後，發現了伊諾的陰謀，於是命令使神荷米斯將一隻長滿光亮金黃羊毛的神羊送給妮佩蕾。在獻祭當天，妮佩蕾用濃霧遮蔽現場，救出王子與公主，讓他們騎上金羊飛空逃離希臘。\n        金羊以極快的速度在高空飛行。當飛越黑海上空時，海倫公主因好奇睜開眼睛往下看，頓時頭暈目眩，不慎鬆手掉入大海失蹤。普里克索斯悲痛萬分，最終獨自騎著金羊抵達黑海東岸的科基斯，受到當地人的友善對待，國王厄里提斯更將女兒嫁給他。\n        為了感謝神明與國王，普里克索斯將神羊獻給宙斯，並將金羊皮送給國王厄里提斯。國王將金羊皮掛在戰神森林的橡樹上，派巨龍日夜看守。宙斯收下獻祭後，許諾擁有金羊皮者將獲得幸福與繁榮，而那隻勇敢救人的金羊則被升上天空，成為今日的牡羊座。\n\n--------------------\n【資料來源】：https://angelcity.tw/world/storys.htm",
+    q: [
+        { 
+            txt: "根據文章內容，繼室王妃伊諾為了除掉前妻的孩子，設計了什麼計謀來製造全國性的災難？", 
+            opts: [
+                "發放炒過的穀物給農夫播種，導致農作物無法發芽收成", 
+                "偷偷在全國的井水中下毒，導致百姓生病無法下田耕作", 
+                "派人火燒國家糧倉，並將罪名推誣給普里克索斯王子", 
+                "強行徵收全國所有糧食，讓平民陷入飢餓並引發暴動"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中明確記載伊諾「將炒過的穀類分發給農夫們播種。結果當然一點收成也沒有」，進而藉此製造假神諭。" 
+        },
+        { 
+            txt: "在金羊載著兄妹倆逃離希臘的途中，海倫公主為何會不慎墜入大海失蹤？", 
+            opts: [
+                "因為在高空飛行時因好奇往下看，頭暈目眩而不慎鬆開雙手", 
+                "因為金羊為了躲避怪獸狄封的追擊而劇烈晃動，將她甩落", 
+                "因為伊諾派出的巨龍在空中襲擊金羊，將海倫抓走落入海中", 
+                "因為海倫為了救險些掉落的哥哥，失足從羊背上滑落"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中描述海倫「由於好奇，她睜開眼睛往下看。由於金羊正以光一般的速度在高空飛行，海倫頓時感到頭暈眼花，一不小心，抓著羊背的手放開了」。" 
+        },
+        { 
+            txt: "天神宙斯在查明伊諾王妃的陰謀後，為何選擇派使神送去「金羊」而不是直接雷霆懲罰伊諾？", 
+            opts: [
+                "為了化解眼前的獻祭危機並安全護送無辜的孩子逃離險境", 
+                "因為宙斯的法力受制於神諭，無法直接干涉凡間王室的內政", 
+                "因為宙斯打算試探普里克索斯王子是否願意為了國家犧牲自己", 
+                "因為伊諾背後有戰神阿瑞士撐腰，宙斯不願公開與戰神正面衝突"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "宙斯聽見妮佩蕾祈禱並發現陰謀後，命令荷米斯「趕快把那隻長滿了光亮金黃色羊毛的羊，帶去給妮佩蕾，讓她救救孩子吧！」，顯示其首要考量是救出即將被獻祭的孩子。" 
+        },
+        { 
+            txt: "綜合全文關於「金羊救人」與「金羊皮被掛在戰神森林」的情節發展，下列對於「金羊」在神話中所扮演的角色與象徵意義，何者歸納最為準確？", 
+            opts: [
+                "金羊是承載母愛祈求與神聖救贖的化身，其犧牲與獻祭最終換來庇佑與繁榮", 
+                "金羊是天神用來懲罰底比斯國王冷落前妻的工具，象徵著天庭對凡間不忠的懲罰", 
+                "金羊是科基斯國王用來招攬外國勇士的誘餌，象徵著權力爭奪與無休止的戰爭", 
+                "金羊是伊諾王妃為了奪取王位而召喚的魔獸，最終因背叛主人而被升為星座"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "金羊回應了母親妮佩蕾的祈禱（拯救無辜），將王子送達安全之地，最後被獻給宙斯並昇為星座，其羊皮也成為帶給人們幸福與繁榮的神聖象徵。" 
+        }
+    ]
+},
+{
+    t: "認識自體免疫疾病：類風濕性關節炎",
+    c: "        今天我們來看一個自體免疫疾病——類風濕性關節炎。這是身體裡的免疫系統不小心「認錯敵人」，開始攻擊自己的組織與器官，引發慢性發炎而導致不適。雖然病名叫做「關節炎」，但其實這個疾病侵犯的不只有關節，連皮膚、眼睛，甚至心臟、肺臟與血管都可能受到影響。\n<img src='x5110-2.jpg' alt='x5110-2.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n        當類風濕性關節炎發作時，患者最容易注意到的就是關節又紅、又腫、又痛。早期通常會從手指或腳趾等小關節開始，接著慢慢影響到手腕、手肘、膝蓋等地方，而且很喜歡同時攻擊雙手的同一位置或雙側膝蓋。發病後，患者在早晨起床或坐著很久沒活動時，常會覺得關節非常僵硬；平時也會特別容易感到疲累、體重下降，甚至會有微微發燒的感覺。\n        為什麼免疫系統會出錯呢？原來是免疫細胞跑到了關節裡的「滑膜」發動攻擊。滑膜原本的功用是產生潤滑液、幫助關節順暢活動，但當它反覆發炎變厚後，就會慢慢破壞周圍的軟骨與硬骨，讓關節變形與疼痛。雖然科學家推測這可能與細菌病毒感染、荷爾蒙變化或遺傳有關，但目前還沒有確定真正的發病原因。\n<img src='x5110-3.jpg' alt='x5110-3.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n        在罹患這個疾病的族群中，女性得病的機會是男性的三倍，且多數在四十到六十歲之間發病，不過年輕人也有機會罹患，例如創立伊甸基金會的知名作家杏林子（劉俠女士），就是在十二歲時發病的。此外，抽菸更是相當危險的因子，有吸菸習慣的人發病機會是普通人的四倍，症狀也會更加嚴重，因此遠離香菸非常重要。\n<img src='x5110-4.jpg' alt='x5110-4.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n        目前醫學上還沒有完全治癒類風濕性關節炎的方法，患者的症狀往往會忽好忽壞。在日常生活中，規律運動、充分休息，以及適時透過冷熱敷減輕關節不適都很重要。同時，保持心情放鬆避免壓力、注意飲食習慣、勤洗手預防感冒與施打流感疫苗，都能減少發作的機會；若症狀復發，只要與醫師密切合作配合藥物控制，依然能維持良好的生活品質。\n<img src='x5110-5.jpg' alt='x5110-5.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n        資料來源：https://www.careonline.com.tw/2018/01/rheumatoid-arthritis.html",
+    q: [
+        { 
+            txt: "根據文章內容，類風濕性關節炎是免疫系統攻擊關節裡的哪一個組織，導致其反覆發炎變厚並進一步破壞軟骨與硬骨？", 
+            opts: [
+                "滑膜", 
+                "肌腱", 
+                "韌帶", 
+                "骨髓"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第三段明確指出「原來是免疫細胞跑到了關節裡的『滑膜』發動攻擊……當它反覆發炎變厚後，就會慢慢破壞周圍的軟骨與硬骨」。" 
+        },
+        { 
+            txt: "關於類風濕性關節炎的流行病學特徵與危險因子，下列敘述何者最符合文章的分析？", 
+            opts: [
+                "女性患病機率為男性三倍且吸菸者發病率增為四倍，但任何年齡層皆可能發病", 
+                "只有四十至六十歲的中老年人會罹患此病，青少年因免疫系統健全而不會發病", 
+                "吸菸只會導致咳嗽與肺部疾病，對於類風濕性關節炎的發病機率並無直接影響", 
+                "男性因為運動量較大且荷爾蒙變化劇烈，患病機率遠高於女性"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中提到女性患病率是男性三倍、吸菸者發病機會是普通人四倍，且舉作家杏林子十二歲發病為例證明年輕人亦可能患病。" 
+        },
+        { 
+            txt: "類風濕性關節炎患者在早晨起床或長時間保持固定姿勢後，關節經常會感到異常僵硬，這是因為什麼原因造成的？", 
+            opts: [
+                "關節內的滑膜受到免疫系統攻擊而反覆發炎變厚，影響了關節潤滑與活動", 
+                "患者體內的維生素 B 群被酒精過度消耗，導致肌肉無法正常放縮", 
+                "長時間缺乏運動導致冷暖空氣在大氣中產生劇烈交會與垂直對流", 
+                "體內缺乏高劑量的色胺酸，導致血清素分泌不足而引起關節麻痺"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文章說明免疫細胞攻擊原本負責產生潤滑液的「滑膜」，導致滑膜反覆發炎變厚，進而使關節在久未活動時出現僵硬與疼痛。" 
+        },
+        { 
+            txt: "綜合全文關於類風濕性關節炎的病因、症狀與照護方式的介紹，下列對於這個疾病的總結，何者歸納最為準確？", 
+            opts: [
+                "屬於全身性的自體免疫慢性發炎疾病，雖無法根治但可透過良好生活習慣與藥物控制維持品質", 
+                "屬於僅侵犯手足小關節的短暫傳染性疾病，只要施打流感疫苗就能達到百分之百完全治癒", 
+                "病因已明確證實為細菌感染所引發，患者應避免任何體能活動與冷熱敷理以防惡化", 
+                "只要戒菸並保持運動就能徹底免疫，不需要與醫師合作或接受任何臨床藥物治療"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章指出類風濕性關節炎不只侵犯關節（全身性），目前無法根治，但透過運動、休息、避壓、預防感染並與醫師配合藥物控制，依然能維持良好品質。" 
+        }
+    ]
+},
+{
+    t: "餓到睡不著？營養師列7款「助眠宵夜」不怕胖：香蕉牛奶、豆漿都OK",
+    c: "        網路上流傳各種有關宵夜的迷思，究竟吃宵夜是不是肥胖的原兇？其實吃宵夜可以幫助燃燒脂肪？對此，雙和醫院家醫科醫師葉睿儒表示，根據人體總熱量的精算法，若每日攝取不超過人體總熱量應不會發胖。不過他強調，宵夜確實對於睡眠品質有直接影響關係。\n        宵夜吃色胺酸食物可助眠\n        葉睿儒指出，宵夜不等於肥胖，若是民眾可以選擇以健康的方式烹飪的宵夜，就可以改善疾病問題。他建議，在睡前可適量攝取富含色胺酸的食物，像是堅果和牛奶，就能幫助血清素分泌，有助於穩定情緒和提升睡眠品質。\n        葉睿儒提醒，日常生活中色胺酸可從魚類、黑巧克力、海藻、花生和櫻桃中攝取，充足的睡眠與人體中的荷爾蒙有密切相關，包括瘦素和生長素，皆是幫助瘦身的一大關鍵。「不過，睡前吃宵夜少量攝取是重點，過量的食物不僅會造成腹部壓力增大，還會導致胃食道逆流、食道灼傷等問題，可能影響交感神經，反而使睡眠品質變差。」\n        健康宵夜4原則不傷胃\n        如果睡前真的飢腸轆轆，想要吃宵夜幫助入睡，該如何選擇？營養師劉怡里在臉書粉絲頁發文建議，想吃助眠宵夜可遵循以下4原則，避免肚子不舒服影響睡眠，也能控制熱量，依然可以輕鬆入睡：\n        液體為主，可以選擇豆漿、牛奶、湯品、粥品較好消化，控制在250～300毫升左右，夜間易頻尿的人，提前1小時進食完畢。\n        可以選擇富含鈣、鎂、色胺酸、芝麻素的食材，具有放鬆效果。\n        如果睡前才吃宵夜，吃完馬上要入睡，建議可以墊高枕頭，採取左側臥姿為佳，避免胃食道逆流而影響睡眠。\n        如果宵夜真的吃太多，睡前建議可以在家裡散步15～30分鐘，補充益生菌，例如比菲德氏菌，幫助腸道蠕動消化，也較易入睡。\n        劉怡里建議，不管吃什麼宵夜都會影響睡眠，建議睡前2小時把餐點食用完畢，讓消化道好好休息，才能享受良好的睡眠品質。\n        <img src='x5110-1.jpg' alt='x5110-1.jpg' style='max-width:100%; height:auto; border-radius:8px;'></div>\n\n--------------------\n【資料來源】：https://www.uho.com.tw/article-64209.html",
+    q: [
+        { 
+            txt: "根據雙和醫院家醫科醫師葉睿儒的說明，睡前適量攝取富含「色胺酸」的食物，主要能促進哪一種物質的分泌以幫助穩定情緒與提升睡眠品質？", 
+            opts: [
+                "血清素", 
+                "褪黑激素", 
+                "胰島素", 
+                "腎上腺素"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第二段明確提及「睡前可適量攝取富含色胺酸的食物……就能幫助血清素分泌，有助於穩定情緒和提升睡眠品質」。" 
+        },
+        { 
+            txt: "根據營養師劉怡里的建議，若民眾剛吃完宵夜便需要立刻入睡，採取何種姿勢與睡姿調整最能有效預防胃食道逆流？", 
+            opts: [
+                "將枕頭墊高並採取左側臥姿", 
+                "完全不使用枕頭並採取平躺仰臥姿", 
+                "將枕頭墊高並採取右側臥姿", 
+                "保持趴睡姿勢並將雙腿抬高"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中「健康宵夜4原則」第3點明確指出，若吃完馬上要入睡，建議「墊高枕頭，採取左側臥姿為佳，避免胃食道逆流而影響睡眠」。" 
+        },
+        { 
+            txt: "關於吃宵夜是否會導致肥胖的機制，家醫科醫師葉睿儒提出了什麼樣的專業分析？", 
+            opts: [
+                "只要每日攝取的總熱量沒有超過人體所需，即使吃宵夜也不一定會發胖", 
+                "凡是在晚上 10 點之後進食的食物，都會百分之百轉化為脂肪堆積", 
+                "吃宵夜能直接加速新陳代謝，因此吃得越多越能幫助身體燃燒脂肪", 
+                "只要選擇無糖液體宵夜，即使熱量超過每日總熱量上限也不會增重"
+            ], 
+            a: 0, 
+            s: 1, 
+            fb: "文中第一段指出「根據人體總熱量的精算法，若每日攝取不超過人體總熱量應不會發胖」，強調關鍵在於一日總熱量平衡而非吃宵夜本身。" 
+        },
+        { 
+            txt: "綜合全文醫師與營養師的建議，下列關於「健康吃宵夜以維護睡眠品質」的原則歸納，何者最為準確？", 
+            opts: [
+                "宵夜應以適量、易消化的液體或富含放鬆營養素的食物為主，避免過量或過晚進食增加腸胃負擔", 
+                "只要睡前補充益生菌，便可以不限制宵夜的份量與熱量，且吃完即可立刻平躺入睡", 
+                "為了達到最佳助眠效果，應於宵夜中加入大量高糖分食材以快速提升血糖幫助入睡", 
+                "夜間容易頻尿者應在睡前 10 分鐘內喝完 500 毫升以上的濃稠粥品以達到飽足感"
+            ], 
+            a: 0, 
+            s: 2, 
+            fb: "文章綜合了熱量控制、食物質地（液體/好消化）、營養成分（色胺酸/鈣/鎂）、進食時間與份量控制（250-300ml/少量）等多重原則，確保睡得好且不傷腸胃。" 
+        }
+    ]
+}
+      ];
+
+        // 冷卻時間設定：1 小時 (以毫秒計算 = 60分 * 60秒 * 1000毫秒)
+        const COOLDOWN_TIME = 20 * 60 * 1000;
+        let cooldownInterval = null;
+        let liveTimerInterval = null; // 即時計時器變數
+
+        // 洗牌演算法
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let db = shuffle(JSON.parse(JSON.stringify(rawDb)));
+        db.forEach(article => {
+            shuffle(article.q);
+            article.q.forEach(question => {
+                let formattedOpts = question.opts.map((optText, origIdx) => ({
+                    text: optText,
+                    isCorrect: origIdx === question.a
+                }));
+                shuffle(formattedOpts);
+                question.shuffledOpts = formattedOpts;
+            });
+        });
+
+        let idx = 0;
+        let totalScore = 0;
+        let articleStartTime = null; 
+        let articleTimes = [];       
+
+        // 檢查是否處於 1 小時冷卻期
+        function checkCooldown() {
+            const lastSubmitTime = localStorage.getItem('last_quiz_submit_time');
+            if (lastSubmitTime) {
+                const now = new Date().getTime();
+                const timePassed = now - parseInt(lastSubmitTime);
+
+                if (timePassed < COOLDOWN_TIME) {
+                    showCooldownScreen(COOLDOWN_TIME - timePassed);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 顯示倒數鎖定畫面
+        function showCooldownScreen(remainingTime) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('cooldown-screen').classList.remove('hidden');
+
+            function updateTimer() {
+                remainingTime -= 1000;
+                if (remainingTime <= 0) {
+                    clearInterval(cooldownInterval);
+                    document.getElementById('cooldown-screen').classList.add('hidden');
+                    document.getElementById('game-container').classList.remove('hidden');
+                    render();
+                    return;
+                }
+                const mins = Math.floor(remainingTime / (1000 * 60));
+                const secs = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                document.getElementById('cd-timer-text').innerText = `剩餘時間：${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+            }
+
+            updateTimer();
+            cooldownInterval = setInterval(updateTimer, 1000);
+        }
+
+        function render() {
+            if (checkCooldown()) return;
+
+            // 清除前一篇的即時計時器（若存在）
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            const data = db[idx];
+            document.getElementById('display-title').innerText = data.t;
+            document.getElementById('display-content').innerHTML = data.c;
+            
+            const list = document.getElementById('quiz-list');
+            list.innerHTML = '';
+            data.q.forEach((item, i) => {
+                let optsHtml = '';
+                item.shuffledOpts.forEach((o, oi) => {
+                    optsHtml += `<label class="opt-item"><input type="radio" name="q${i}" value="${oi}"> ${o.text}</label>`;
+                });
+                list.innerHTML += `
+                    <div class="q-block">
+                        <div class="q-header">${i+1}. ${item.txt} (${item.s}分)</div>
+                        ${optsHtml}
+                        <div id="fb${i}" class="ans-feedback"></div>
+                    </div>`;
+            });
+
+            document.getElementById('live-timer-box').classList.remove('hidden');
+            document.getElementById('btn-submit').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            
+            // 重置滾動條頂部位置
+            document.getElementById('quiz-scroll-area').scrollTop = 0;
+            document.querySelector('.article-pane').scrollTop = 0;
+
+            articleStartTime = new Date();
+
+            // 啟動即時動態計時器 (每秒更新一次)
+            const timerText = document.getElementById('live-timer-text');
+            function updateLiveTimer() {
+                const now = new Date();
+                const diffSec = Math.floor((now - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                timerText.innerText = `${mins} 分 ${secs < 10 ? '0' : ''}${secs} 秒`;
+
+                // 超過 3 分鐘 (180 秒) 文字會轉為綠色作為溫馨提示
+                if (diffSec >= 180) {
+                    timerText.style.color = '#27ae60';
+                } else {
+                    timerText.style.color = '#e67e22';
+                }
+            }
+
+            updateLiveTimer();
+            liveTimerInterval = setInterval(updateLiveTimer, 1000);
+        }
+
+        function checkAll() {
+            const data = db[idx];
+            let roundScore = 0;
+
+            for(let i=0; i<data.q.length; i++) {
+                if(!document.querySelector(`input[name="q${i}"]:checked`)) {
+                    alert("第 " + (i+1) + " 題還沒寫喔！"); return;
+                }
+            }
+
+            // 停止本篇的即時計時器
+            if (liveTimerInterval) clearInterval(liveTimerInterval);
+
+            if (articleStartTime) {
+                const articleEndTime = new Date();
+                const diffSec = Math.floor((articleEndTime - articleStartTime) / 1000);
+                const mins = Math.floor(diffSec / 60);
+                const secs = diffSec % 60;
+                const timeStr = `${mins > 0 ? mins + ' 分 ' : ''}${secs} 秒`;
+                
+                articleTimes[idx] = {
+                    title: data.t,
+                    time: timeStr
+                };
+            }
+
+            for(let i=0; i<data.q.length; i++) {
+                const userVal = parseInt(document.querySelector(`input[name="q${i}"]:checked`).value);
+                const item = data.q[i];
+                const selectedOpt = item.shuffledOpts[userVal];
+                const correctOpt = item.shuffledOpts.find(o => o.isCorrect);
+                const fb = document.getElementById('fb'+i);
+                fb.style.display = "block";
+                
+                if(selectedOpt.isCorrect) {
+                    fb.className = "ans-feedback is-correct";
+                    fb.innerHTML = `<strong>✅ 答對了！</strong> ${item.fb}`;
+                    roundScore += item.s;
+                } else {
+                    fb.className = "ans-feedback is-wrong";
+                    fb.innerHTML = `<strong>❌ 答錯了！</strong> 正確答案是：${correctOpt.text}<br>${item.fb}`;
+                }
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(el => el.disabled = true);
+            }
+
+            totalScore += roundScore;
+            document.getElementById('score-val').innerText = totalScore;
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            
+            if(idx === db.length - 1) document.getElementById('btn-next').innerText = "查看最後總分";
+        }
+
+        function goNext() {
+            idx++;
+            if(idx < db.length) {
+                render();
+            } else {
+                // 完成全部測驗，紀錄當前時間到 localStorage 作為冷卻起點
+                localStorage.setItem('last_quiz_submit_time', new Date().getTime().toString());
+
+                // 隱藏題目與文章
+                document.getElementById('quiz-article-wrap').classList.add('hidden');
+                document.getElementById('quiz-questions-wrap').classList.add('hidden');
+                
+                // 顯示結算報告與右側圖片
+                document.getElementById('finish-report').classList.remove('hidden');
+                document.getElementById('finish-image-wrap').classList.remove('hidden');
+
+                document.getElementById('left-pane').classList.add('no-scroll');
+                document.getElementById('right-pane').classList.add('no-scroll');
+
+                document.getElementById('final-score').innerText = totalScore;
+
+                let timeReportHtml = "<div style='font-weight:bold; margin-bottom:10px; color:#27ae60; font-size:1.4rem;'>⏱️ 各篇閱讀與答題耗時：</div>";
+                articleTimes.forEach((item) => {
+                    timeReportHtml += `<div>📄 ${item.title}：<span style="color:#e67e22; font-weight:bold;">${item.time}</span></div>`;
+                });
+                document.getElementById('time-report').innerHTML = timeReportHtml;
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
