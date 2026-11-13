@@ -193,6 +193,7 @@
         <div id="final-screen" class="result-content hidden">
             <h1 id="final-status-text" style="font-size: 3rem; margin: 0;">速度太慢了，下次再來挑戰吧！</h1>
             <div style="font-size: 4rem; color: #f1c40f;">💰 <span id="final-coins">0</span></div>
+<div id="submission-time" style="font-size: 1.2rem; color: #f1c40f; margin: 15px 0; font-weight: bold; background: rgba(0,0,0,0.5); display: inline-block; padding: 10px 20px; border-radius: 10px; line-height: 1.5;"></div>
             <p style="font-size: 1.5rem;">請至秘書處登記獎勵點數！</p>
         </div>
     </div>
@@ -417,6 +418,9 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
         }
 
  function endGame(status) {
+// ▼▼▼ 新增這行：只隱藏上方資訊欄裡的點數與血量 ▼▼▼
+    document.querySelectorAll('.stats').forEach(el => el.classList.add('hidden'));
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
             // 1. 隱藏遊戲主容器
             document.getElementById('game-area').classList.add('hidden');
             
@@ -453,7 +457,19 @@ document.getElementById('fb-answer-reveal').innerHTML = `正確答案：${finalA
             
             const pTag = document.querySelector('#final-screen p');
             if (pTag) pTag.innerText = detailTxt;
-
+// ▼▼▼ 新增：自動取得當下時間並填入防弊欄位 ▼▼▼
+            const now = new Date();
+            const timeString = now.toLocaleString('zh-TW', { 
+                hour12: true, 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('submission-time').innerHTML = `U5106提交時間：<br>${timeString}`;
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
             // 4. 顯示結算畫面
             document.getElementById('final-screen').classList.remove('hidden');
         }
