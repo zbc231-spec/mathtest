@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>法老密碼 - 班級同步搶答看板</title>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b1807 0%, #5c340e 50%, #1f1105 100%);
+      color: #fffdf5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+
+    .card {
+      background: #fffdf5;
+      color: #222;
+      border: 4px solid #b8860b;
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 1060px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .card.narrow {
+      max-width: 460px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #6e4200;
+      font-size: 1.55rem;
+      font-weight: 900;
+    }
+
+    p.sub {
+      color: #666;
+      font-size: 0.95rem;
+      margin: 8px 0 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-blue {
+      background: linear-gradient(180deg, #4da6ff 0%, #0066cc 100%);
+      color: #fff;
+      border: 2px solid #004080;
+    }
+
+    .btn-red {
+      background: linear-gradient(180deg, #ff6666 0%, #cc0000 100%);
+      color: #fff;
+    }
+
+    .btn-green {
+      background: linear-gradient(180deg, #5cd65c 0%, #248f24 100%);
+      color: #fff;
+    }
+
+    .btn-gray {
+      background: #e6e6e6;
+      color: #333;
+      border: 2px solid #aaa;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* 進房表單 */
+    .form-group {
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 900;
+      color: #4a2e00;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .text-input {
+      width: 100%;
+      font-size: 1.3rem;
+      font-weight: 900;
+      padding: 10px 12px;
+      border: 2.5px solid #8a5a00;
+      border-radius: 10px;
+      text-align: center;
+      color: #111;
+      background: #fff;
+    }
+
+    /* 頂部共用列 */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #d4ae6a;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .info-badge {
+      background: #fff0b3;
+      color: #5c3a00;
+      border: 2px solid #b8860b;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 1.08rem;
+      font-weight: 900;
+    }
+
+    /* 左右雙欄主體 */
+    .split-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .split-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pane {
+      background: #fffaf0;
+      border: 2px solid #e0c080;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .pane-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #6e4200;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .formula-input {
+      width: 100%;
+      font-size: 1.65rem;
+      font-weight: 900;
+      padding: 10px 12px;
+      border: 3px solid #333;
+      border-radius: 10px;
+      text-align: center;
+      background: #ffffff;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .formula-input.dup-alert {
+      border-color: #cc0000;
+      background: #fff0f0;
+    }
+
+    .dup-warning {
+      background: #ffe6e6;
+      border: 2px solid #cc0000;
+      color: #990000;
+      font-weight: 900;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .key-btn {
+      padding: 11px 0;
+      font-size: 1.25rem;
+      font-weight: 900;
+      border: 1px solid #999;
+      border-radius: 8px;
+      background: #f2f2f2;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .key-btn:active {
+      background: #d9d9d9;
+    }
+
+    .key-btn.op {
+      background: #ffe699;
+      border-color: #b8860b;
+    }
+
+    .key-btn.del {
+      background: #ffcccc;
+      border-color: #cc0000;
+      color: #990000;
+      font-size: 1.05rem;
+    }
+
+    .submitted-banner {
+      background: #e6ffe6;
+      border: 2px solid #248f24;
+      color: #196619;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    /* 右側全班傳送答案區 */
+    .answer-list {
+      max-height: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .answer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff8dc;
+      border: 2px solid #b8860b;
+      border-radius: 10px;
+      padding: 10px 14px;
+      animation: popIn 0.2s ease-out;
+    }
+
+    .answer-item.rank-1 {
+      background: linear-gradient(90deg, #fff0b3 0%, #ffe066 100%);
+      border: 2.5px solid #cc8800;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .rank-tag {
+      font-size: 1rem;
+      font-weight: 900;
+      background: #5c3a00;
+      color: #ffe066;
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-right: 10px;
+      min-width: 74px;
+      text-align: center;
+    }
+
+    .rank-1 .rank-tag {
+      background: #cc0000;
+      color: #fff;
+    }
+
+    .sender-tag {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #3d2300;
+      background: #ffe9a8;
+      padding: 3px 9px;
+      border-radius: 6px;
+      margin-right: 10px;
+    }
+
+    .formula-text {
+      font-family: "Arial Black", sans-serif;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #003399;
+      flex: 1;
+    }
+
+    .time-diff {
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    /* 密碼清除彈窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 999;
+    }
+
+    .modal-box {
+      background: #fffdf5;
+      color: #222;
+      border: 4px solid #b8860b;
+      border-radius: 14px;
+      padding: 22px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 進房畫面：輸入座號與組別（免輸入房間號碼） -->
+  <div class="card narrow" id="view-entry">
+    <h1>𓆣 法老密碼同步搶答</h1>
+    <p class="sub">輸入座號與組別即可直接進入搶答室</p>
+
+    <div class="form-group">
+      <label class="form-label" for="entry-seat">座號</label>
+      <input type="text" class="text-input" id="entry-seat" placeholder="例如：03 或 15" maxlength="10" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="entry-group">組別</label>
+      <input type="text" class="text-input" id="entry-group" placeholder="例如：第一組 或 1組" maxlength="12" />
+    </div>
+
+    <button type="button" class="btn btn-blue" id="btn-join" onclick="enterClassroom()">進入搶答室</button>
+    <p id="entry-error" style="color: #cc0000; font-weight: bold; margin-top: 10px;"></p>
+  </div>
+
+  <!-- 2. 左右雙欄畫面（教師與學生共用相同版本） -->
+  <div class="card hidden" id="view-room">
+    <div class="top-bar">
+      <div>
+        <h1>𓆣 法老密碼同步搶答</h1>
+        <div id="conn-status" style="font-size:0.88rem; color:#248f24; font-weight:bold; margin-top:2px;">● 正在連線至班級頻道...</div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div class="info-badge" id="my-identity-display">組別：--・座號：--</div>
+        <button type="button" class="btn btn-red" style="width:auto;" onclick="openClearModal()">🔒 清除答案</button>
+      </div>
+    </div>
+
+    <div class="split-layout">
+      <!-- 左邊：輸入區 -->
+      <div class="pane">
+        <div class="pane-title">
+          <span>✍️ 算式輸入區</span>
+        </div>
+
+        <div id="submitted-banner" class="submitted-banner hidden">
+          <span>✅ 已送出：<b id="last-sent-text"></b></span>
+          <button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px; font-size:0.88rem;" onclick="resetInput()">再寫一組</button>
+        </div>
+
+        <input type="text" class="formula-input" id="formula-box" placeholder="輸入完整算式" readonly />
+
+        <div id="dup-warning" class="dup-warning hidden">
+          ⚠️ 右邊已有相同算式！若不想重複，可按「放棄 / 清空」改寫。
+        </div>
+
+        <div class="keypad">
+          <button type="button" class="key-btn" onclick="appendKey('7')">7</button>
+          <button type="button" class="key-btn" onclick="appendKey('8')">8</button>
+          <button type="button" class="key-btn" onclick="appendKey('9')">9</button>
+          <button type="button" class="key-btn op" onclick="appendKey('+')">+</button>
+          <button type="button" class="key-btn op" onclick="appendKey('-')">-</button>
+
+          <button type="button" class="key-btn" onclick="appendKey('4')">4</button>
+          <button type="button" class="key-btn" onclick="appendKey('5')">5</button>
+          <button type="button" class="key-btn" onclick="appendKey('6')">6</button>
+          <button type="button" class="key-btn op" onclick="appendKey('×')">×</button>
+          <button type="button" class="key-btn op" onclick="appendKey('÷')">÷</button>
+
+          <button type="button" class="key-btn" onclick="appendKey('1')">1</button>
+          <button type="button" class="key-btn" onclick="appendKey('2')">2</button>
+          <button type="button" class="key-btn" onclick="appendKey('3')">3</button>
+          <button type="button" class="key-btn op" onclick="appendKey('(')">(</button>
+          <button type="button" class="key-btn op" onclick="appendKey(')')">)</button>
+
+          <button type="button" class="key-btn" onclick="appendKey('0')">0</button>
+          <button type="button" class="key-btn op" onclick="appendKey('=')">=</button>
+          <button type="button" class="key-btn del" onclick="backspaceKey()">⌫ 倒退</button>
+          <button type="button" class="key-btn del" style="grid-column: span 2;" onclick="giveUpFormula()">放棄 / 清空</button>
+        </div>
+
+        <button type="button" class="btn btn-green" onclick="submitFormula()">🚀 送出算式</button>
+      </div>
+
+      <!-- 右邊：全班傳送的答案區 -->
+      <div class="pane">
+        <div class="pane-title">
+          <span>📋 全班已送出算式</span>
+          <span id="answer-count" style="font-size:0.9rem; color:#666;">共 0 筆</span>
+        </div>
+        <div class="answer-list" id="answer-list">
+          <p style="text-align:center; color:#888; padding:40px 0; font-size:1.05rem;">目前尚無已送出的算式</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 清除答案密碼輸入框 -->
+  <div class="modal-backdrop hidden" id="clear-modal">
+    <div class="modal-box">
+      <h2 style="color:#6e4200; font-size:1.35rem; margin-bottom:8px;">🔒 輸入清除密碼</h2>
+      <p style="color:#666; font-size:0.92rem; margin-bottom:12px;">輸入正確密碼才能清空全班答案</p>
+      <input type="password" class="text-input" id="clear-pwd-input" placeholder="請輸入密碼" />
+      <p id="clear-pwd-error" style="color:#cc0000; font-weight:bold; font-size:0.9rem; margin-top:8px;"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-gray" onclick="closeClearModal()">取消</button>
+        <button type="button" class="btn btn-red" onclick="verifyAndClear()">確認清除</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CLASS_CHANNEL_ID = "pharaoh-class-fixed-channel-v1";
+    const CLEAR_PASSWORD = "1234";
+
+    let mySeat = "";
+    let myGroup = "";
+    let isChannelHost = false;
+    let peer = null;
+    let hostConn = null;
+    let clientConns = [];
+    let answers = [];
+    let firstTimestamp = null;
+
+    function enterClassroom() {
+      const seat = document.getElementById("entry-seat").value.trim();
+      const group = document.getElementById("entry-group").value.trim();
+      const errEl = document.getElementById("entry-error");
+
+      if (!seat) {
+        errEl.textContent = "請先輸入座號！";
+        return;
+      }
+      if (!group) {
+        errEl.textContent = "請先輸入組別！";
+        return;
+      }
+
+      mySeat = seat;
+      myGroup = group;
+      errEl.textContent = "";
+      document.getElementById("btn-join").disabled = true;
+
+      document.getElementById("view-entry").classList.add("hidden");
+      document.getElementById("view-room").classList.remove("hidden");
+      document.getElementById("my-identity-display").textContent = `${myGroup}・${mySeat}號`;
+
+      initFixedChannel();
+    }
+
+    function initFixedChannel() {
+      document.getElementById("conn-status").textContent = "⏳ 連線至班級頻道中...";
+      peer = new Peer(CLASS_CHANNEL_ID);
+
+      peer.on("open", () => {
+        isChannelHost = true;
+        document.getElementById("conn-status").textContent = "● 已連線（班級同步頻道已開啟）";
+        document.getElementById("conn-status").style.color = "#248f24";
+
+        peer.on("connection", (connection) => {
+          clientConns.push(connection);
+
+          connection.on("open", () => {
+            connection.send({
+              type: "SYNC_STATE",
+              answers,
+              firstTimestamp
+            });
+          });
+
+          connection.on("data", (data) => {
+            if (!data) return;
+            if (data.type === "SUBMIT_FORMULA") {
+              addAnswerRecord(data.sender, data.formula);
+            } else if (data.type === "REQUEST_CLEAR") {
+              performClearBoard();
+            }
+          });
+
+          connection.on("close", () => {
+            clientConns = clientConns.filter(c => c !== connection);
+          });
+        });
+      });
+
+      peer.on("error", (err) => {
+        if (err.type === "unavailable-id") {
+          connectAsClient();
+        } else {
+          document.getElementById("conn-status").textContent = "⚠️ 連線異常：" + err.type;
+          document.getElementById("conn-status").style.color = "#cc0000";
+        }
+      });
+    }
+
+    function connectAsClient() {
+      isChannelHost = false;
+      const clientPeer = new Peer();
+      peer = clientPeer;
+
+      clientPeer.on("open", () => {
+        hostConn = clientPeer.connect(CLASS_CHANNEL_ID);
+
+        hostConn.on("open", () => {
+          document.getElementById("conn-status").textContent = "● 已連線至班級同步頻道";
+          document.getElementById("conn-status").style.color = "#248f24";
+        });
+
+        hostConn.on("data", (data) => {
+          if (!data) return;
+          if (data.type === "SYNC_STATE") {
+            answers = data.answers || [];
+            firstTimestamp = data.firstTimestamp || null;
+            renderAnswerList();
+            checkDuplicate();
+            if (answers.length === 0) {
+              resetLocalSubmittedBanner();
+            }
+          } else if (data.type === "CLEAR_ROUND") {
+            answers = [];
+            firstTimestamp = null;
+            renderAnswerList();
+            resetLocalSubmittedBanner();
+          }
+        });
+
+        hostConn.on("close", () => {
+          document.getElementById("conn-status").textContent = "● 連線已中斷，請重新整理";
+          document.getElementById("conn-status").style.color = "#cc0000";
+        });
+      });
+    }
+
+    function broadcastState() {
+      const payload = {
+        type: "SYNC_STATE",
+        answers,
+        firstTimestamp
+      };
+      clientConns.forEach(c => {
+        if (c && c.open) {
+          c.send(payload);
+        }
+      });
+    }
+
+    function broadcastClear() {
+      clientConns.forEach(c => {
+        if (c && c.open) {
+          c.send({ type: "CLEAR_ROUND" });
+        }
+      });
+    }
+
+    function resetLocalSubmittedBanner() {
+      document.getElementById("formula-box").value = "";
+      document.getElementById("last-sent-text").textContent = "";
+      document.getElementById("submitted-banner").classList.add("hidden");
+      checkDuplicate();
+    }
+
+    function addAnswerRecord(sender, formula) {
+      const now = Date.now();
+      if (answers.length === 0) {
+        firstTimestamp = now;
+      }
+      answers.push({ sender, formula, time: now });
+      renderAnswerList();
+      checkDuplicate();
+      if (isChannelHost) {
+        broadcastState();
+      }
+    }
+
+    function performClearBoard() {
+      answers = [];
+      firstTimestamp = null;
+      renderAnswerList();
+      resetLocalSubmittedBanner();
+      if (isChannelHost) {
+        broadcastState();
+        broadcastClear();
+      } else if (hostConn && hostConn.open) {
+        hostConn.send({ type: "REQUEST_CLEAR" });
+      }
+    }
+
+    // ==================== 密碼彈窗邏輯 ====================
+    function openClearModal() {
+      document.getElementById("clear-pwd-input").value = "";
+      document.getElementById("clear-pwd-error").textContent = "";
+      document.getElementById("clear-modal").classList.remove("hidden");
+      document.getElementById("clear-pwd-input").focus();
+    }
+
+    function closeClearModal() {
+      document.getElementById("clear-modal").classList.add("hidden");
+    }
+
+    function verifyAndClear() {
+      const inputPwd = document.getElementById("clear-pwd-input").value;
+      if (inputPwd === CLEAR_PASSWORD) {
+        performClearBoard();
+        closeClearModal();
+      } else {
+        document.getElementById("clear-pwd-error").textContent = "密碼錯誤，無法清除！";
+      }
+    }
+
+    // ==================== 比對與輸入邏輯 ====================
+    function normalizeFormula(str) {
+      return str
+        .replace(/\s+/g, "")
+        .replace(/\*/g, "×")
+        .replace(/\//g, "÷")
+        .toLowerCase();
+    }
+
+    function checkDuplicate() {
+      const raw = document.getElementById("formula-box").value.trim();
+      const norm = normalizeFormula(raw);
+      const warningEl = document.getElementById("dup-warning");
+      const inputEl = document.getElementById("formula-box");
+
+      if (!norm) {
+        warningEl.classList.add("hidden");
+        inputEl.classList.remove("dup-alert");
+        return;
+      }
+
+      const isDup = answers.some(item => normalizeFormula(item.formula) === norm);
+      warningEl.classList.toggle("hidden", !isDup);
+      inputEl.classList.toggle("dup-alert", isDup);
+    }
+
+    function appendKey(char) {
+      const box = document.getElementById("formula-box");
+      if (box.value.length < 25) {
+        box.value += char;
+        checkDuplicate();
+      }
+    }
+
+    function backspaceKey() {
+      const box = document.getElementById("formula-box");
+      box.value = box.value.slice(0, -1);
+      checkDuplicate();
+    }
+
+    function giveUpFormula() {
+      document.getElementById("formula-box").value = "";
+      checkDuplicate();
+    }
+
+    function resetInput() {
+      document.getElementById("formula-box").value = "";
+      document.getElementById("submitted-banner").classList.add("hidden");
+      checkDuplicate();
+    }
+
+    function submitFormula() {
+      const formula = document.getElementById("formula-box").value.trim();
+      if (!formula) {
+        alert("請先輸入算式再送出！");
+        return;
+      }
+
+      const senderLabel = `${myGroup}・${mySeat}號`;
+
+      if (isChannelHost) {
+        addAnswerRecord(senderLabel, formula);
+      } else {
+        if (!hostConn || !hostConn.open) {
+          alert("尚未連上班級頻道，請稍候或重新整理網頁！");
+          return;
+        }
+        hostConn.send({
+          type: "SUBMIT_FORMULA",
+          sender: senderLabel,
+          formula
+        });
+      }
+
+      document.getElementById("last-sent-text").textContent = `${senderLabel}：${formula}`;
+      document.getElementById("submitted-banner").classList.remove("hidden");
+      document.getElementById("formula-box").value = "";
+      checkDuplicate();
+    }
+
+    function renderAnswerList() {
+      const list = document.getElementById("answer-list");
+      const countEl = document.getElementById("answer-count");
+      countEl.textContent = `共 ${answers.length} 筆`;
+
+      if (answers.length === 0) {
+        list.innerHTML = `<p style="text-align:center; color:#888; padding:40px 0; font-size:1.05rem;">目前尚無已送出的算式</p>`;
+        return;
+      }
+
+      list.innerHTML = answers.map((item, idx) => {
+        const diffSec = firstTimestamp ? ((item.time - firstTimestamp) / 1000).toFixed(2) : "0.00";
+        const timeText = idx === 0 ? "⚡ 最快" : `+${diffSec}s`;
+        return `
+          <div class="answer-item ${idx === 0 ? "rank-1" : ""}">
+            <div style="display:flex; align-items:center; flex:1; flex-wrap:wrap; gap:4px;">
+              <span class="rank-tag">第 ${idx + 1} 順位</span>
+              <span class="sender-tag">${escapeHtml(item.sender)}</span>
+              <span class="formula-text">${escapeHtml(item.formula)}</span>
+            </div>
+            <span class="time-diff">${timeText}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
