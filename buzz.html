@@ -502,9 +502,13 @@
       document.getElementById("view-room").classList.remove("hidden");
       document.getElementById("my-identity-display").textContent = `${myGroup}・${mySeat}號`;
 
-      // 立即讀取一次並啟動定時同步（每 1.5 秒讀取一次試算表）
+     // 立即讀取一次並啟動定時同步（每 2.5 秒同步一次，分頁隱藏時暫停）
       fetchSheetState();
-      pollTimer = setInterval(fetchSheetState, 1500);
+      pollTimer = setInterval(() => {
+        if (!document.hidden && typeof fetchSheetState === "function") {
+          fetchSheetState();
+        }
+      }, 2500);
     }
 
     async function fetchSheetState() {
