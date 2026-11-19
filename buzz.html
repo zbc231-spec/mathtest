@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>法老密碼 - 班級同步搶答看板</title>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -67,6 +66,11 @@
       transform: scale(0.97);
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-blue {
       background: linear-gradient(180deg, #4da6ff 0%, #0066cc 100%);
       color: #fff;
@@ -93,7 +97,6 @@
       display: none !important;
     }
 
-    /* 進房表單 */
     .form-group {
       margin-bottom: 14px;
       text-align: left;
@@ -119,7 +122,6 @@
       background: #fff;
     }
 
-    /* 頂部共用列 */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -141,7 +143,6 @@
       font-weight: 900;
     }
 
-    /* 左右雙欄主體 */
     .split-layout {
       display: grid;
       grid-template-columns: 1fr 1.15fr;
@@ -252,7 +253,6 @@
       font-size: 0.95rem;
     }
 
-    /* 右側全班傳送答案區 */
     .answer-list {
       max-height: 440px;
       display: flex;
@@ -324,7 +324,6 @@
       margin-left: 8px;
     }
 
-    /* 密碼清除彈窗 */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -358,7 +357,7 @@
 </head>
 <body>
 
-  <!-- 1. 進房畫面：輸入座號與組別（免輸入房間號碼） -->
+  <!-- 1. 進房畫面：輸入座號與組別 -->
   <div class="card narrow" id="view-entry">
     <h1>𓆣 法老密碼同步搶答</h1>
     <p class="sub">輸入座號與組別即可直接進入搶答室</p>
@@ -382,7 +381,7 @@
     <div class="top-bar">
       <div>
         <h1>𓆣 法老密碼同步搶答</h1>
-        <div id="conn-status" style="font-size:0.88rem; color:#248f24; font-weight:bold; margin-top:2px;">● 正在連線至班級頻道...</div>
+        <div id="conn-status" style="font-size:0.88rem; color:#248f24; font-weight:bold; margin-top:2px;">● 正在連線至雲端試算表...</div>
       </div>
 
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -434,7 +433,7 @@
           <button type="button" class="key-btn del" style="grid-column: span 2;" onclick="giveUpFormula()">放棄 / 清空</button>
         </div>
 
-        <button type="button" class="btn btn-green" onclick="submitFormula()">🚀 送出算式</button>
+        <button type="button" class="btn btn-green" id="btn-submit" onclick="submitFormula()">🚀 送出算式</button>
       </div>
 
       <!-- 右邊：全班傳送的答案區 -->
@@ -459,23 +458,23 @@
       <p id="clear-pwd-error" style="color:#cc0000; font-weight:bold; font-size:0.9rem; margin-top:8px;"></p>
       <div class="modal-actions">
         <button type="button" class="btn btn-gray" onclick="closeClearModal()">取消</button>
-        <button type="button" class="btn btn-red" onclick="verifyAndClear()">確認清除</button>
+        <button type="button" class="btn btn-red" id="btn-confirm-clear" onclick="verifyAndClear()">確認清除</button>
       </div>
     </div>
   </div>
 
   <script>
-    const CLASS_CHANNEL_ID = "pharaoh-class-fixed-channel-v1";
-    const CLEAR_PASSWORD = "1234";
+    // ★ 請將下方引號內的網址換成你部署好的 Google Apps Script 網頁應用程式網址（結尾為 /exec）
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyLdWz-a8NCkc6NptGcJsWzktBPGparnf00diCHouEtqJP3h6sssvoSav3fFZmrgOVnUQ/exec";
+    // 清除答案密碼（可自行修改）
+    const CLEAR_PASSWORD = "995";
 
     let mySeat = "";
     let myGroup = "";
-    let isChannelHost = false;
-    let peer = null;
-    let hostConn = null;
-    let clientConns = [];
     let answers = [];
-    let firstTimestamp = null;
+    let currentRoundId = null;
+    let pollTimer = null;
+    let isRequesting = false;
 
     function enterClassroom() {
       const seat = document.getElementById("entry-seat").value.trim();
@@ -490,121 +489,47 @@
         errEl.textContent = "請先輸入組別！";
         return;
       }
+      if (GAS_WEB_APP_URL.includes("請貼上你的部署ID")) {
+        errEl.textContent = "尚未設定 Google Apps Script 網址，請先完成部署！";
+        return;
+      }
 
       mySeat = seat;
       myGroup = group;
       errEl.textContent = "";
-      document.getElementById("btn-join").disabled = true;
 
       document.getElementById("view-entry").classList.add("hidden");
       document.getElementById("view-room").classList.remove("hidden");
       document.getElementById("my-identity-display").textContent = `${myGroup}・${mySeat}號`;
 
-      initFixedChannel();
+      // 立即讀取一次並啟動定時同步（每 1.5 秒讀取一次試算表）
+      fetchSheetState();
+      pollTimer = setInterval(fetchSheetState, 1500);
     }
 
-    function initFixedChannel() {
-      document.getElementById("conn-status").textContent = "⏳ 連線至班級頻道中...";
-      peer = new Peer(CLASS_CHANNEL_ID);
-
-      peer.on("open", () => {
-        isChannelHost = true;
-        document.getElementById("conn-status").textContent = "● 已連線（班級同步頻道已開啟）";
-        document.getElementById("conn-status").style.color = "#248f24";
-
-        peer.on("connection", (connection) => {
-          clientConns.push(connection);
-
-          connection.on("open", () => {
-            connection.send({
-              type: "SYNC_STATE",
-              answers,
-              firstTimestamp
-            });
-          });
-
-          connection.on("data", (data) => {
-            if (!data) return;
-            if (data.type === "SUBMIT_FORMULA") {
-              addAnswerRecord(data.sender, data.formula);
-            } else if (data.type === "REQUEST_CLEAR") {
-              performClearBoard();
-            }
-          });
-
-          connection.on("close", () => {
-            clientConns = clientConns.filter(c => c !== connection);
-          });
-        });
-      });
-
-      peer.on("error", (err) => {
-        if (err.type === "unavailable-id") {
-          connectAsClient();
-        } else {
-          document.getElementById("conn-status").textContent = "⚠️ 連線異常：" + err.type;
-          document.getElementById("conn-status").style.color = "#cc0000";
-        }
-      });
-    }
-
-    function connectAsClient() {
-      isChannelHost = false;
-      const clientPeer = new Peer();
-      peer = clientPeer;
-
-      clientPeer.on("open", () => {
-        hostConn = clientPeer.connect(CLASS_CHANNEL_ID);
-
-        hostConn.on("open", () => {
-          document.getElementById("conn-status").textContent = "● 已連線至班級同步頻道";
+    async function fetchSheetState() {
+      if (isRequesting) return;
+      try {
+        const res = await fetch(`${GAS_WEB_APP_URL}?action=read&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.status === "ok") {
+          document.getElementById("conn-status").textContent = "● 已連線（與 Google 試算表即時同步中）";
           document.getElementById("conn-status").style.color = "#248f24";
-        });
 
-        hostConn.on("data", (data) => {
-          if (!data) return;
-          if (data.type === "SYNC_STATE") {
-            answers = data.answers || [];
-            firstTimestamp = data.firstTimestamp || null;
-            renderAnswerList();
-            checkDuplicate();
-            if (answers.length === 0) {
-              resetLocalSubmittedBanner();
-            }
-          } else if (data.type === "CLEAR_ROUND") {
-            answers = [];
-            firstTimestamp = null;
-            renderAnswerList();
+          // 若偵測到回合 ID 變更（老師按了清除），同步重置本地已送出提示條
+          if (currentRoundId !== null && data.roundId !== currentRoundId) {
             resetLocalSubmittedBanner();
           }
-        });
+          currentRoundId = data.roundId;
 
-        hostConn.on("close", () => {
-          document.getElementById("conn-status").textContent = "● 連線已中斷，請重新整理";
-          document.getElementById("conn-status").style.color = "#cc0000";
-        });
-      });
-    }
-
-    function broadcastState() {
-      const payload = {
-        type: "SYNC_STATE",
-        answers,
-        firstTimestamp
-      };
-      clientConns.forEach(c => {
-        if (c && c.open) {
-          c.send(payload);
+          answers = data.answers || [];
+          renderAnswerList();
+          checkDuplicate();
         }
-      });
-    }
-
-    function broadcastClear() {
-      clientConns.forEach(c => {
-        if (c && c.open) {
-          c.send({ type: "CLEAR_ROUND" });
-        }
-      });
+      } catch (err) {
+        document.getElementById("conn-status").textContent = "⚠️ 連線重試中...";
+        document.getElementById("conn-status").style.color = "#cc6600";
+      }
     }
 
     function resetLocalSubmittedBanner() {
@@ -614,33 +539,44 @@
       checkDuplicate();
     }
 
-    function addAnswerRecord(sender, formula) {
-      const now = Date.now();
-      if (answers.length === 0) {
-        firstTimestamp = now;
+    async function submitFormula() {
+      const formula = document.getElementById("formula-box").value.trim();
+      if (!formula) {
+        alert("請先輸入算式再送出！");
+        return;
       }
-      answers.push({ sender, formula, time: now });
-      renderAnswerList();
-      checkDuplicate();
-      if (isChannelHost) {
-        broadcastState();
+
+      const senderLabel = `${myGroup}・${mySeat}號`;
+      const btn = document.getElementById("btn-submit");
+      btn.disabled = true;
+      btn.textContent = "⏳ 送出中...";
+      isRequesting = true;
+
+      try {
+        const url = `${GAS_WEB_APP_URL}?action=submit&sender=${encodeURIComponent(senderLabel)}&formula=${encodeURIComponent(formula)}&_t=${Date.now()}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data.status === "ok") {
+          currentRoundId = data.roundId;
+          answers = data.answers || [];
+          renderAnswerList();
+
+          document.getElementById("last-sent-text").textContent = `${senderLabel}：${formula}`;
+          document.getElementById("submitted-banner").classList.remove("hidden");
+          document.getElementById("formula-box").value = "";
+          checkDuplicate();
+        }
+      } catch (err) {
+        alert("送出失敗，請檢查網路後再試一次！");
+      } finally {
+        isRequesting = false;
+        btn.disabled = false;
+        btn.textContent = "🚀 送出算式";
       }
     }
 
-    function performClearBoard() {
-      answers = [];
-      firstTimestamp = null;
-      renderAnswerList();
-      resetLocalSubmittedBanner();
-      if (isChannelHost) {
-        broadcastState();
-        broadcastClear();
-      } else if (hostConn && hostConn.open) {
-        hostConn.send({ type: "REQUEST_CLEAR" });
-      }
-    }
-
-    // ==================== 密碼彈窗邏輯 ====================
+    // ==================== 密碼彈窗與清除邏輯 ====================
     function openClearModal() {
       document.getElementById("clear-pwd-input").value = "";
       document.getElementById("clear-pwd-error").textContent = "";
@@ -652,13 +588,34 @@
       document.getElementById("clear-modal").classList.add("hidden");
     }
 
-    function verifyAndClear() {
+    async function verifyAndClear() {
       const inputPwd = document.getElementById("clear-pwd-input").value;
-      if (inputPwd === CLEAR_PASSWORD) {
-        performClearBoard();
-        closeClearModal();
-      } else {
+      if (inputPwd !== CLEAR_PASSWORD) {
         document.getElementById("clear-pwd-error").textContent = "密碼錯誤，無法清除！";
+        return;
+      }
+
+      const btn = document.getElementById("btn-confirm-clear");
+      btn.disabled = true;
+      btn.textContent = "清除中...";
+      isRequesting = true;
+
+      try {
+        const res = await fetch(`${GAS_WEB_APP_URL}?action=clear&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.status === "ok") {
+          currentRoundId = data.roundId;
+          answers = [];
+          renderAnswerList();
+          resetLocalSubmittedBanner();
+          closeClearModal();
+        }
+      } catch (err) {
+        document.getElementById("clear-pwd-error").textContent = "清除失敗，請重試！";
+      } finally {
+        isRequesting = false;
+        btn.disabled = false;
+        btn.textContent = "確認清除";
       }
     }
 
@@ -713,35 +670,6 @@
       checkDuplicate();
     }
 
-    function submitFormula() {
-      const formula = document.getElementById("formula-box").value.trim();
-      if (!formula) {
-        alert("請先輸入算式再送出！");
-        return;
-      }
-
-      const senderLabel = `${myGroup}・${mySeat}號`;
-
-      if (isChannelHost) {
-        addAnswerRecord(senderLabel, formula);
-      } else {
-        if (!hostConn || !hostConn.open) {
-          alert("尚未連上班級頻道，請稍候或重新整理網頁！");
-          return;
-        }
-        hostConn.send({
-          type: "SUBMIT_FORMULA",
-          sender: senderLabel,
-          formula
-        });
-      }
-
-      document.getElementById("last-sent-text").textContent = `${senderLabel}：${formula}`;
-      document.getElementById("submitted-banner").classList.remove("hidden");
-      document.getElementById("formula-box").value = "";
-      checkDuplicate();
-    }
-
     function renderAnswerList() {
       const list = document.getElementById("answer-list");
       const countEl = document.getElementById("answer-count");
@@ -752,8 +680,9 @@
         return;
       }
 
+      const firstTime = answers[0].time;
       list.innerHTML = answers.map((item, idx) => {
-        const diffSec = firstTimestamp ? ((item.time - firstTimestamp) / 1000).toFixed(2) : "0.00";
+        const diffSec = firstTime ? ((item.time - firstTime) / 1000).toFixed(2) : "0.00";
         const timeText = idx === 0 ? "⚡ 最快" : `+${diffSec}s`;
         return `
           <div class="answer-item ${idx === 0 ? "rank-1" : ""}">
