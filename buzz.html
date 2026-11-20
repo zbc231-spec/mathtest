@@ -372,7 +372,7 @@
       <input type="text" class="text-input" id="entry-group" placeholder="例如：第一組 或 1組" maxlength="12" />
     </div>
 
-    <button type="button" class="btn btn-blue" id="btn-join" onclick="enterClassroom()">進入搶答室</button>
+    <button type="button" class="btn btn-blue" id="btn-join">進入搶答室</button>
     <p id="entry-error" style="color: #cc0000; font-weight: bold; margin-top: 10px;"></p>
   </div>
 
@@ -381,12 +381,12 @@
     <div class="top-bar">
       <div>
         <h1>𓆣 法老密碼同步搶答</h1>
-        <div id="conn-status" style="font-size:0.88rem; color:#248f24; font-weight:bold; margin-top:2px;">● 正在連線至雲端試算表...</div>
+        <div id="conn-status" style="font-size:0.88rem; color:#cc6600; font-weight:bold; margin-top:2px;">● 正在連線至 Firebase 即時資料庫...</div>
       </div>
 
       <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <div class="info-badge" id="my-identity-display">組別：--・座號：--</div>
-        <button type="button" class="btn btn-red" style="width:auto;" onclick="openClearModal()">🔒 清除答案</button>
+        <button type="button" class="btn btn-red" style="width:auto;" id="btn-open-clear">🔒 清除答案</button>
       </div>
     </div>
 
@@ -399,7 +399,7 @@
 
         <div id="submitted-banner" class="submitted-banner hidden">
           <span>✅ 已送出：<b id="last-sent-text"></b></span>
-          <button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px; font-size:0.88rem;" onclick="resetInput()">再寫一組</button>
+          <button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px; font-size:0.88rem;" id="btn-reset-input">再寫一組</button>
         </div>
 
         <input type="text" class="formula-input" id="formula-box" placeholder="輸入完整算式" readonly />
@@ -409,31 +409,31 @@
         </div>
 
         <div class="keypad">
-          <button type="button" class="key-btn" onclick="appendKey('7')">7</button>
-          <button type="button" class="key-btn" onclick="appendKey('8')">8</button>
-          <button type="button" class="key-btn" onclick="appendKey('9')">9</button>
-          <button type="button" class="key-btn op" onclick="appendKey('+')">+</button>
-          <button type="button" class="key-btn op" onclick="appendKey('-')">-</button>
+          <button type="button" class="key-btn" data-key="7">7</button>
+          <button type="button" class="key-btn" data-key="8">8</button>
+          <button type="button" class="key-btn" data-key="9">9</button>
+          <button type="button" class="key-btn op" data-key="+">+</button>
+          <button type="button" class="key-btn op" data-key="-">-</button>
 
-          <button type="button" class="key-btn" onclick="appendKey('4')">4</button>
-          <button type="button" class="key-btn" onclick="appendKey('5')">5</button>
-          <button type="button" class="key-btn" onclick="appendKey('6')">6</button>
-          <button type="button" class="key-btn op" onclick="appendKey('×')">×</button>
-          <button type="button" class="key-btn op" onclick="appendKey('÷')">÷</button>
+          <button type="button" class="key-btn" data-key="4">4</button>
+          <button type="button" class="key-btn" data-key="5">5</button>
+          <button type="button" class="key-btn" data-key="6">6</button>
+          <button type="button" class="key-btn op" data-key="×">×</button>
+          <button type="button" class="key-btn op" data-key="÷">÷</button>
 
-          <button type="button" class="key-btn" onclick="appendKey('1')">1</button>
-          <button type="button" class="key-btn" onclick="appendKey('2')">2</button>
-          <button type="button" class="key-btn" onclick="appendKey('3')">3</button>
-          <button type="button" class="key-btn op" onclick="appendKey('(')">(</button>
-          <button type="button" class="key-btn op" onclick="appendKey(')')">)</button>
+          <button type="button" class="key-btn" data-key="1">1</button>
+          <button type="button" class="key-btn" data-key="2">2</button>
+          <button type="button" class="key-btn" data-key="3">3</button>
+          <button type="button" class="key-btn op" data-key="(">(</button>
+          <button type="button" class="key-btn op" data-key=")">)</button>
 
-          <button type="button" class="key-btn" onclick="appendKey('0')">0</button>
-          <button type="button" class="key-btn op" onclick="appendKey('=')">=</button>
-          <button type="button" class="key-btn del" onclick="backspaceKey()">⌫ 倒退</button>
-          <button type="button" class="key-btn del" style="grid-column: span 2;" onclick="giveUpFormula()">放棄 / 清空</button>
+          <button type="button" class="key-btn" data-key="0">0</button>
+          <button type="button" class="key-btn op" data-key="=">=</button>
+          <button type="button" class="key-btn del" id="btn-backspace">⌫ 倒退</button>
+          <button type="button" class="key-btn del" style="grid-column: span 2;" id="btn-giveup">放棄 / 清空</button>
         </div>
 
-        <button type="button" class="btn btn-green" id="btn-submit" onclick="submitFormula()">🚀 送出算式</button>
+        <button type="button" class="btn btn-green" id="btn-submit">🚀 送出算式</button>
       </div>
 
       <!-- 右邊：全班傳送的答案區 -->
@@ -457,24 +457,61 @@
       <input type="password" class="text-input" id="clear-pwd-input" placeholder="請輸入密碼" />
       <p id="clear-pwd-error" style="color:#cc0000; font-weight:bold; font-size:0.9rem; margin-top:8px;"></p>
       <div class="modal-actions">
-        <button type="button" class="btn btn-gray" onclick="closeClearModal()">取消</button>
-        <button type="button" class="btn btn-red" id="btn-confirm-clear" onclick="verifyAndClear()">確認清除</button>
+        <button type="button" class="btn btn-gray" id="btn-cancel-clear">取消</button>
+        <button type="button" class="btn btn-red" id="btn-confirm-clear">確認清除</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // ★ 請將下方引號內的網址換成你部署好的 Google Apps Script 網頁應用程式網址（結尾為 /exec）
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyLdWz-a8NCkc6NptGcJsWzktBPGparnf00diCHouEtqJP3h6sssvoSav3fFZmrgOVnUQ/exec";
-    // 清除答案密碼（可自行修改）
-    const CLEAR_PASSWORD = "995";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
+    // ====== Firebase 與活動設定 ======
+    const FIREBASE_DATABASE_URL = "https://epgyt-code-default-rtdb.asia-southeast1.firebasedatabase.app";
+    const CLEAR_PASSWORD = "995";
+    const DB_ROOT = "pharaohBuzzer/room_default";
+
+    const app = initializeApp({ databaseURL: FIREBASE_DATABASE_URL });
+    const db = getDatabase(app);
+
+    const roundIdRef = ref(db, `${DB_ROOT}/roundId`);
+    const answersRef = ref(db, `${DB_ROOT}/answers`);
+    const connectedRef = ref(db, ".info/connected");
+
+    // ====== 狀態 ======
     let mySeat = "";
     let myGroup = "";
-    let answers = [];
+    let serverAnswers = [];
+    let optimisticAnswers = [];
     let currentRoundId = null;
-    let pollTimer = null;
-    let isRequesting = false;
+    let isClearingRound = false;
+
+    // ====== DOM ======
+    const connStatusEl = document.getElementById("conn-status");
+    const formulaBox = document.getElementById("formula-box");
+    const dupWarningEl = document.getElementById("dup-warning");
+    const submittedBanner = document.getElementById("submitted-banner");
+    const lastSentText = document.getElementById("last-sent-text");
+    const answerListEl = document.getElementById("answer-list");
+    const answerCountEl = document.getElementById("answer-count");
+    const clearModal = document.getElementById("clear-modal");
+    const clearPwdInput = document.getElementById("clear-pwd-input");
+    const clearPwdError = document.getElementById("clear-pwd-error");
+    const btnSubmit = document.getElementById("btn-submit");
+    const btnConfirmClear = document.getElementById("btn-confirm-clear");
+
+    function getMergedSortedAnswers() {
+      const merged = [...serverAnswers, ...optimisticAnswers];
+      merged.sort((a, b) => (a.time || 0) - (b.time || 0));
+      return merged;
+    }
 
     function enterClassroom() {
       const seat = document.getElementById("entry-seat").value.trim();
@@ -489,10 +526,6 @@
         errEl.textContent = "請先輸入組別！";
         return;
       }
-      if (GAS_WEB_APP_URL.includes("請貼上你的部署ID")) {
-        errEl.textContent = "尚未設定 Google Apps Script 網址，請先完成部署！";
-        return;
-      }
 
       mySeat = seat;
       myGroup = group;
@@ -502,130 +535,107 @@
       document.getElementById("view-room").classList.remove("hidden");
       document.getElementById("my-identity-display").textContent = `${myGroup}・${mySeat}號`;
 
-     // 立即讀取一次並啟動定時同步（每 2.5 秒同步一次，分頁隱藏時暫停）
-      fetchSheetState();
-      pollTimer = setInterval(() => {
-        if (!document.hidden && typeof fetchSheetState === "function") {
-          fetchSheetState();
-        }
-      }, 2500);
-    }
-
-    async function fetchSheetState() {
-      if (isRequesting) return;
-      try {
-        const res = await fetch(`${GAS_WEB_APP_URL}?action=read&_t=${Date.now()}`);
-        const data = await res.json();
-        if (data && data.status === "ok") {
-          document.getElementById("conn-status").textContent = "● 已連線（與 Google 試算表即時同步中）";
-          document.getElementById("conn-status").style.color = "#248f24";
-
-          // 若偵測到回合 ID 變更（老師按了清除），同步重置本地已送出提示條
-          if (currentRoundId !== null && data.roundId !== currentRoundId) {
-            resetLocalSubmittedBanner();
-          }
-          currentRoundId = data.roundId;
-
-          answers = data.answers || [];
-          renderAnswerList();
-          checkDuplicate();
-        }
-      } catch (err) {
-        document.getElementById("conn-status").textContent = "⚠️ 連線重試中...";
-        document.getElementById("conn-status").style.color = "#cc6600";
-      }
+      renderAnswerList();
+      checkDuplicate();
     }
 
     function resetLocalSubmittedBanner() {
-      document.getElementById("formula-box").value = "";
-      document.getElementById("last-sent-text").textContent = "";
-      document.getElementById("submitted-banner").classList.add("hidden");
+      formulaBox.value = "";
+      lastSentText.textContent = "";
+      submittedBanner.classList.add("hidden");
       checkDuplicate();
     }
 
     async function submitFormula() {
-      const formula = document.getElementById("formula-box").value.trim();
+      const formula = formulaBox.value.trim();
       if (!formula) {
         alert("請先輸入算式再送出！");
         return;
       }
 
       const senderLabel = `${myGroup}・${mySeat}號`;
-      const btn = document.getElementById("btn-submit");
-      btn.disabled = true;
-      btn.textContent = "⏳ 送出中...";
-      isRequesting = true;
+      const nowTime = Date.now();
+      const tempId = `opt_${nowTime}_${Math.random().toString(36).slice(2, 7)}`;
+
+      const payload = {
+        sender: senderLabel,
+        formula,
+        time: nowTime,
+        roundId: currentRoundId || "init"
+      };
+
+      // 樂觀更新：先顯示在畫面與提示條，輸入框立即清空
+      optimisticAnswers.push({ id: tempId, ...payload });
+      lastSentText.textContent = `${senderLabel}：${formula}`;
+      submittedBanner.classList.remove("hidden");
+      formulaBox.value = "";
+      checkDuplicate();
+      renderAnswerList();
+
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = "⏳ 送出中...";
 
       try {
-        const url = `${GAS_WEB_APP_URL}?action=submit&sender=${encodeURIComponent(senderLabel)}&formula=${encodeURIComponent(formula)}&_t=${Date.now()}`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data && data.status === "ok") {
-          currentRoundId = data.roundId;
-          answers = data.answers || [];
-          renderAnswerList();
-
-          document.getElementById("last-sent-text").textContent = `${senderLabel}：${formula}`;
-          document.getElementById("submitted-banner").classList.remove("hidden");
-          document.getElementById("formula-box").value = "";
-          checkDuplicate();
-        }
+        await push(answersRef, payload);
+        optimisticAnswers = optimisticAnswers.filter((item) => item.id !== tempId);
+        renderAnswerList();
       } catch (err) {
+        optimisticAnswers = optimisticAnswers.filter((item) => item.id !== tempId);
+        renderAnswerList();
         alert("送出失敗，請檢查網路後再試一次！");
       } finally {
-        isRequesting = false;
-        btn.disabled = false;
-        btn.textContent = "🚀 送出算式";
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "🚀 送出算式";
       }
     }
 
     // ==================== 密碼彈窗與清除邏輯 ====================
     function openClearModal() {
-      document.getElementById("clear-pwd-input").value = "";
-      document.getElementById("clear-pwd-error").textContent = "";
-      document.getElementById("clear-modal").classList.remove("hidden");
-      document.getElementById("clear-pwd-input").focus();
+      clearPwdInput.value = "";
+      clearPwdError.textContent = "";
+      clearModal.classList.remove("hidden");
+      clearPwdInput.focus();
     }
 
     function closeClearModal() {
-      document.getElementById("clear-modal").classList.add("hidden");
+      clearModal.classList.add("hidden");
     }
 
     async function verifyAndClear() {
-      const inputPwd = document.getElementById("clear-pwd-input").value;
+      const inputPwd = clearPwdInput.value;
       if (inputPwd !== CLEAR_PASSWORD) {
-        document.getElementById("clear-pwd-error").textContent = "密碼錯誤，無法清除！";
+        clearPwdError.textContent = "密碼錯誤，無法清除！";
         return;
       }
 
-      const btn = document.getElementById("btn-confirm-clear");
-      btn.disabled = true;
-      btn.textContent = "清除中...";
-      isRequesting = true;
+      const nextRoundId = `round_${Date.now()}`;
+      btnConfirmClear.disabled = true;
+      btnConfirmClear.textContent = "清除中...";
+      isClearingRound = true;
+
+      // 樂觀清空本地畫面
+      optimisticAnswers = [];
+      serverAnswers = [];
+      currentRoundId = nextRoundId;
+      renderAnswerList();
+      resetLocalSubmittedBanner();
+      closeClearModal();
 
       try {
-        const res = await fetch(`${GAS_WEB_APP_URL}?action=clear&_t=${Date.now()}`);
-        const data = await res.json();
-        if (data && data.status === "ok") {
-          currentRoundId = data.roundId;
-          answers = [];
-          renderAnswerList();
-          resetLocalSubmittedBanner();
-          closeClearModal();
-        }
+        await set(answersRef, null);
+        await set(roundIdRef, nextRoundId);
       } catch (err) {
-        document.getElementById("clear-pwd-error").textContent = "清除失敗，請重試！";
+        alert("清除同步失敗，請重試！");
       } finally {
-        isRequesting = false;
-        btn.disabled = false;
-        btn.textContent = "確認清除";
+        isClearingRound = false;
+        btnConfirmClear.disabled = false;
+        btnConfirmClear.textContent = "確認清除";
       }
     }
 
     // ==================== 比對與輸入邏輯 ====================
     function normalizeFormula(str) {
-      return str
+      return String(str || "")
         .replace(/\s+/g, "")
         .replace(/\*/g, "×")
         .replace(/\//g, "÷")
@@ -633,77 +643,140 @@
     }
 
     function checkDuplicate() {
-      const raw = document.getElementById("formula-box").value.trim();
+      const raw = formulaBox.value.trim();
       const norm = normalizeFormula(raw);
-      const warningEl = document.getElementById("dup-warning");
-      const inputEl = document.getElementById("formula-box");
+      const list = getMergedSortedAnswers();
 
       if (!norm) {
-        warningEl.classList.add("hidden");
-        inputEl.classList.remove("dup-alert");
+        dupWarningEl.classList.add("hidden");
+        formulaBox.classList.remove("dup-alert");
         return;
       }
 
-      const isDup = answers.some(item => normalizeFormula(item.formula) === norm);
-      warningEl.classList.toggle("hidden", !isDup);
-      inputEl.classList.toggle("dup-alert", isDup);
+      const isDup = list.some((item) => normalizeFormula(item.formula) === norm);
+      dupWarningEl.classList.toggle("hidden", !isDup);
+      formulaBox.classList.toggle("dup-alert", isDup);
     }
 
     function appendKey(char) {
-      const box = document.getElementById("formula-box");
-      if (box.value.length < 25) {
-        box.value += char;
+      if (formulaBox.value.length < 25) {
+        formulaBox.value += char;
         checkDuplicate();
       }
     }
 
     function backspaceKey() {
-      const box = document.getElementById("formula-box");
-      box.value = box.value.slice(0, -1);
+      formulaBox.value = formulaBox.value.slice(0, -1);
       checkDuplicate();
     }
 
     function giveUpFormula() {
-      document.getElementById("formula-box").value = "";
+      formulaBox.value = "";
       checkDuplicate();
     }
 
     function resetInput() {
-      document.getElementById("formula-box").value = "";
-      document.getElementById("submitted-banner").classList.add("hidden");
+      formulaBox.value = "";
+      submittedBanner.classList.add("hidden");
       checkDuplicate();
     }
 
     function renderAnswerList() {
-      const list = document.getElementById("answer-list");
-      const countEl = document.getElementById("answer-count");
-      countEl.textContent = `共 ${answers.length} 筆`;
+      const list = getMergedSortedAnswers();
+      answerCountEl.textContent = `共 ${list.length} 筆`;
 
-      if (answers.length === 0) {
-        list.innerHTML = `<p style="text-align:center; color:#888; padding:40px 0; font-size:1.05rem;">目前尚無已送出的算式</p>`;
+      if (list.length === 0) {
+        answerListEl.innerHTML = `<p style="text-align:center; color:#888; padding:40px 0; font-size:1.05rem;">目前尚無已送出的算式</p>`;
         return;
       }
 
-      const firstTime = answers[0].time;
-      list.innerHTML = answers.map((item, idx) => {
-        const diffSec = firstTime ? ((item.time - firstTime) / 1000).toFixed(2) : "0.00";
-        const timeText = idx === 0 ? "⚡ 最快" : `+${diffSec}s`;
-        return `
-          <div class="answer-item ${idx === 0 ? "rank-1" : ""}">
-            <div style="display:flex; align-items:center; flex:1; flex-wrap:wrap; gap:4px;">
-              <span class="rank-tag">第 ${idx + 1} 順位</span>
-              <span class="sender-tag">${escapeHtml(item.sender)}</span>
-              <span class="formula-text">${escapeHtml(item.formula)}</span>
+      const firstTime = list[0].time;
+      answerListEl.innerHTML = list
+        .map((item, idx) => {
+          const diffSec = firstTime ? (((item.time || firstTime) - firstTime) / 1000).toFixed(2) : "0.00";
+          const timeText = idx === 0 ? "⚡ 最快" : `+${diffSec}s`;
+          return `
+            <div class="answer-item ${idx === 0 ? "rank-1" : ""}">
+              <div style="display:flex; align-items:center; flex:1; flex-wrap:wrap; gap:4px;">
+                <span class="rank-tag">第 ${idx + 1} 順位</span>
+                <span class="sender-tag">${escapeHtml(item.sender)}</span>
+                <span class="formula-text">${escapeHtml(item.formula)}</span>
+              </div>
+              <span class="time-diff">${timeText}</span>
             </div>
-            <span class="time-diff">${timeText}</span>
-          </div>
-        `;
-      }).join("");
+          `;
+        })
+        .join("");
     }
 
     function escapeHtml(str) {
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
+
+    // ====== 綁定事件 ======
+    document.getElementById("btn-join").addEventListener("click", enterClassroom);
+    document.getElementById("btn-open-clear").addEventListener("click", openClearModal);
+    document.getElementById("btn-cancel-clear").addEventListener("click", closeClearModal);
+    btnConfirmClear.addEventListener("click", verifyAndClear);
+    btnSubmit.addEventListener("click", submitFormula);
+    document.getElementById("btn-backspace").addEventListener("click", backspaceKey);
+    document.getElementById("btn-giveup").addEventListener("click", giveUpFormula);
+    document.getElementById("btn-reset-input").addEventListener("click", resetInput);
+
+    document.querySelectorAll(".key-btn[data-key]").forEach((btn) => {
+      btn.addEventListener("click", () => appendKey(btn.getAttribute("data-key")));
+    });
+
+    clearPwdInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        verifyAndClear();
+      }
+    });
+
+    // ====== Firebase 即時監聽 ======
+    onValue(connectedRef, (snap) => {
+      const online = Boolean(snap.val());
+      if (online) {
+        connStatusEl.textContent = "● 已連線（與 Firebase 即時同步中）";
+        connStatusEl.style.color = "#248f24";
+      } else {
+        connStatusEl.textContent = "⚠️ 連線重試中...";
+        connStatusEl.style.color = "#cc6600";
+      }
+    });
+
+    onValue(roundIdRef, (snap) => {
+      const nextRound = snap.val();
+      if (!nextRound) return;
+
+      if (currentRoundId !== null && nextRound !== currentRoundId && !isClearingRound) {
+        optimisticAnswers = [];
+        resetLocalSubmittedBanner();
+      }
+      currentRoundId = nextRound;
+    });
+
+    onValue(answersRef, (snap) => {
+      const raw = snap.val();
+      if (!raw) {
+        serverAnswers = [];
+      } else {
+        serverAnswers = Object.entries(raw).map(([key, val]) => ({
+          id: key,
+          sender: val.sender || "",
+          formula: val.formula || "",
+          time: Number(val.time) || 0,
+          roundId: val.roundId || ""
+        }));
+      }
+      serverAnswers.sort((a, b) => (a.time || 0) - (b.time || 0));
+      renderAnswerList();
+      checkDuplicate();
+    });
   </script>
 </body>
 </html>
