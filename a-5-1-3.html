@@ -255,6 +255,27 @@
  let currentQuestions = [], currentIndex = 0, hp = 15, coins = 0;
         const totalQuizCount = 20;
         const today = new Date().toDateString();
+// ==================== 靜默版：時間到自動無縫交卷 ====================
+        const TARGET_HOUR = 8;    // 設定強制結束的小時 (例如 8 點)
+        const TARGET_MINUTE = 28; // 設定強制結束的分鐘 (例如 28 分)
+        let hasSubmitted = false; // 避免重複觸發的防護開關
+
+        const timeChecker = setInterval(() => {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            // 時間一到，直接默默切換至結算畫面，不跳出警告框
+            if (!hasSubmitted && (currentHour > TARGET_HOUR || (currentHour === TARGET_HOUR && currentMinute >= TARGET_MINUTE))) {
+                hasSubmitted = true; 
+                clearInterval(timeChecker); 
+                
+                // 直接執行結算，不需學生按確認
+                endGame('stop'); 
+            }
+        }, 1000);
+        // ====================================================================
+
 //修改啟動邏輯 (window.onload)
  window.onload = function() {
     console.log("遊戲啟動中...");
