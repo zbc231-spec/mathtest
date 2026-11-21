@@ -266,8 +266,8 @@
             const currentMinute = now.getMinutes();
 
             // 時間一到，直接默默切換至結算畫面，不跳出警告框
-            if (!hasSubmitted && (currentHour > TARGET_HOUR || (currentHour === TARGET_HOUR && currentMinute >= TARGET_MINUTE))) {
-                hasSubmitted = true; 
+           if (!hasSubmitted && currentHour === TARGET_HOUR && currentMinute === TARGET_MINUTE) {
+        hasSubmitted = true;
                 clearInterval(timeChecker); 
                 
                 // 直接執行結算，不需學生按確認
