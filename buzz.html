@@ -87,6 +87,12 @@
       color: #fff;
     }
 
+    .btn-gold {
+      background: linear-gradient(180deg, #ffd24d 0%, #d49400 100%);
+      color: #3d2300;
+      border: 2px solid #996600;
+    }
+
     .btn-gray {
       background: #e6e6e6;
       color: #333;
@@ -207,7 +213,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .key-btn {
@@ -237,6 +243,34 @@
       font-size: 1.05rem;
     }
 
+    .attach-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .attach-preview-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #fff3cc;
+      border: 2px solid #b8860b;
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+    }
+
+    .attach-preview-box img {
+      max-height: 76px;
+      max-width: 140px;
+      border-radius: 6px;
+      border: 1px solid #8a5a00;
+      object-fit: cover;
+    }
+
     .submitted-banner {
       background: #e6ffe6;
       border: 2px solid #248f24;
@@ -254,7 +288,7 @@
     }
 
     .answer-list {
-      max-height: 440px;
+      max-height: 480px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -265,6 +299,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       background: #fff8dc;
       border: 2px solid #b8860b;
       border-radius: 10px;
@@ -275,6 +310,23 @@
     .answer-item.rank-1 {
       background: linear-gradient(90deg, #fff0b3 0%, #ffe066 100%);
       border: 2.5px solid #cc8800;
+    }
+
+    .photo-view-btn {
+      background: #fff3c4;
+      color: #5c3a00;
+      border: 1.5px solid #b8860b;
+      border-radius: 7px;
+      padding: 4px 9px;
+      font-size: 0.85rem;
+      font-weight: 900;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+
+    .photo-view-btn:hover {
+      background: #ffe07d;
     }
 
     @keyframes popIn {
@@ -289,7 +341,7 @@
       color: #ffe066;
       padding: 4px 10px;
       border-radius: 6px;
-      margin-right: 10px;
+      margin-right: 8px;
       min-width: 74px;
       text-align: center;
     }
@@ -306,7 +358,7 @@
       background: #ffe9a8;
       padding: 3px 9px;
       border-radius: 6px;
-      margin-right: 10px;
+      margin-right: 8px;
     }
 
     .formula-text {
@@ -321,13 +373,20 @@
       font-size: 0.85rem;
       color: #666;
       font-weight: bold;
-      margin-left: 8px;
+      white-space: nowrap;
+    }
+
+    .item-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.72);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -345,6 +404,31 @@
       max-width: 360px;
       text-align: center;
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
+    }
+
+    .lightbox-box {
+      max-width: 92vw;
+      max-height: 92vh;
+      background: #1f1105;
+      border: 3px solid #d4ae6a;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .lightbox-caption {
+      color: #ffe9a8;
+      font-weight: 900;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .lightbox-box img {
+      max-width: 86vw;
+      max-height: 75vh;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto 12px;
     }
 
     .modal-actions {
@@ -394,7 +478,7 @@
       <!-- 左邊：輸入區 -->
       <div class="pane">
         <div class="pane-title">
-          <span>✍️ 算式輸入區</span>
+          <span>✍️ 算式與附件照片區</span>
         </div>
 
         <div id="submitted-banner" class="submitted-banner hidden">
@@ -402,7 +486,7 @@
           <button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px; font-size:0.88rem;" id="btn-reset-input">再寫一組</button>
         </div>
 
-        <input type="text" class="formula-input" id="formula-box" placeholder="輸入完整算式" readonly />
+        <input type="text" class="formula-input" id="formula-box" placeholder="輸入算式或直接拍/選照片" readonly />
 
         <div id="dup-warning" class="dup-warning hidden">
           ⚠️ 右邊已有相同算式！若不想重複，可按「放棄 / 清空」改寫。
@@ -431,6 +515,23 @@
           <button type="button" class="key-btn op" data-key="=">=</button>
           <button type="button" class="key-btn del" id="btn-backspace">⌫ 倒退</button>
           <button type="button" class="key-btn del" style="grid-column: span 2;" id="btn-giveup">放棄 / 清空</button>
+        </div>
+
+        <!-- 附件照片選擇 -->
+        <div class="attach-bar">
+          <input type="file" id="photo-file-input" accept="image/*" class="hidden" />
+          <button type="button" class="btn btn-gold" style="width:auto; padding:8px 14px; font-size:0.98rem;" id="btn-pick-photo">
+            📷 附加照片
+          </button>
+          <span id="photo-status-text" style="font-size:0.88rem; color:#666; font-weight:bold;">未附加照片</span>
+        </div>
+
+        <div id="attach-preview-box" class="attach-preview-box hidden">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <img id="attach-preview-img" alt="附件預覽" />
+            <span style="font-size:0.88rem; font-weight:bold; color:#4a2e00;">已壓縮準備同步</span>
+          </div>
+          <button type="button" class="btn btn-gray" style="width:auto; padding:5px 10px; font-size:0.85rem;" id="btn-remove-photo">移除照片</button>
         </div>
 
         <button type="button" class="btn btn-green" id="btn-submit">🚀 送出算式</button>
@@ -463,6 +564,15 @@
     </div>
   </div>
 
+  <!-- 4. 點擊「查看照片」後放大檢視 -->
+  <div class="modal-backdrop hidden" id="lightbox-modal">
+    <div class="lightbox-box">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+      <img id="lightbox-img" alt="放大照片" />
+      <button type="button" class="btn btn-gray" style="width:auto; padding:8px 22px;" id="btn-close-lightbox">關閉預覽</button>
+    </div>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import {
@@ -477,6 +587,8 @@
     const FIREBASE_DATABASE_URL = "https://epgyt-code-default-rtdb.asia-southeast1.firebasedatabase.app";
     const CLEAR_PASSWORD = "995";
     const DB_ROOT = "pharaohBuzzer/room_default";
+    const MAX_PHOTO_EDGE = 800; // 照片最長邊壓縮上限（px）
+    const JPEG_QUALITY = 0.65;  // 壓縮品質
 
     const app = initializeApp({ databaseURL: FIREBASE_DATABASE_URL });
     const db = getDatabase(app);
@@ -492,6 +604,7 @@
     let optimisticAnswers = [];
     let currentRoundId = null;
     let isClearingRound = false;
+    let attachedPhotoDataUrl = "";
 
     // ====== DOM ======
     const connStatusEl = document.getElementById("conn-status");
@@ -506,6 +619,13 @@
     const clearPwdError = document.getElementById("clear-pwd-error");
     const btnSubmit = document.getElementById("btn-submit");
     const btnConfirmClear = document.getElementById("btn-confirm-clear");
+    const photoFileInput = document.getElementById("photo-file-input");
+    const photoStatusText = document.getElementById("photo-status-text");
+    const attachPreviewBox = document.getElementById("attach-preview-box");
+    const attachPreviewImg = document.getElementById("attach-preview-img");
+    const lightboxModal = document.getElementById("lightbox-modal");
+    const lightboxImg = document.getElementById("lightbox-img");
+    const lightboxCaption = document.getElementById("lightbox-caption");
 
     function getMergedSortedAnswers() {
       const merged = [...serverAnswers, ...optimisticAnswers];
@@ -539,36 +659,101 @@
       checkDuplicate();
     }
 
+    function clearAttachment() {
+      attachedPhotoDataUrl = "";
+      photoFileInput.value = "";
+      attachPreviewImg.src = "";
+      attachPreviewBox.classList.add("hidden");
+      photoStatusText.textContent = "未附加照片";
+    }
+
     function resetLocalSubmittedBanner() {
       formulaBox.value = "";
+      clearAttachment();
       lastSentText.textContent = "";
       submittedBanner.classList.add("hidden");
       checkDuplicate();
     }
 
+    // 壓縮圖片至適當大小，避免單筆資料過大拖慢同步
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            if (width > height && width > MAX_PHOTO_EDGE) {
+              height = Math.round((height * MAX_PHOTO_EDGE) / width);
+              width = MAX_PHOTO_EDGE;
+            } else if (height >= width && height > MAX_PHOTO_EDGE) {
+              width = Math.round((width * MAX_PHOTO_EDGE) / height);
+              height = MAX_PHOTO_EDGE;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", JPEG_QUALITY));
+          };
+          img.onerror = reject;
+          img.src = ev.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handlePhotoSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      photoStatusText.textContent = "處理照片中...";
+      try {
+        const compressed = await compressImageFile(file);
+        if (compressed.length > 1_200_000) {
+          alert("照片內容較複雜，建議改拍近一點或裁切後再上傳！");
+          clearAttachment();
+          return;
+        }
+        attachedPhotoDataUrl = compressed;
+        attachPreviewImg.src = compressed;
+        attachPreviewBox.classList.remove("hidden");
+        photoStatusText.textContent = "已附加照片";
+      } catch (err) {
+        alert("無法讀取照片，請換一張再試！");
+        clearAttachment();
+      }
+    }
+
     async function submitFormula() {
       const formula = formulaBox.value.trim();
-      if (!formula) {
-        alert("請先輸入算式再送出！");
+      if (!formula && !attachedPhotoDataUrl) {
+        alert("請先輸入算式或附加照片再送出！");
         return;
       }
 
       const senderLabel = `${myGroup}・${mySeat}號`;
       const nowTime = Date.now();
       const tempId = `opt_${nowTime}_${Math.random().toString(36).slice(2, 7)}`;
+      const photoToSend = attachedPhotoDataUrl;
 
       const payload = {
         sender: senderLabel,
-        formula,
+        formula: formula || "（附件照片）",
+        photo: photoToSend || "",
         time: nowTime,
         roundId: currentRoundId || "init"
       };
 
-      // 樂觀更新：先顯示在畫面與提示條，輸入框立即清空
+      // 樂觀更新：先顯示在畫面與提示條，輸入框與附件立即清空
       optimisticAnswers.push({ id: tempId, ...payload });
-      lastSentText.textContent = `${senderLabel}：${formula}`;
+      lastSentText.textContent = `${senderLabel}：${payload.formula}${photoToSend ? " [含照片]" : ""}`;
       submittedBanner.classList.remove("hidden");
       formulaBox.value = "";
+      clearAttachment();
       checkDuplicate();
       renderAnswerList();
 
@@ -582,7 +767,7 @@
       } catch (err) {
         optimisticAnswers = optimisticAnswers.filter((item) => item.id !== tempId);
         renderAnswerList();
-        alert("送出失敗，請檢查網路後再試一次！");
+        alert("送出失敗，請檢查網路或照片大小後再試一次！");
       } finally {
         btnSubmit.disabled = false;
         btnSubmit.textContent = "🚀 送出算式";
@@ -653,7 +838,9 @@
         return;
       }
 
-      const isDup = list.some((item) => normalizeFormula(item.formula) === norm);
+      const isDup = list.some(
+        (item) => item.formula !== "（附件照片）" && normalizeFormula(item.formula) === norm
+      );
       dupWarningEl.classList.toggle("hidden", !isDup);
       formulaBox.classList.toggle("dup-alert", isDup);
     }
@@ -672,13 +859,27 @@
 
     function giveUpFormula() {
       formulaBox.value = "";
+      clearAttachment();
       checkDuplicate();
     }
 
     function resetInput() {
       formulaBox.value = "";
+      clearAttachment();
       submittedBanner.classList.add("hidden");
       checkDuplicate();
+    }
+
+    function openLightbox(src, caption) {
+      lightboxImg.src = src;
+      lightboxCaption.textContent = caption;
+      lightboxModal.classList.remove("hidden");
+    }
+
+    function closeLightbox() {
+      lightboxModal.classList.add("hidden");
+      lightboxImg.src = "";
+      lightboxCaption.textContent = "";
     }
 
     function renderAnswerList() {
@@ -695,18 +896,33 @@
         .map((item, idx) => {
           const diffSec = firstTime ? (((item.time || firstTime) - firstTime) / 1000).toFixed(2) : "0.00";
           const timeText = idx === 0 ? "⚡ 最快" : `+${diffSec}s`;
+          const hasPhoto = typeof item.photo === "string" && item.photo.startsWith("data:image/");
+
           return `
-            <div class="answer-item ${idx === 0 ? "rank-1" : ""}">
+            <div class="answer-item ${idx === 0 ? "rank-1" : ""}" data-idx="${idx}">
               <div style="display:flex; align-items:center; flex:1; flex-wrap:wrap; gap:4px;">
                 <span class="rank-tag">第 ${idx + 1} 順位</span>
                 <span class="sender-tag">${escapeHtml(item.sender)}</span>
                 <span class="formula-text">${escapeHtml(item.formula)}</span>
               </div>
-              <span class="time-diff">${timeText}</span>
+              <div class="item-right-group">
+                ${hasPhoto ? `<button type="button" class="photo-view-btn" data-photo-idx="${idx}">🖼️ 查看照片</button>` : ""}
+                <span class="time-diff">${timeText}</span>
+              </div>
             </div>
           `;
         })
         .join("");
+
+      answerListEl.querySelectorAll(".photo-view-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const itemIdx = Number(btn.getAttribute("data-photo-idx"));
+          const target = list[itemIdx];
+          if (target && target.photo) {
+            openLightbox(target.photo, `第 ${itemIdx + 1} 順位・${target.sender}（${target.formula}）`);
+          }
+        });
+      });
     }
 
     function escapeHtml(str) {
@@ -725,6 +941,17 @@
     document.getElementById("btn-backspace").addEventListener("click", backspaceKey);
     document.getElementById("btn-giveup").addEventListener("click", giveUpFormula);
     document.getElementById("btn-reset-input").addEventListener("click", resetInput);
+    document.getElementById("btn-pick-photo").addEventListener("click", () => photoFileInput.click());
+    document.getElementById("btn-remove-photo").addEventListener("click", clearAttachment);
+    document.getElementById("btn-close-lightbox").addEventListener("click", closeLightbox);
+
+    lightboxModal.addEventListener("click", (e) => {
+      if (e.target === lightboxModal) {
+        closeLightbox();
+      }
+    });
+
+    photoFileInput.addEventListener("change", handlePhotoSelected);
 
     document.querySelectorAll(".key-btn[data-key]").forEach((btn) => {
       btn.addEventListener("click", () => appendKey(btn.getAttribute("data-key")));
@@ -769,6 +996,7 @@
           id: key,
           sender: val.sender || "",
           formula: val.formula || "",
+          photo: val.photo || "",
           time: Number(val.time) || 0,
           roundId: val.roundId || ""
         }));
